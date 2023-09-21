@@ -1,40 +1,107 @@
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/vec4.hpp>
-#include <glm/mat4x4.hpp>
-
 #include <iostream>
-
+#include <cstdlib>
 #include <rustlib.h>
+
+const uint32_t WIDTH = 800;
+const uint32_t HEIGHT = 600;
+
+class HelloTriangleApp
+{
+	public:
+		void run()
+		{
+			initWindow();
+			initVulkan();
+			mainLoop();
+			cleanup();
+		}
+
+	private:
+		void initWindow()
+		{
+			glfwInit();
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // don't create an opengl context
+			glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+			window = glfwCreateWindow(WIDTH, HEIGHT, "Goop EDITOR", nullptr, nullptr);
+		}
+
+		void initVulkan()
+		{
+			createInstance();
+		}
+
+		void test(int a, int b)
+		{
+		}
+
+		void createInstance()
+		{
+			VkApplicationInfo appInfo{};
+			appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+			appInfo.pApplicationName = "Hello Triangle";
+			appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+			appInfo.pEngineName = "goop";
+			appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+			appInfo.apiVersion = VK_API_VERSION_1_0;
+
+			VkInstanceCreateInfo createInfo{};
+			createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+			createInfo.pApplicationInfo = &appInfo;
+
+			uint32_t glfwExtensionCount = 0;
+			const char** glfwExtensionNames;
+			glfwExtensionNames = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+			createInfo.enabledExtensionCount = glfwExtensionCount;
+			createInfo.ppEnabledExtensionNames = glfwExtensionNames;
+			createInfo.enabledLayerCount = 0;
+
+			if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
+			{
+				throw std::runtime_error("failed to create instance!");
+			}
+			else
+			{
+				std::cout << "Instance created successfullly!\n";
+				say_hello();
+			}
+		}
+
+		void mainLoop()
+		{
+			while (!glfwWindowShouldClose(window))
+			{
+				glfwPollEvents();
+			}
+		}
+
+		void cleanup()
+		{
+			glfwDestroyWindow(window);
+			glfwTerminate();
+		}
+
+		GLFWwindow* window;
+		VkInstance instance;
+};
 
 int main()
 {
-	glfwInit();
+	HelloTriangleApp app;
 
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	GLFWwindow* window = glfwCreateWindow(800, 600, "goop EDITOR", nullptr, nullptr);
-
-	uint32_t extensionCount = 0;
-	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-
-	std::cout << extensionCount << " extensions supported\n";
-
-	glm::mat4 matrix;
-	glm::vec4 vec;
-	auto test = matrix * vec;
-
-	say_hello();
-	while(!glfwWindowShouldClose(window))
+	try
 	{
-		glfwPollEvents();
+		app.run();
+	} catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return EXIT_FAILURE;
 	}
 
-	glfwDestroyWindow(window);
-
-	glfwTerminate();
-
-	return 0;
+	return EXIT_SUCCESS;
 }
+
