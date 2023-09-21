@@ -5,6 +5,15 @@ project(goop)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_COMPILER g++)
 
+# Find Vulkan package
+find_package(Vulkan REQUIRED)
+
+# Find GLFW package
+find_package(glfw3 REQUIRED)
+
+# Include Vulkan headers
+include_directories(${Vulkan_INCLUDE_DIRS})
+
 # Define the C++ executable
 add_executable(${PROJECT_NAME} main.cpp)
 
@@ -33,4 +42,6 @@ add_dependencies(${PROJECT_NAME} build_rust_project)
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
     ${CMAKE_SOURCE_DIR}/rust_lib/target/release/librust_hello_lib.so
+	glfw
+	${Vulkan_LIBRARIES}
 )
