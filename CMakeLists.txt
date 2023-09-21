@@ -24,6 +24,8 @@ add_custom_target(build_rust_project
     COMMENT "Building Rust project..."
 )
 
+include_directories("rust_lib/include")
+
 # Add a dependency to ensure that the Rust project is built before your C++ project
 add_dependencies(${PROJECT_NAME} build_rust_project)
 

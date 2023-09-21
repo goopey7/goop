@@ -1,6 +1,6 @@
 #include <thread>
 #include <iostream>
-#include "rust_lib/rustlib.h"
+#include <rustlib.h>
 
 int main()
 {
