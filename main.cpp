@@ -79,8 +79,8 @@ class HelloTriangleApp
 			selectPhysicalDevice();
 			createLogicalDevice();
 
-			std::cout << "Instance created successfullly!\n";
-			say_hello();
+			//TODO delete this
+			say_hello("Sam");
 		}
 
 		void createInstance()
