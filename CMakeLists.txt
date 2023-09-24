@@ -23,25 +23,41 @@ add_executable(${PROJECT_NAME} main.cpp)
 find_program(CARGO_EXECUTABLE cargo)
 
 if(NOT CARGO_EXECUTABLE)
-    message(FATAL_ERROR "Cargo not found. Make sure it is installed and in your PATH.")
+  message(
+    FATAL_ERROR "Cargo not found. Make sure it is installed and in your PATH.")
 endif()
 
 # Add a custom target to build your Rust project using cargo
-add_custom_target(build_rust_project
-    COMMAND ${CARGO_EXECUTABLE} build --release
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/rust_lib
-    COMMENT "Building Rust project..."
-)
+add_custom_target(
+  build_rust_project
+  COMMAND ${CARGO_EXECUTABLE} build --release
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/rust_lib
+  COMMENT "Building Rust project...")
 
 include_directories("rust_lib/include")
 
-# Add a dependency to ensure that the Rust project is built before your C++ project
+# Add a dependency to ensure that the Rust project is built before your C++
+# project
 add_dependencies(${PROJECT_NAME} build_rust_project)
 
 # Link the C++ executable with the Rust dynamic library
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-    ${CMAKE_SOURCE_DIR}/rust_lib/target/release/librust_hello_lib.so
-	glfw
-	${Vulkan_LIBRARIES}
-)
+target_link_libraries(
+  ${PROJECT_NAME}
+  PRIVATE ${CMAKE_SOURCE_DIR}/rust_lib/target/release/librust_hello_lib.so glfw
+          ${Vulkan_LIBRARIES})
+
+# Create the "shaders" directory before compiling shaders
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
+
+# Add a custom command to compile GLSL shaders
+add_custom_command(
+  TARGET ${PROJECT_NAME}
+  PRE_BUILD
+  COMMAND glslc -o ${CMAKE_BINARY_DIR}/shaders/shader.vert.spv
+          ${CMAKE_SOURCE_DIR}/shaders/shader.vert
+  COMMAND glslc -o ${CMAKE_BINARY_DIR}/shaders/shader.frag.spv
+          ${CMAKE_SOURCE_DIR}/shaders/shader.frag
+  COMMENT "Compiling GLSL shaders...")
+
+# Specify the output directory for shader files
+set(SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
