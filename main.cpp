@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <fstream>
 #include <limits>
 #include <optional>
 #include <set>
@@ -16,8 +17,8 @@
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"};
-const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
+const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
@@ -26,9 +27,9 @@ const bool enableValidationLayers = true;
 #endif
 
 VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
-									  const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
-									  const VkAllocationCallbacks *pAllocator,
-									  VkDebugUtilsMessengerEXT *pDebugMessenger)
+									  const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+									  const VkAllocationCallbacks* pAllocator,
+									  VkDebugUtilsMessengerEXT* pDebugMessenger)
 {
 
 	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
@@ -44,7 +45,7 @@ VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
 }
 
 void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
-								   const VkAllocationCallbacks *pAllocator)
+								   const VkAllocationCallbacks* pAllocator)
 {
 	auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
 		instance, "vkDestroyDebugUtilsMessengerEXT");
@@ -52,6 +53,26 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 	{
 		func(instance, debugMessenger, pAllocator);
 	}
+}
+
+static std::vector<char> readFile(const std::string& filename)
+{
+	// ate: start reading at the end of the file
+	std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+	if (!file.is_open())
+	{
+		throw std::runtime_error("failed to open file!");
+	}
+
+	// get current read position (which is at the end since we opened the file with ate)
+	size_t fileSize = (size_t)file.tellg();
+	std::vector<char> buffer(fileSize);
+	file.seekg(0);						// seek back to beginning of file
+	file.read(buffer.data(), fileSize); // read the whole file at once
+	file.close();
+
+	return buffer;
 }
 
 class HelloTriangleApp
@@ -85,6 +106,7 @@ class HelloTriangleApp
 		createLogicalDevice();
 		createSwapchain();
 		createImageViews();
+		createGraphicsPipeline();
 
 		// TODO delete this
 		say_hello("Sam");
@@ -120,7 +142,7 @@ class HelloTriangleApp
 			createInfo.ppEnabledLayerNames = validationLayers.data();
 
 			populateDebugMessengerCreateInfo(debugCreateInfo);
-			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugCreateInfo;
+			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
 		}
 		else
 		{
@@ -141,11 +163,11 @@ class HelloTriangleApp
 		std::vector<VkLayerProperties> layers(layerCount);
 		vkEnumerateInstanceLayerProperties(&layerCount, layers.data());
 
-		for (const char *layerName : validationLayers)
+		for (const char* layerName : validationLayers)
 		{
 			bool layerFound = false;
 
-			for (const auto &layerProps : layers)
+			for (const auto& layerProps : layers)
 			{
 				if (strcmp(layerName, layerProps.layerName) == 0)
 				{
@@ -163,14 +185,14 @@ class HelloTriangleApp
 		return true;
 	}
 
-	std::vector<const char *> getRequiredExtensions()
+	std::vector<const char*> getRequiredExtensions()
 	{
 		uint32_t glfwExtensionCount = 0;
-		const char **glfwExtensionNames;
+		const char** glfwExtensionNames;
 		glfwExtensionNames = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-		std::vector<const char *> extensions(glfwExtensionNames,
-											 glfwExtensionNames + glfwExtensionCount);
+		std::vector<const char*> extensions(glfwExtensionNames,
+											glfwExtensionNames + glfwExtensionCount);
 
 		if (enableValidationLayers)
 		{
@@ -183,7 +205,7 @@ class HelloTriangleApp
 	static VKAPI_ATTR VkBool32 VKAPI_CALL
 	debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 				  VkDebugUtilsMessageTypeFlagsEXT messageType,
-				  const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData)
+				  const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
 	{
 		if (messageSeverity >=
 			VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
@@ -202,7 +224,7 @@ class HelloTriangleApp
 		return VK_FALSE;
 	}
 
-	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo)
+	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
 	{
 		createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -254,7 +276,7 @@ class HelloTriangleApp
 
 		for (int i = 0; i < queueFamilies.size(); i++)
 		{
-			const auto &queueFamily = queueFamilies[i];
+			const auto& queueFamily = queueFamilies[i];
 			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
 			{
 				indices.graphics = i;
@@ -288,7 +310,7 @@ class HelloTriangleApp
 
 		std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
-		for (const auto &extension : availableExtensions)
+		for (const auto& extension : availableExtensions)
 		{
 			// erase all the extensions we have
 			// requiredExtensions should be empty if our device supports all required extensions
@@ -326,7 +348,7 @@ class HelloTriangleApp
 		std::vector<VkPhysicalDevice> devices(deviceCount);
 		vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 
-		for (const auto &device : devices)
+		for (const auto& device : devices)
 		{
 			if (checkDeviceCompatability(device))
 			{
@@ -435,9 +457,9 @@ class HelloTriangleApp
 		return details;
 	}
 
-	VkSurfaceFormatKHR selectSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
+	VkSurfaceFormatKHR selectSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
 	{
-		for (const auto &availableFormat : availableFormats)
+		for (const auto& availableFormat : availableFormats)
 		{
 			if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
 				availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
@@ -449,9 +471,9 @@ class HelloTriangleApp
 		return availableFormats[0];
 	}
 
-	VkPresentModeKHR selectPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes)
+	VkPresentModeKHR selectPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
 	{
-		for (const auto &availablePresentMode : availablePresentModes)
+		for (const auto& availablePresentMode : availablePresentModes)
 		{
 			if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
 			{
@@ -462,7 +484,7 @@ class HelloTriangleApp
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
-	VkExtent2D selectExtent(const VkSurfaceCapabilitiesKHR &capabilities)
+	VkExtent2D selectExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 	{
 		// if extent.width is ui32 max then we are taking up max space in the window
 		// otherwise we must've specified a specific size
@@ -542,7 +564,7 @@ class HelloTriangleApp
 			createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		}
 
-		if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapchain) !=  VK_SUCCESS)
+		if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapchain) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create swapchain!");
 		}
@@ -576,11 +598,55 @@ class HelloTriangleApp
 			createInfo.subresourceRange.baseArrayLayer = 0;
 			createInfo.subresourceRange.layerCount = 1;
 
-			if (vkCreateImageView(device, &createInfo, nullptr, &swapchainImageViews[i]) != VK_SUCCESS)
+			if (vkCreateImageView(device, &createInfo, nullptr, &swapchainImageViews[i]) !=
+				VK_SUCCESS)
 			{
 				throw std::runtime_error("failed to create image views!");
 			}
 		}
+	}
+
+	void createGraphicsPipeline()
+	{
+		std::vector<char> vertShaderBytecode = readFile("shaders/shader.vert.spv");
+		std::vector<char> fragShaderBytecode = readFile("shaders/shader.frag.spv");
+
+		VkShaderModule vertShaderModule = createShaderModule(vertShaderBytecode);
+		VkShaderModule fragShaderModule = createShaderModule(fragShaderBytecode);
+
+		VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
+		vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+		vertShaderStageInfo.module = vertShaderModule;
+		vertShaderStageInfo.pName = "main"; // entry point (means that it's possible to combine
+											// multiple shaders into one module)
+
+		VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
+		vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		vertShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+		vertShaderStageInfo.module = fragShaderModule;
+		vertShaderStageInfo.pName = "main";
+
+		VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
+
+		vkDestroyShaderModule(device, vertShaderModule, nullptr);
+		vkDestroyShaderModule(device, fragShaderModule, nullptr);
+	}
+
+	VkShaderModule createShaderModule(const std::vector<char>& bytecode)
+	{
+		VkShaderModuleCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		createInfo.codeSize = bytecode.size();
+		createInfo.pCode = reinterpret_cast<const uint32_t*>(bytecode.data());
+
+		VkShaderModule shaderModule;
+		if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create shader module!");
+		}
+
+		return shaderModule;
 	}
 
 	void mainLoop()
@@ -609,7 +675,7 @@ class HelloTriangleApp
 		glfwTerminate();
 	}
 
-	GLFWwindow *window;
+	GLFWwindow* window;
 	VkInstance instance;
 	VkDebugUtilsMessengerEXT debugMessenger;
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
@@ -632,7 +698,7 @@ int main()
 	{
 		app.run();
 	}
-	catch (const std::exception &e)
+	catch (const std::exception& e)
 	{
 		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;
@@ -640,4 +706,3 @@ int main()
 
 	return EXIT_SUCCESS;
 }
-

@@ -17,9 +17,7 @@ include_directories(${Vulkan_INCLUDE_DIRS})
 # Define the C++ executable
 add_executable(${PROJECT_NAME} main.cpp)
 
-# Build rust library
-
-# Find the cargo executable
+# ##################### Build rust library Find the cargo executable
 find_program(CARGO_EXECUTABLE cargo)
 
 if(NOT CARGO_EXECUTABLE)
@@ -45,13 +43,13 @@ target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE ${CMAKE_SOURCE_DIR}/rust_lib/target/release/librust_hello_lib.so glfw
           ${Vulkan_LIBRARIES})
+# ##############################################################################
 
-
-# Compile Shaders
+# ##################### Build shaders
 find_program(GLSLC_EXECUTABLE glslc)
 if(NOT GLSLC_EXECUTABLE)
   message(
-	FATAL_ERROR "glslc not found. Make sure it is installed and in your PATH.")
+    FATAL_ERROR "glslc not found. Make sure it is installed and in your PATH.")
 endif()
 
 # Create the "shaders" directory before compiling shaders
@@ -63,9 +61,16 @@ add_custom_command(
   PRE_BUILD
   COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/shaders/shader.vert.spv
           ${CMAKE_SOURCE_DIR}/shaders/shader.vert
-		  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/shaders/shader.frag.spv
+  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/shaders/shader.frag.spv
+          ${CMAKE_SOURCE_DIR}/shaders/shader.frag
+
+  # Add them to working directory as well for development
+  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/../shaders/shader.vert.spv
+          ${CMAKE_SOURCE_DIR}/shaders/shader.vert
+  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/../shaders/shader.frag.spv
           ${CMAKE_SOURCE_DIR}/shaders/shader.frag
   COMMENT "Compiling GLSL shaders...")
 
 # Specify the output directory for shader files
 set(SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
+# ##############################################################################
