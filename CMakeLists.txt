@@ -46,6 +46,14 @@ target_link_libraries(
   PRIVATE ${CMAKE_SOURCE_DIR}/rust_lib/target/release/librust_hello_lib.so glfw
           ${Vulkan_LIBRARIES})
 
+
+# Compile Shaders
+find_program(GLSLC_EXECUTABLE glslc)
+if(NOT GLSLC_EXECUTABLE)
+  message(
+	FATAL_ERROR "glslc not found. Make sure it is installed and in your PATH.")
+endif()
+
 # Create the "shaders" directory before compiling shaders
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
 
@@ -53,9 +61,9 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
 add_custom_command(
   TARGET ${PROJECT_NAME}
   PRE_BUILD
-  COMMAND glslc -o ${CMAKE_BINARY_DIR}/shaders/shader.vert.spv
+  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/shaders/shader.vert.spv
           ${CMAKE_SOURCE_DIR}/shaders/shader.vert
-  COMMAND glslc -o ${CMAKE_BINARY_DIR}/shaders/shader.frag.spv
+		  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/shaders/shader.frag.spv
           ${CMAKE_SOURCE_DIR}/shaders/shader.frag
   COMMENT "Compiling GLSL shaders...")
 
