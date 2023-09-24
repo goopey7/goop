@@ -14,6 +14,7 @@ const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
 const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"};
+const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
@@ -271,10 +272,40 @@ class HelloTriangleApp
 		return indices;
 	}
 
+	bool checkDeviceExtensionSupport(VkPhysicalDevice device)
+	{
+		uint32_t extensionCount;
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount,
+											 availableExtensions.data());
+
+		std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+		for (const auto &extension : availableExtensions)
+		{
+			// erase all the extensions we have
+			// requiredExtensions should be empty if our device supports all required extensions
+			requiredExtensions.erase(extension.extensionName);
+		}
+
+		return requiredExtensions.empty();
+	}
+
 	bool checkDeviceCompatability(VkPhysicalDevice device)
 	{
 		QueueFamilyIndices indices = findQueueFamilies(device);
-		return indices.isComplete();
+		bool supportsExtensions = checkDeviceExtensionSupport(device);
+		bool supportsSwapchain = false;
+
+		if (supportsExtensions)
+		{
+			SwapchainSupportInfo info = getSwapchainSupportInfo(device);
+			supportsSwapchain = !info.formats.empty() && !info.presentModes.empty();
+		}
+
+		return indices.isComplete() && supportsExtensions && supportsSwapchain;
 	}
 
 	void selectPhysicalDevice()
@@ -332,7 +363,8 @@ class HelloTriangleApp
 		createInfo.pQueueCreateInfos = queueCreateInfos.data();
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		createInfo.pEnabledFeatures = &deviceFeatures;
-		createInfo.enabledExtensionCount = 0;
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
 		if (enableValidationLayers)
 		{
@@ -361,6 +393,41 @@ class HelloTriangleApp
 		{
 			throw std::runtime_error("failed to create window surface!");
 		}
+	}
+
+	struct SwapchainSupportInfo
+	{
+		VkSurfaceCapabilitiesKHR capabilities;
+		std::vector<VkSurfaceFormatKHR> formats;
+		std::vector<VkPresentModeKHR> presentModes;
+	};
+
+	SwapchainSupportInfo getSwapchainSupportInfo(VkPhysicalDevice device)
+	{
+		SwapchainSupportInfo details;
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
+
+		uint32_t formatCount;
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+
+		if (formatCount != 0)
+		{
+			details.formats.resize(formatCount);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount,
+												 details.formats.data());
+		}
+
+		uint32_t presentModeCount;
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
+
+		if (presentModeCount != 0)
+		{
+			details.presentModes.resize(presentModeCount);
+			vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount,
+													  details.presentModes.data());
+		}
+
+		return details;
 	}
 
 	void mainLoop()
