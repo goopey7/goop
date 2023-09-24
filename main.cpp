@@ -82,6 +82,7 @@ class HelloTriangleApp
 		createSurface();
 		selectPhysicalDevice();
 		createLogicalDevice();
+		createSwapchain();
 
 		// TODO delete this
 		say_hello("Sam");
@@ -488,6 +489,63 @@ class HelloTriangleApp
 		}
 	}
 
+	void createSwapchain()
+	{
+		SwapchainSupportInfo supportInfo = getSwapchainSupportInfo(physicalDevice);
+		VkSurfaceFormatKHR surfaceFormat = selectSurfaceFormat(supportInfo.formats);
+		VkPresentModeKHR presentMode = selectPresentMode(supportInfo.presentModes);
+		VkExtent2D extent = selectExtent(supportInfo.capabilities);
+
+		// it's recommended to request at least one more image than the minimum. that way we won't
+		// have to worry about sometimes waiting on the drive to complete internal operations before
+		// acquiring another image to render to
+		uint32_t imageCount = supportInfo.capabilities.minImageCount + 1;
+
+		if (supportInfo.capabilities.maxImageCount > 0 &&
+			imageCount > supportInfo.capabilities.maxImageCount)
+		{
+			imageCount = supportInfo.capabilities.maxImageCount;
+		}
+
+		VkSwapchainCreateInfoKHR createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+		createInfo.surface = surface;
+		createInfo.minImageCount = imageCount;
+		createInfo.imageFormat = surfaceFormat.format;
+		createInfo.imageColorSpace = surfaceFormat.colorSpace;
+		createInfo.imageExtent = extent;
+		createInfo.imageArrayLayers = 1; // always 1 unless we doing some kinda stereoscopic 3D
+		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		createInfo.preTransform = supportInfo.capabilities.currentTransform;
+		createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+		createInfo.presentMode = presentMode;
+		createInfo.clipped = VK_TRUE; // don't bother with pixels that are being obstructed by other
+									  // windows (I think)
+		createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+		QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+		uint32_t queueFamilyIndices[] = {indices.graphics.value(), indices.present.value()};
+
+		if (indices.graphics != indices.present)
+		{
+			// Concurrent mode is less performant than using EXCLUSIVE
+			// but for now it's easier. TODO transition to EXCLUSIVE
+			// need to specify the queue families that would be sharing ownership for CONCURRENT
+			createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+			createInfo.queueFamilyIndexCount = 2;
+			createInfo.pQueueFamilyIndices = queueFamilyIndices;
+		}
+		else
+		{
+			createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		}
+
+		if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapchain) !=  VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create swapchain!");
+		}
+	}
+
 	void mainLoop()
 	{
 		while (!glfwWindowShouldClose(window))
@@ -498,6 +556,7 @@ class HelloTriangleApp
 
 	void cleanup()
 	{
+		vkDestroySwapchainKHR(device, swapchain, nullptr);
 		vkDestroyDevice(device, nullptr);
 		if (enableValidationLayers)
 		{
@@ -517,6 +576,7 @@ class HelloTriangleApp
 	VkQueue graphicsQueue;
 	VkQueue presentQueue;
 	VkSurfaceKHR surface;
+	VkSwapchainKHR swapchain;
 };
 
 int main()
