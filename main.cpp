@@ -544,6 +544,13 @@ class HelloTriangleApp
 		{
 			throw std::runtime_error("failed to create swapchain!");
 		}
+
+		vkGetSwapchainImagesKHR(device, swapchain, &imageCount, nullptr);
+		swapchainImages.resize(imageCount);
+		vkGetSwapchainImagesKHR(device, swapchain, &imageCount, swapchainImages.data());
+
+		swapchainImageFormat = surfaceFormat.format;
+		swapchainExtent = extent;
 	}
 
 	void mainLoop()
@@ -577,6 +584,9 @@ class HelloTriangleApp
 	VkQueue presentQueue;
 	VkSurfaceKHR surface;
 	VkSwapchainKHR swapchain;
+	std::vector<VkImage> swapchainImages;
+	VkFormat swapchainImageFormat;
+	VkExtent2D swapchainExtent;
 };
 
 int main()
