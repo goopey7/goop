@@ -108,6 +108,7 @@ class HelloTriangleApp
 		createImageViews();
 		createRenderPass();
 		createGraphicsPipeline();
+		createFramebuffers();
 
 		// TODO delete this
 		say_hello("Sam");
@@ -692,8 +693,7 @@ class HelloTriangleApp
 		scissor.extent = swapchainExtent;
 
 		// dynamic states can be changed at draw time without recreating the pipeline
-		VkDynamicState dynamicStates[] = {VK_DYNAMIC_STATE_VIEWPORT,
-													 VK_DYNAMIC_STATE_SCISSOR};
+		VkDynamicState dynamicStates[] = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
 
 		VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
 		dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -803,6 +803,29 @@ class HelloTriangleApp
 		return shaderModule;
 	}
 
+	void createFramebuffers()
+	{
+		swapchainFramebuffers.resize(swapchainImageViews.size());
+		for (size_t i = 0; i < swapchainImageViews.size(); i++)
+		{
+			VkImageView attachments[] = {swapchainImageViews[i]};
+
+			VkFramebufferCreateInfo framebufferInfo{};
+			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferInfo.renderPass = renderPass;
+			framebufferInfo.attachmentCount = 1;
+			framebufferInfo.pAttachments = attachments;
+			framebufferInfo.width = swapchainExtent.width;
+			framebufferInfo.height = swapchainExtent.height;
+			framebufferInfo.layers = 1;
+
+			if(vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapchainFramebuffers[i]) != VK_SUCCESS)
+			{
+				throw std::runtime_error("failed to create framebuffer!");
+			}
+		}
+	}
+
 	void mainLoop()
 	{
 		while (!glfwWindowShouldClose(window))
@@ -813,6 +836,10 @@ class HelloTriangleApp
 
 	void cleanup()
 	{
+		for (auto framebuffer : swapchainFramebuffers)
+		{
+			vkDestroyFramebuffer(device, framebuffer, nullptr);
+		}
 		vkDestroyPipeline(device, graphicsPipeline, nullptr);
 		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 		vkDestroyRenderPass(device, renderPass, nullptr);
@@ -848,6 +875,7 @@ class HelloTriangleApp
 	VkRenderPass renderPass;
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
+	std::vector<VkFramebuffer> swapchainFramebuffers;
 };
 
 int main()
