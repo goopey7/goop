@@ -89,14 +89,23 @@ class HelloTriangleApp
 	}
 
   private:
+
+	static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
+	{
+		auto app = reinterpret_cast<HelloTriangleApp*>(glfwGetWindowUserPointer(window));
+		app->frameBufferResized = true;
+	}
+
 	void initWindow()
 	{
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API,
 					   GLFW_NO_API); // don't create an opengl context
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-		window = glfwCreateWindow(WIDTH, HEIGHT, "Goop EDITOR", nullptr, nullptr);
+		window = glfwCreateWindow(WIDTH, HEIGHT, "GOOP", nullptr, nullptr);
+		glfwSetWindowUserPointer(window, this);
+		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 	}
 
 	void initVulkan()
@@ -520,7 +529,7 @@ class HelloTriangleApp
 		}
 	}
 
-	void createSwapchain()
+	void createSwapchain(VkSwapchainKHR oldSwapchain = VK_NULL_HANDLE)
 	{
 		SwapchainSupportInfo supportInfo = getSwapchainSupportInfo(physicalDevice);
 		VkSurfaceFormatKHR surfaceFormat = selectSurfaceFormat(supportInfo.formats);
@@ -552,7 +561,7 @@ class HelloTriangleApp
 		createInfo.presentMode = presentMode;
 		createInfo.clipped = VK_TRUE; // don't bother with pixels that are being obstructed by other
 									  // windows (I think)
-		createInfo.oldSwapchain = VK_NULL_HANDLE;
+		createInfo.oldSwapchain = oldSwapchain;
 
 		QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 		uint32_t queueFamilyIndices[] = {indices.graphics.value(), indices.present.value()};
@@ -582,6 +591,9 @@ class HelloTriangleApp
 
 		swapchainImageFormat = surfaceFormat.format;
 		swapchainExtent = extent;
+
+		destroySwapchainDependents();
+		vkDestroySwapchainKHR(device, oldSwapchain, nullptr);
 	}
 
 	void createImageViews()
@@ -950,16 +962,49 @@ class HelloTriangleApp
 		}
 	}
 
+	void recreateSwapchain()
+	{
+		int width = 0, height = 0;
+		glfwGetFramebufferSize(window, &width, &height);
+		// wait until the window is actually visible
+		// because it has been minimized or something
+		while (width == 0 || height == 0)
+		{
+			glfwGetFramebufferSize(window, &width, &height);
+			glfwWaitEvents();
+		}
+
+		vkDeviceWaitIdle(device);
+
+		createSwapchain(swapchain);
+		createImageViews();
+		createFramebuffers();
+	}
+
 	void drawFrame()
 	{
 		// wait for the fence to signal that the frame is finished
 		vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-		vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
 		// Acquire image from swapchain
 		uint32_t imageIndex;
-		vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, imageAvailableSemaphores[currentFrame],
-							  VK_NULL_HANDLE, &imageIndex);
+		VkResult result = vkAcquireNextImageKHR(device, swapchain, UINT64_MAX,
+												imageAvailableSemaphores[currentFrame],
+												VK_NULL_HANDLE, &imageIndex);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			recreateSwapchain();
+			return;
+		}
+		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+		{
+			throw std::runtime_error("failed to acquire swapchain image!");
+		}
+
+		// Only reset the fence if we're definitely submitting work to gpu
+		// which is at this point
+		vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
 		// Submit command buffer
 		vkResetCommandBuffer(commandBuffers[currentFrame], 0);
@@ -978,7 +1023,8 @@ class HelloTriangleApp
 		submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = &renderFinishedSemaphores[currentFrame];
-		if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
+		if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) !=
+			VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to submit draw command buffer!");
 		}
@@ -991,7 +1037,17 @@ class HelloTriangleApp
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = &swapchain;
 		presentInfo.pImageIndices = &imageIndex;
-		vkQueuePresentKHR(presentQueue, &presentInfo);
+		result = vkQueuePresentKHR(presentQueue, &presentInfo);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frameBufferResized)
+		{
+			frameBufferResized = false;
+			recreateSwapchain();
+		}
+		else if (result != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to present swapchain image!");
+		}
 
 		// advance frame (modulo will wrap around)
 		currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -1007,8 +1063,22 @@ class HelloTriangleApp
 		vkDeviceWaitIdle(device);
 	}
 
+	void destroySwapchainDependents()
+	{
+		for (auto framebuffer : swapchainFramebuffers)
+		{
+			vkDestroyFramebuffer(device, framebuffer, nullptr);
+		}
+		for (auto imageView : swapchainImageViews)
+		{
+			vkDestroyImageView(device, imageView, nullptr);
+		}
+	}
+
 	void cleanup()
 	{
+		destroySwapchainDependents();
+		vkDestroySwapchainKHR(device, swapchain, nullptr);
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			vkDestroyFence(device, inFlightFences[i], nullptr);
@@ -1016,18 +1086,9 @@ class HelloTriangleApp
 			vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
 		}
 		vkDestroyCommandPool(device, commandPool, nullptr);
-		for (auto framebuffer : swapchainFramebuffers)
-		{
-			vkDestroyFramebuffer(device, framebuffer, nullptr);
-		}
 		vkDestroyPipeline(device, graphicsPipeline, nullptr);
 		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 		vkDestroyRenderPass(device, renderPass, nullptr);
-		for (auto imageView : swapchainImageViews)
-		{
-			vkDestroyImageView(device, imageView, nullptr);
-		}
-		vkDestroySwapchainKHR(device, swapchain, nullptr);
 		vkDestroyDevice(device, nullptr);
 		if (enableValidationLayers)
 		{
@@ -1062,6 +1123,7 @@ class HelloTriangleApp
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	std::vector<VkFence> inFlightFences;
 	uint32_t currentFrame = 0;
+	bool frameBufferResized = false;
 };
 
 int main()
