@@ -55,22 +55,18 @@ endif()
 # Create the "shaders" directory before compiling shaders
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
 
-# Add a custom command to compile GLSL shaders
-add_custom_command(
-  TARGET ${PROJECT_NAME}
-  PRE_BUILD
+# Add a custom target to compile GLSL shaders
+add_custom_target(
+  compile_shaders
   COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/shaders/shader.vert.spv
           ${CMAKE_SOURCE_DIR}/shaders/shader.vert
   COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/shaders/shader.frag.spv
-          ${CMAKE_SOURCE_DIR}/shaders/shader.frag
-
-  # Add them to working directory as well for development
-  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/../shaders/shader.vert.spv
-          ${CMAKE_SOURCE_DIR}/shaders/shader.vert
-  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/../shaders/shader.frag.spv
           ${CMAKE_SOURCE_DIR}/shaders/shader.frag
   COMMENT "Compiling GLSL shaders...")
 
 # Specify the output directory for shader files
 set(SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
+
+# Add the custom shader target as a dependency for your C++ project
+add_dependencies(${PROJECT_NAME} compile_shaders)
 # ##############################################################################
