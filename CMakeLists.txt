@@ -62,6 +62,10 @@ add_custom_target(
           ${CMAKE_SOURCE_DIR}/shaders/shader.vert
   COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/shaders/shader.frag.spv
           ${CMAKE_SOURCE_DIR}/shaders/shader.frag
+  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_SOURCE_DIR}/shaders/shader.vert.spv
+          ${CMAKE_SOURCE_DIR}/shaders/shader.vert
+  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_SOURCE_DIR}/shaders/shader.frag.spv
+          ${CMAKE_SOURCE_DIR}/shaders/shader.frag
   COMMENT "Compiling GLSL shaders...")
 
 # Specify the output directory for shader files
