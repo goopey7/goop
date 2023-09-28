@@ -112,9 +112,14 @@ struct Vertex
 };
 
 const std::vector<Vertex> vertices = {
-	{{0.f, -0.5f}, {1.f, 0.f, 0.f}},
-	{{0.5f, 0.5f}, {0.f, 1.f, 0.f}},
-	{{-0.5f, 0.5f}, {0.f, 1.f, 1.f}},
+	{{-0.5f, -0.5f}, {1.f, 0.f, 0.f}},
+	{{0.5f, -0.5f}, {0.f, 1.f, 0.f}},
+	{{0.5f, 0.5f}, {0.f, 0.f, 1.f}},
+	{{-0.5f, 0.5f}, {1.f, 1.f, 0.f}},
+};
+
+const std::vector<uint32_t> indices = {
+	0, 1, 2, 2, 3, 0,
 };
 
 class HelloTriangleApp
@@ -161,6 +166,7 @@ class HelloTriangleApp
 		createFramebuffers();
 		createCommandPool();
 		createVertexBuffer();
+		createIndexBuffer();
 		createCommandBuffers();
 		createSyncObjects();
 
@@ -961,7 +967,8 @@ class HelloTriangleApp
 		vkBindBufferMemory(device, buffer, bufferMemory, 0);
 	}
 
-	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
+	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+	{
 		// TODO consider using a different command pool for short-lived commands
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -991,7 +998,8 @@ class HelloTriangleApp
 		submitInfo.pCommandBuffers = &commandBuffer;
 
 		vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(graphicsQueue); // TODO if there are multiple buffers to copy, this is inefficient
+		vkQueueWaitIdle(
+			graphicsQueue); // TODO if there are multiple buffers to copy, this is inefficient
 		// TODO consider using fences instead of waiting for idle
 		vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 	}
@@ -1016,6 +1024,31 @@ class HelloTriangleApp
 					 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
 
 		copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+		vkDestroyBuffer(device, stagingBuffer, nullptr);
+		vkFreeMemory(device, stagingBufferMemory, nullptr);
+	}
+
+	void createIndexBuffer()
+	{
+		VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+		createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+					 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+					 stagingBuffer, stagingBufferMemory);
+
+		void* data;
+		vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+		memcpy(data, indices.data(), (size_t)bufferSize);
+		vkUnmapMemory(device, stagingBufferMemory);
+
+		createBuffer(bufferSize,
+					 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+					 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+
+		copyBuffer(stagingBuffer, indexBuffer, bufferSize);
 
 		vkDestroyBuffer(device, stagingBuffer, nullptr);
 		vkFreeMemory(device, stagingBufferMemory, nullptr);
@@ -1063,6 +1096,7 @@ class HelloTriangleApp
 
 		VkDeviceSize offset = 0;
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &offset);
+		vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
 		VkViewport viewport{};
 		viewport.x = 0.f;
@@ -1078,7 +1112,7 @@ class HelloTriangleApp
 		scissor.extent = swapchainExtent;
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-		vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
 		vkCmdEndRenderPass(commandBuffer);
 
@@ -1233,6 +1267,8 @@ class HelloTriangleApp
 	{
 		destroySwapchainDependents();
 		vkDestroySwapchainKHR(device, swapchain, nullptr);
+		vkDestroyBuffer(device, indexBuffer, nullptr);
+		vkFreeMemory(device, indexBufferMemory, nullptr);
 		vkDestroyBuffer(device, vertexBuffer, nullptr);
 		vkFreeMemory(device, vertexBufferMemory, nullptr);
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -1280,8 +1316,13 @@ class HelloTriangleApp
 	std::vector<VkFence> inFlightFences;
 	uint32_t currentFrame = 0;
 	bool frameBufferResized = false;
+
+	// TODO driver developers recommend storing vertex and index buffers into a single VkBuffer and
+	// use offsets. That way the data is more cache friendly
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;
+	VkBuffer indexBuffer;
+	VkDeviceMemory indexBufferMemory;
 };
 
 int main()
