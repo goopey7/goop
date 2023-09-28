@@ -179,6 +179,8 @@ class HelloTriangleApp
 		createVertexBuffer();
 		createIndexBuffer();
 		createUniformBuffers();
+		createDescriptorPool();
+		createDescriptorSets();
 		createCommandBuffers();
 		createSyncObjects();
 
@@ -825,7 +827,7 @@ class HelloTriangleApp
 		rasterizerInfo.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizerInfo.lineWidth = 1.f;
 		rasterizerInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizerInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+		rasterizerInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizerInfo.depthBiasEnable = VK_FALSE;
 
 		VkPipelineMultisampleStateCreateInfo multisamplingInfo{};
@@ -1105,6 +1107,62 @@ class HelloTriangleApp
 		}
 	}
 
+	// descriptor sets cannot be created directly, they must be allocated from a pool
+	void createDescriptorPool()
+	{
+		VkDescriptorPoolSize poolSize{};
+		poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+		VkDescriptorPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolInfo.poolSizeCount = 1;
+		poolInfo.pPoolSizes = &poolSize;
+		poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+		if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create descriptor pool!");
+		}
+	}
+
+	void createDescriptorSets()
+	{
+		std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+		VkDescriptorSetAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = descriptorPool;
+		allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+		allocInfo.pSetLayouts = layouts.data();
+
+		descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+		if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to allocate descriptor sets!");
+		}
+
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			VkDescriptorBufferInfo bufferInfo{};
+			bufferInfo.buffer = uniformBuffers[i];
+			bufferInfo.offset = 0;
+			bufferInfo.range = sizeof(UniformBufferObject);
+
+			VkWriteDescriptorSet descriptorWrite{};
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = descriptorSets[i];
+			descriptorWrite.dstBinding = 0;
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.pBufferInfo = &bufferInfo;
+
+			std::cout << "descriptorWrite.pBufferInfo->buffer: "
+					  << descriptorWrite.pBufferInfo->buffer << std::endl;
+			vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+		}
+	}
+
 	void createCommandBuffers()
 	{
 		commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
@@ -1163,6 +1221,9 @@ class HelloTriangleApp
 		scissor.extent = swapchainExtent;
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0,
+								1, &descriptorSets[currentFrame], 0, nullptr);
+
 		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
 		vkCmdEndRenderPass(commandBuffer);
@@ -1173,7 +1234,7 @@ class HelloTriangleApp
 		}
 	}
 
-	void updateUniformBuffer(uint32_t imageIndex)
+	void updateUniformBuffer(uint32_t currentFrame)
 	{
 		static auto startTime = std::chrono::high_resolution_clock::now();
 		auto currentTime = std::chrono::high_resolution_clock::now();
@@ -1185,7 +1246,7 @@ class HelloTriangleApp
 		UniformBufferObject ubo{};
 
 		ubo.model =
-			glm::rotate(glm::mat4(1.f), time * glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
+			glm::rotate(glm::mat4(1.f), time + glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
 
 		ubo.view = glm::lookAt(glm::vec3(2.f, 2.f, 2.f), glm::vec3(0.f, 0.f, 0.f),
 							   glm::vec3(0.f, 0.f, 1.f));
@@ -1196,7 +1257,7 @@ class HelloTriangleApp
 		// flip y coordinate, glm was designed for OpenGL which has an inverted y coordinate
 		ubo.proj[1][1] *= -1;
 
-		memcpy(uniformBuffersData[imageIndex], &ubo, sizeof(ubo));
+		memcpy(uniformBuffersData[currentFrame], &ubo, sizeof(ubo));
 	}
 
 	void createSyncObjects()
@@ -1271,10 +1332,11 @@ class HelloTriangleApp
 		// which is at this point
 		vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
+		updateUniformBuffer(currentFrame);
+
 		// Submit command buffer
 		vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 		recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
-		updateUniformBuffer(imageIndex);
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.waitSemaphoreCount = 1;
@@ -1345,6 +1407,8 @@ class HelloTriangleApp
 	{
 		destroySwapchainDependents();
 		vkDestroySwapchainKHR(device, swapchain, nullptr);
+		vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+		vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			vkDestroyBuffer(device, uniformBuffers[i], nullptr);
@@ -1412,6 +1476,9 @@ class HelloTriangleApp
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
 	std::vector<void*> uniformBuffersData;
+
+	VkDescriptorPool descriptorPool;
+	std::vector<VkDescriptorSet> descriptorSets;
 };
 
 int main()
