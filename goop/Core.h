@@ -1,8 +1,8 @@
 // Sam Collier 2023
 #pragma once
 
-#include "sys/Renderer.h"
-#include "sys/Window.h"
+#include <goop/sys/Renderer.h>
+#include <goop/sys/Window.h>
 #include <cstdint>
 #include <memory>
 

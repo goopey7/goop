@@ -1,7 +1,7 @@
 // Sam Collier 2023
 #pragma once
 
-#include "../Window.h"
+#include <goop/sys/Window.h>
 
 class GLFWwindow;
 

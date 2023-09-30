@@ -5,6 +5,8 @@ project(goop)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_COMPILER clang++)
 
+include_directories(".")
+
 # Find Vulkan package
 find_package(Vulkan REQUIRED)
 
@@ -15,7 +17,7 @@ find_package(glfw3 REQUIRED)
 include_directories(${Vulkan_INCLUDE_DIRS})
 
 # Recursively glob all .cpp and .h files in src/ directory
-file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.h")
+file(GLOB_RECURSE SRC_FILES "goop/*.cpp" "goop/*.h")
 
 # Define the C++ executable
 add_executable(${PROJECT_NAME} ${SRC_FILES})

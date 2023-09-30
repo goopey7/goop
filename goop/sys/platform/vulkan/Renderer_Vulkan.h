@@ -1,7 +1,7 @@
 // Sam Collier 2023
 #pragma once
 
-#include "../Renderer.h"
+#include <goop/sys/Renderer.h>
 #include <array>
 #include <glm/glm.hpp>
 #include <optional>
