@@ -12,7 +12,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Pull Docker Image
-        run: docker pull archlinux/base-devel
+        run: docker pull archlinux:base-devel
       - name: Run Steps in New Container
         run: |
           docker run --rm -v ${{ github.workspace }}:/app archlinux/base-devel bash -c '
