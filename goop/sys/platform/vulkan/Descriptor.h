@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <vulkan/vulkan.h>
+#include <goop/sys/platform/vulkan/UniformBuffer.h>
 
 namespace goop::sys::platform::vulkan
 {
@@ -11,7 +12,7 @@ class Descriptor
   public:
 	Descriptor(const Descriptor&) = delete;
 	Descriptor& operator=(const Descriptor&) = delete;
-	Descriptor(VkDevice device, uint8_t maxFramesInFlight, VkBuffer* uniformBuffers);
+	Descriptor(VkDevice device, uint8_t maxFramesInFlight, UniformBuffer* ub);
 	~Descriptor();
 
 	VkDescriptorSetLayout getLayout() const { return descriptorSetLayout; }
@@ -21,7 +22,7 @@ class Descriptor
   private:
 	void createDescriptorSetLayout();
 	void createDescriptorPool();
-	void createDescriptorSets(VkBuffer* uniformBuffers);
+	void createDescriptorSets(UniformBuffer* ub);
 
 	VkDevice device;
 	uint8_t maxFramesInFlight;

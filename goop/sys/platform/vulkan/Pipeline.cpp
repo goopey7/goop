@@ -42,9 +42,9 @@ VkShaderModule Pipeline::createShaderModule(const std::vector<char>& bytecode)
 	return shaderModule;
 }
 
-Pipeline::Pipeline(VkDevice device, VkExtent2D swapchainExtent, VkRenderPass renderPass, VkDescriptorSetLayout descriptorSetLayout) : device(device)
+Pipeline::Pipeline(VkDevice device, VkExtent2D swapchainExtent, VkRenderPass renderPass, Descriptor* descriptor) : device(device)
 {
-	createPipelineLayout(descriptorSetLayout);
+	createPipelineLayout(descriptor->getLayout());
 	createGraphicsPipeline(swapchainExtent, renderPass);
 }
 

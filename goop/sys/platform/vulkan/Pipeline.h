@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <vulkan/vulkan.h>
+#include <goop/sys/platform/vulkan/Descriptor.h>
 
 namespace goop::sys::platform::vulkan
 {
@@ -12,7 +13,7 @@ class Pipeline
 	Pipeline(const Pipeline&) = delete;
 	Pipeline& operator=(const Pipeline&) = delete;
 	Pipeline(VkDevice device, VkExtent2D swapchainExtent, VkRenderPass renderPass,
-			 VkDescriptorSetLayout descriptorSetLayout);
+			 Descriptor* descriptor);
 	~Pipeline();
 
 	VkPipeline getPipeline() const { return pipeline; }

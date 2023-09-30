@@ -6,7 +6,6 @@
 #include <glm/glm.hpp>
 #include <goop/sys/Renderer.h>
 #include <goop/sys/platform/vulkan/Pipeline.h>
-#include <goop/sys/platform/vulkan/Descriptor.h>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -48,15 +47,10 @@ class Renderer_Vulkan : public Renderer
 	void createSwapchain(VkSwapchainKHR oldSwapchain = VK_NULL_HANDLE);
 	void createImageViews();
 	void createRenderPass();
-	void createDescriptorSetLayout();
-	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
 	void createVertexBuffer();
 	void createIndexBuffer();
-	void createUniformBuffers();
-	void createDescriptorPool();
-	void createDescriptorSets();
 	void createCommandBuffers();
 	void createSyncObjects();
 
@@ -74,11 +68,6 @@ class Renderer_Vulkan : public Renderer
 	VkPresentModeKHR selectPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	void destroySwapchainDependents();
 	VkShaderModule createShaderModule(const std::vector<char>& bytecode);
-	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-					  VkBuffer& buffer, VkDeviceMemory& bufferMemory);
-	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 	void updateUniformBuffer(uint32_t currentFrame);
 
@@ -97,6 +86,7 @@ class Renderer_Vulkan : public Renderer
 	VkExtent2D swapchainExtent;
 	std::vector<VkImageView> swapchainImageViews;
 	VkRenderPass renderPass;
+	UniformBuffer* uniformBuffer;
 	Descriptor* descriptor;
 	Pipeline* pipeline;
 	std::vector<VkFramebuffer> swapchainFramebuffers;
@@ -114,9 +104,5 @@ class Renderer_Vulkan : public Renderer
 	VkDeviceMemory vertexBufferMemory;
 	VkBuffer indexBuffer;
 	VkDeviceMemory indexBufferMemory;
-
-	std::vector<VkBuffer> uniformBuffers;
-	std::vector<VkDeviceMemory> uniformBuffersMemory;
-	std::vector<void*> uniformBuffersData;
 };
 } // namespace goop::sys::platform::vulkan

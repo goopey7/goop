@@ -2,16 +2,15 @@
 
 #include "Descriptor.h"
 #include <stdexcept>
-#include <goop/sys/platform/vulkan/UniformBufferObject.h>
 
 using namespace goop::sys::platform::vulkan;
 
-Descriptor::Descriptor(VkDevice device, uint8_t maxFramesInFlight, VkBuffer* uniformBuffers)
+Descriptor::Descriptor(VkDevice device, uint8_t maxFramesInFlight, UniformBuffer* ub)
 	: device(device), maxFramesInFlight(maxFramesInFlight)
 {
 	createDescriptorSetLayout();
 	createDescriptorPool();
-	createDescriptorSets(uniformBuffers);
+	createDescriptorSets(ub);
 }
 
 void Descriptor::createDescriptorSetLayout()
@@ -52,7 +51,7 @@ void Descriptor::createDescriptorPool()
 	}
 }
 
-void Descriptor::createDescriptorSets(VkBuffer* uniformBuffers)
+void Descriptor::createDescriptorSets(UniformBuffer* ub)
 {
 	std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, descriptorSetLayout);
 	VkDescriptorSetAllocateInfo allocInfo{};
@@ -70,7 +69,7 @@ void Descriptor::createDescriptorSets(VkBuffer* uniformBuffers)
 	for (size_t i = 0; i < maxFramesInFlight; i++)
 	{
 		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = uniformBuffers[i];
+		bufferInfo.buffer = ub->getBuffer(i);
 		bufferInfo.offset = 0;
 		bufferInfo.range = sizeof(UniformBufferObject);
 
