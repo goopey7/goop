@@ -1,6 +1,7 @@
 // Sam Collier 2023
 
 #include "Window_GLFW.h"
+#include <vulkan/vulkan_core.h>
 #ifdef RENDERER_VULKAN
 #define GLFW_INCLUDE_VULKAN
 #endif
@@ -17,8 +18,6 @@ using namespace goop::sys::platform;
 int Window_GLFW::initialize()
 {
 	glfwInit();
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 	return 0;
 }
 
@@ -29,8 +28,12 @@ int Window_GLFW::destroy()
 	return 0;
 }
 
-int Window_GLFW::openWindow(uint32_t width, uint32_t height, const char* title)
+int Window_GLFW::openWindow(uint32_t width, uint32_t height, const char* title, uint32_t flags)
 {
+#ifndef RENDERER_OPENGL
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+#endif
+	glfwWindowHint(GLFW_RESIZABLE, (flags & GOOP_WINDOW_RESIZABLE) ? GLFW_TRUE : GLFW_FALSE);
 	window = glfwCreateWindow(width, height, title, nullptr, nullptr);
 	return 0;
 }

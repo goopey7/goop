@@ -15,7 +15,7 @@ class Window_GLFW : public Window
 	int destroy() final;
 
 	// Window Interface
-	int openWindow(uint32_t width, uint32_t height, const char* title) final;
+	int openWindow(uint32_t width, uint32_t height, const char* title, uint32_t flags) final;
 	const char** getRequiredExtensions(uint32_t* count) final;
 	void createVulkanSurface(VkInstance instance, VkSurfaceKHR* surface) final;
 	void getFramebufferSize(int* width, int* height) final;

@@ -18,7 +18,7 @@ class Core
 	void run();
 
   private:
-	void openWindow(uint32_t width, uint32_t height, const char* title);
+	void openWindow(uint32_t width, uint32_t height, const char* title, uint32_t flags);
 	int handleEvents();
 	void update();
 	void render();
