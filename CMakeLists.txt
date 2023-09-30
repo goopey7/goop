@@ -14,8 +14,15 @@ find_package(glfw3 REQUIRED)
 # Include Vulkan headers
 include_directories(${Vulkan_INCLUDE_DIRS})
 
+# Recursively glob all .cpp and .h files in src/ directory
+file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.h")
+
 # Define the C++ executable
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} ${SRC_FILES})
+
+# define systems
+target_compile_definitions(${PROJECT_NAME} PRIVATE RENDERER_VULKAN=1)
+target_compile_definitions(${PROJECT_NAME} PRIVATE WINDOW_GLFW=1)
 
 # ##################### Build rust library Find the cargo executable
 find_program(CARGO_EXECUTABLE cargo)
@@ -74,3 +81,4 @@ set(SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
 # Add the custom shader target as a dependency for your C++ project
 add_dependencies(${PROJECT_NAME} compile_shaders)
 # ##############################################################################
+
