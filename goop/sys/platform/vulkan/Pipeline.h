@@ -13,9 +13,10 @@ class Pipeline
 	Pipeline& operator=(const Pipeline&) = delete;
 	Pipeline(VkDevice device, VkExtent2D swapchainExtent, VkRenderPass renderPass,
 			 VkDescriptorSetLayout descriptorSetLayout);
+	~Pipeline();
+
 	VkPipeline getPipeline() const { return pipeline; }
 	VkPipelineLayout getPipelineLayout() const { return pipelineLayout; }
-	~Pipeline();
 
   private:
 	VkPipeline pipeline;

@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <goop/sys/Renderer.h>
 #include <goop/sys/platform/vulkan/Pipeline.h>
+#include <goop/sys/platform/vulkan/Descriptor.h>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -96,7 +97,7 @@ class Renderer_Vulkan : public Renderer
 	VkExtent2D swapchainExtent;
 	std::vector<VkImageView> swapchainImageViews;
 	VkRenderPass renderPass;
-	VkDescriptorSetLayout descriptorSetLayout;
+	Descriptor* descriptor;
 	Pipeline* pipeline;
 	std::vector<VkFramebuffer> swapchainFramebuffers;
 	VkCommandPool commandPool;
@@ -117,8 +118,5 @@ class Renderer_Vulkan : public Renderer
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
 	std::vector<void*> uniformBuffersData;
-
-	VkDescriptorPool descriptorPool;
-	std::vector<VkDescriptorSet> descriptorSets;
 };
 } // namespace goop::sys::platform::vulkan
