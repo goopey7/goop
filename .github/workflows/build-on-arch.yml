@@ -3,14 +3,15 @@ on: push
 
 jobs:
   build:
-	name: Build on Arch Linux
-	runs-on: ubuntu-latest
-	container:
-	  image: archlinux:base-devel
-	  volumes:
-		- ${{ github.workspace }}:/app
-	steps:
-	  - name: Checkout the repo
-		uses: actions/checkout@v3
-	  - name: Install Dependencies
-		run: sudo pacman -Syy
+    name: Build on Arch Linux
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux/base
+      volumes:
+        - ${{ github.workspace }}:/app
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: |
+          sudo pacman -Syu --noconfirm
