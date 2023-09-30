@@ -5,7 +5,7 @@
 
 class GLFWwindow;
 
-namespace goop::sys::platform
+namespace goop::sys::platform::glfw
 {
 class Window_GLFW : public Window
 {
@@ -26,4 +26,4 @@ class Window_GLFW : public Window
   private:
 	GLFWwindow* window = nullptr;
 };
-} // namespace goop::sys::platform
+} // namespace goop::sys::platform::glfw

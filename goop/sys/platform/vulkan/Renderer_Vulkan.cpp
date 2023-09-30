@@ -12,12 +12,14 @@
 #include <stdexcept>
 #include <vector>
 
+#include <goop/sys/platform/vulkan/UniformBufferObject.h>
+
 #ifdef RENDERER_VULKAN
-goop::sys::platform::Renderer_Vulkan gRendererVulkan;
+goop::sys::platform::vulkan::Renderer_Vulkan gRendererVulkan;
 goop::sys::Renderer* goop::sys::gRenderer = &gRendererVulkan;
 #endif
 
-using namespace goop::sys::platform;
+using namespace goop::sys::platform::vulkan;
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -145,7 +147,6 @@ int Renderer_Vulkan::destroy()
 
 void Renderer_Vulkan::render()
 {
-
 	// wait for the fence to signal that the frame is finished
 	vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 

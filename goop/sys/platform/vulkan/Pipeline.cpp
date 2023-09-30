@@ -4,6 +4,8 @@
 #include <fstream>
 #include "Vertex.h"
 
+using namespace goop::sys::platform::vulkan;
+
 static std::vector<char> readFile(const std::string& filename)
 {
 	// ate: start reading at the end of the file

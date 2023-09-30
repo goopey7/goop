@@ -1,45 +1,21 @@
 // Sam Collier 2023
 #pragma once
 
-#include <goop/sys/Renderer.h>
+#include "Vertex.h"
 #include <array>
 #include <glm/glm.hpp>
+#include <goop/sys/Renderer.h>
+#include <goop/sys/platform/vulkan/Pipeline.h>
 #include <memory>
 #include <optional>
 #include <vector>
 #include <vulkan/vulkan_core.h>
-#include "Vertex.h"
-#include "goop/sys/platform/vulkan/Pipeline.h"
 
-namespace goop::sys::platform
+#include <goop/sys/platform/vulkan/QueueFamilyIndices.h>
+#include <goop/sys/platform/vulkan/SwapchainSupportInfo.h>
+
+namespace goop::sys::platform::vulkan
 {
-
-struct UniformBufferObject
-{
-	glm::mat4 model;
-	glm::mat4 view;
-	glm::mat4 proj;
-};
-
-struct QueueFamilyIndices
-{
-	// it's possible that the device uses a separate queue for drawing and presentation
-	// but this approach will at least handle both cases
-	// TODO prefer that graphics and presentation are in same queue for improved performance
-	// TODO investigate separating transfers to a separate queue
-	std::optional<uint32_t> graphics; // graphics queues support transfer operations
-	std::optional<uint32_t> present;
-	// std::optional<uint32_t> transfer;
-
-	bool isComplete() { return graphics.has_value() && present.has_value(); }
-};
-
-struct SwapchainSupportInfo
-{
-	VkSurfaceCapabilitiesKHR capabilities;
-	std::vector<VkSurfaceFormatKHR> formats;
-	std::vector<VkPresentModeKHR> presentModes;
-};
 
 const std::vector<Vertex> vertices = {
 	{{-0.5f, -0.5f}, {1.f, 0.f, 0.f}},
@@ -145,4 +121,4 @@ class Renderer_Vulkan : public Renderer
 	VkDescriptorPool descriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
 };
-} // namespace goop::sys::platform
+} // namespace goop::sys::platform::vulkan

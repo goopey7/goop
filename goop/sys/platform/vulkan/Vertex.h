@@ -1,7 +1,9 @@
+#include <array>
 #include <glm/glm.hpp>
 #include <vulkan/vulkan.h>
-#include <array>
 
+namespace goop::sys::platform::vulkan
+{
 struct Vertex
 {
 	glm::vec2 pos;
@@ -33,3 +35,4 @@ struct Vertex
 		return attributeDescriptions;
 	}
 };
+} // namespace goop::sys::platform::vulkan

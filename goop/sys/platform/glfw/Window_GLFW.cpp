@@ -9,11 +9,11 @@
 #include <stdexcept>
 
 #ifdef WINDOW_GLFW
-goop::sys::platform::Window_GLFW gWindow_GLFW;
+goop::sys::platform::glfw::Window_GLFW gWindow_GLFW;
 goop::sys::Window* goop::sys::gWindow = &gWindow_GLFW;
 #endif
 
-using namespace goop::sys::platform;
+using namespace goop::sys::platform::glfw;
 
 int Window_GLFW::initialize()
 {
