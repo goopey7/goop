@@ -5,6 +5,7 @@
 #include <array>
 #include <glm/glm.hpp>
 #include <goop/sys/Renderer.h>
+#include <goop/sys/platform/vulkan/Context.h>
 #include <goop/sys/platform/vulkan/Pipeline.h>
 #include <memory>
 #include <optional>
@@ -39,11 +40,6 @@ class Renderer_Vulkan : public Renderer
 	void render() final;
 
   private:
-	void createInstance();
-	void createDebugMessenger();
-	void createSurface();
-	void selectPhysicalDevice();
-	void createLogicalDevice();
 	void createSwapchain(VkSwapchainKHR oldSwapchain = VK_NULL_HANDLE);
 	void createImageViews();
 	void createRenderPass();
@@ -60,10 +56,8 @@ class Renderer_Vulkan : public Renderer
 	bool checkValidationLayerSupport();
 	bool isDeviceSuitable(VkPhysicalDevice device);
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 	bool checkDeviceCompatibility(VkPhysicalDevice device);
-	SwapchainSupportInfo getSwapchainSupportInfo(VkPhysicalDevice device);
 	VkSurfaceFormatKHR selectSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 	VkPresentModeKHR selectPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	void destroySwapchainDependents();
@@ -73,22 +67,18 @@ class Renderer_Vulkan : public Renderer
 
 	void recreateSwapchain();
 
-	VkInstance instance;
-	VkDebugUtilsMessengerEXT debugMessenger;
-	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-	VkDevice device;
-	VkQueue graphicsQueue;
-	VkQueue presentQueue;
-	VkSurfaceKHR surface;
 	VkSwapchainKHR swapchain;
 	std::vector<VkImage> swapchainImages;
 	VkFormat swapchainImageFormat;
 	VkExtent2D swapchainExtent;
 	std::vector<VkImageView> swapchainImageViews;
 	VkRenderPass renderPass;
+
+	Context* ctx;
 	UniformBuffer* uniformBuffer;
 	Descriptor* descriptor;
 	Pipeline* pipeline;
+
 	std::vector<VkFramebuffer> swapchainFramebuffers;
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;

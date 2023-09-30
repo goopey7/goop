@@ -1,8 +1,8 @@
 // Sam Collier 2023
 
 #include "Pipeline.h"
-#include <fstream>
 #include "Vertex.h"
+#include <fstream>
 
 using namespace goop::sys::platform::vulkan;
 
@@ -42,7 +42,9 @@ VkShaderModule Pipeline::createShaderModule(const std::vector<char>& bytecode)
 	return shaderModule;
 }
 
-Pipeline::Pipeline(VkDevice device, VkExtent2D swapchainExtent, VkRenderPass renderPass, Descriptor* descriptor) : device(device)
+Pipeline::Pipeline(Context* ctx, VkExtent2D swapchainExtent, VkRenderPass renderPass,
+				   Descriptor* descriptor)
+	: device(ctx->getDevice())
 {
 	createPipelineLayout(descriptor->getLayout());
 	createGraphicsPipeline(swapchainExtent, renderPass);
@@ -158,7 +160,6 @@ void Pipeline::createGraphicsPipeline(VkExtent2D swapchainExtent, VkRenderPass r
 	colorBlendingInfo.blendConstants[2] = 0.f;
 	colorBlendingInfo.blendConstants[3] = 0.f;
 
-
 	VkGraphicsPipelineCreateInfo pipelineInfo{};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipelineInfo.stageCount = 2;
@@ -175,8 +176,8 @@ void Pipeline::createGraphicsPipeline(VkExtent2D swapchainExtent, VkRenderPass r
 	pipelineInfo.renderPass = renderPass;
 	pipelineInfo.subpass = 0;
 
-	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr,
-								  &pipeline) != VK_SUCCESS)
+	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) !=
+		VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
@@ -205,4 +206,3 @@ Pipeline::~Pipeline()
 	vkDestroyPipeline(device, pipeline, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 }
-

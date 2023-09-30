@@ -5,8 +5,8 @@
 
 using namespace goop::sys::platform::vulkan;
 
-Descriptor::Descriptor(VkDevice device, uint8_t maxFramesInFlight, UniformBuffer* ub)
-	: device(device), maxFramesInFlight(maxFramesInFlight)
+Descriptor::Descriptor(Context* ctx, uint8_t maxFramesInFlight, UniformBuffer* ub)
+	: device(ctx->getDevice()), maxFramesInFlight(maxFramesInFlight)
 {
 	createDescriptorSetLayout();
 	createDescriptorPool();

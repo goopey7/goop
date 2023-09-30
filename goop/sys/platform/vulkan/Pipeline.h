@@ -12,7 +12,7 @@ class Pipeline
   public:
 	Pipeline(const Pipeline&) = delete;
 	Pipeline& operator=(const Pipeline&) = delete;
-	Pipeline(VkDevice device, VkExtent2D swapchainExtent, VkRenderPass renderPass,
+	Pipeline(Context* ctx, VkExtent2D swapchainExtent, VkRenderPass renderPass,
 			 Descriptor* descriptor);
 	~Pipeline();
 

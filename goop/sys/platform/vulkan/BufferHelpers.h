@@ -2,12 +2,13 @@
 
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
+#include <goop/sys/platform/vulkan/Context.h>
 
-inline uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter,
+inline uint32_t findMemoryType(goop::sys::platform::vulkan::Context* ctx, uint32_t typeFilter,
 						VkMemoryPropertyFlags properties)
 {
 	VkPhysicalDeviceMemoryProperties memProperties;
-	vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+	vkGetPhysicalDeviceMemoryProperties(ctx->getPhysicalDevice(), &memProperties);
 
 	for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
 	{
@@ -22,7 +23,7 @@ inline uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFil
 	throw std::runtime_error("failed to find suitable memory type!");
 }
 
-inline void createBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkDeviceSize size,
+inline void createBuffer(goop::sys::platform::vulkan::Context* ctx, VkDeviceSize size,
 				  VkBufferUsageFlags usage, VkMemoryPropertyFlags memProps, VkBuffer& buffer,
 				  VkDeviceMemory& bufferMemory)
 {
@@ -31,28 +32,28 @@ inline void createBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkDev
 	bufferInfo.size = size;
 	bufferInfo.usage = usage;
 	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+	if (vkCreateBuffer(ctx->getDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create buffer!");
 	}
 
 	VkMemoryRequirements memRequirements;
-	vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
+	vkGetBufferMemoryRequirements(ctx->getDevice(), buffer, &memRequirements);
 
 	VkMemoryAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = memRequirements.size;
 	allocInfo.memoryTypeIndex =
-		findMemoryType(physicalDevice, memRequirements.memoryTypeBits, memProps);
-	if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
+		findMemoryType(ctx, memRequirements.memoryTypeBits, memProps);
+	if (vkAllocateMemory(ctx->getDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to allocate buffer memory!");
 	}
 
-	vkBindBufferMemory(device, buffer, bufferMemory, 0);
+	vkBindBufferMemory(ctx->getDevice(), buffer, bufferMemory, 0);
 }
 
-inline void copyBuffer(VkDevice device, VkCommandPool commandPool, VkQueue queue, VkBuffer srcBuffer,
+inline void copyBuffer(goop::sys::platform::vulkan::Context* ctx, VkCommandPool commandPool, VkQueue queue, VkBuffer srcBuffer,
 				VkBuffer dstBuffer, VkDeviceSize size)
 {
 	// TODO consider using a different command pool for short-lived commands
@@ -63,7 +64,7 @@ inline void copyBuffer(VkDevice device, VkCommandPool commandPool, VkQueue queue
 	allocInfo.commandBufferCount = 1;
 
 	VkCommandBuffer commandBuffer;
-	vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+	vkAllocateCommandBuffers(ctx->getDevice(), &allocInfo, &commandBuffer);
 
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -86,5 +87,5 @@ inline void copyBuffer(VkDevice device, VkCommandPool commandPool, VkQueue queue
 	vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
 	vkQueueWaitIdle(queue); // TODO if there are multiple buffers to copy, this is inefficient
 	// TODO consider using fences instead of waiting for idle
-	vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+	vkFreeCommandBuffers(ctx->getDevice(), commandPool, 1, &commandBuffer);
 }
