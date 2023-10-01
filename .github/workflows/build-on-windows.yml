@@ -19,15 +19,12 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: Install Chocolatey
-      run: |
-        # Install Chocolatey on the Windows runner
-        Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-
     - name: Install Vulkan SDK
       run: |
         # Use Chocolatey to install the Vulkan SDK
-        choco install vulkan-sdk -y
+        Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.3.261.1/windows/VulkanSDK-1.3.261.1-Installer.exe" -OutFile VulkanSDK.exe
+        $installer = Start-Process -FilePath VulkanSDK.exe -Wait -PassThru -ArgumentList @("/S");
+        $installer.WaitForExit();
 
    # - name: Install glm
    ##   run: |
