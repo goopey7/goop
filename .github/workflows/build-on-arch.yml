@@ -20,7 +20,7 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/app archlinux:base-devel bash -c '
             # Install build deps
-            pacman -Syu cmake vulkan-headers vulkan-validation-layers shaderc glfw-x11 rustup --noconfirm
+            pacman -Syu cmake vulkan-headers vulkan-validation-layers shaderc glfw-x11 glm rustup --noconfirm
             rustup default stable
 
             # Run Build
