@@ -13,10 +13,20 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Pull Docker Image
         run: docker pull archlinux:base-devel
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
       - name: Run Steps in New Container
         run: |
           docker run --rm -v ${{ github.workspace }}:/app archlinux:base-devel bash -c '
             # Commands to run within the new container
-            pacman -Syu --noconfirm
+            pacman -Syu cmake vulkan-headers vulkan-validation-layers shaderc glfw-x11 rustup --noconfirm
+            rustup default stable
             # Add more commands as needed
+            
+            # Now, you can access the repository in /app inside the container
+            ls /app  # Example: List files in the repository directory
           '
+
+          # Additional commands within the container if needed
+
