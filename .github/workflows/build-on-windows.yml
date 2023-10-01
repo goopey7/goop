@@ -19,32 +19,6 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: Install Vulkan SDK
-      run: |
-        # Use Chocolatey to install the Vulkan SDK
-        Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.3.261.1/windows/VulkanSDK-1.3.261.1-Installer.exe" -OutFile VulkanSDK.exe
-        $installer = Start-Process -FilePath VulkanSDK.exe -Wait -PassThru -ArgumentList @("/S");
-        $installer.WaitForExit();
-
-   # - name: Install glm
-   ##   run: |
-        # Use Chocolatey to install glm
-    #    choco install glm -y
-
-    - name: Install glfw3
-      run: |
-        # Use Chocolatey to install glfw3
-        choco install glfw3 -y
-
-    - name: Install Rust
-      run: |
-        # Use Chocolatey to install Rust
-        choco install rust -y
-
-    #- name: Install glslc
-     # run: |
-     #   # Use Chocolatey to install glslc
-      #  choco install glslc -y
 
     - name: Configure CMake
       run: >
