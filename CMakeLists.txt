@@ -3,7 +3,8 @@ project(goop)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_COMPILER g++)
+
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 include_directories(".")
 
@@ -11,7 +12,15 @@ include_directories(".")
 find_package(Vulkan REQUIRED)
 
 # Find GLFW package
-find_package(glfw3 REQUIRED)
+find_package(GLFW3 REQUIRED)
+include_directories(${GLFW3_INCLUDE_DIR})
+
+if(GLFW3_FOUND)
+message("WE FOUND GLFW")
+message(${GLFW3_LIBRARY})
+message(${GLFW3_INCLUDE_DIR})
+else()
+endif()
 
 # Include Vulkan headers
 include_directories(${Vulkan_INCLUDE_DIRS})
@@ -50,7 +59,7 @@ add_dependencies(${PROJECT_NAME} build_rust_project)
 # Link the C++ executable with the Rust dynamic library
 target_link_libraries(
   ${PROJECT_NAME}
-  PRIVATE ${CMAKE_SOURCE_DIR}/rust_lib/target/release/librust_hello_lib.so glfw
+  PRIVATE ${CMAKE_SOURCE_DIR}/rust_lib/target/release/rust_hello_lib.dll.lib ${GLFW3_LIBRARY}
           ${Vulkan_LIBRARIES})
 # ##############################################################################
 
@@ -83,4 +92,10 @@ set(SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
 # Add the custom shader target as a dependency for your C++ project
 add_dependencies(${PROJECT_NAME} compile_shaders)
 # ##############################################################################
+
+# Copy the rust_hello_lib.dll to the build directory where the .exe goes
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/rust_lib/target/release/rust_hello_lib.dll
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 

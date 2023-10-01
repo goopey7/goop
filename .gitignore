@@ -1,3 +1,5 @@
 .cache/clangd/index
 build
 shaders/*.spv
+.vs
+CMakeSettings.json
