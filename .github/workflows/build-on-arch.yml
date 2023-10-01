@@ -15,8 +15,8 @@ jobs:
         run: docker pull archlinux:base-devel
       - name: Run Steps in New Container
         run: |
-		  docker run --rm -v ${{ github.workspace }}:/app archlinux:base-devel bash -c '
+          docker run --rm -v ${{ github.workspace }}:/app archlinux:base-devel bash -c '
             # Commands to run within the new container
-            pacman -Syu neovim --noconfirm
+            pacman -Syu --noconfirm
             # Add more commands as needed
           '
