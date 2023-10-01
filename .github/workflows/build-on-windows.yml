@@ -1,0 +1,65 @@
+name: CMake on Windows
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  build:
+    runs-on: windows-latest  # Set the runner to Windows
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set reusable strings
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+    - name: Install Chocolatey
+      run: |
+        # Install Chocolatey on the Windows runner
+        Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+    - name: Install Vulkan SDK
+      run: |
+        # Use Chocolatey to install the Vulkan SDK
+        choco install vulkan-sdk -y
+
+   # - name: Install glm
+   ##   run: |
+        # Use Chocolatey to install glm
+    #    choco install glm -y
+
+    - name: Install glfw3
+      run: |
+        # Use Chocolatey to install glfw3
+        choco install glfw3 -y
+
+    - name: Install Rust
+      run: |
+        # Use Chocolatey to install Rust
+        choco install rust -y
+
+    #- name: Install glslc
+     # run: |
+     #   # Use Chocolatey to install glslc
+      #  choco install glslc -y
+
+    - name: Configure CMake
+      run: >
+        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -DCMAKE_CXX_COMPILER=cl  # Specify the C++ compiler for Windows
+        -DCMAKE_C_COMPILER=cl    # Specify the C compiler for Windows
+        -DCMAKE_BUILD_TYPE=Release
+        -S ${{ github.workspace }}
+
+    - name: Build
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
+
+    - name: Test
+      working-directory: ${{ steps.strings.outputs.build-output-dir }}
+      run: ctest --build-config Release
