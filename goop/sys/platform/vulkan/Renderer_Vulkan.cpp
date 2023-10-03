@@ -141,22 +141,6 @@ void Renderer_Vulkan::render()
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void Renderer_Vulkan::createSwapchain(VkSwapchainKHR oldSwapchain)
-{
-}
-
-void Renderer_Vulkan::createImageViews()
-{
-}
-
-void Renderer_Vulkan::createRenderPass()
-{
-}
-
-void Renderer_Vulkan::createFramebuffers()
-{
-}
-
 void Renderer_Vulkan::createCommandPool()
 {
 	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(*ctx, ctx->getSurface());

@@ -41,10 +41,6 @@ class Renderer_Vulkan : public Renderer
 	void render() final;
 
   private:
-	void createSwapchain(VkSwapchainKHR oldSwapchain = VK_NULL_HANDLE);
-	void createImageViews();
-	void createRenderPass();
-	void createFramebuffers();
 	void createCommandPool();
 	void createVertexBuffer();
 	void createIndexBuffer();
