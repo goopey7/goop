@@ -7,6 +7,7 @@
 #include <goop/sys/Renderer.h>
 #include <goop/sys/platform/vulkan/Context.h>
 #include <goop/sys/platform/vulkan/Pipeline.h>
+#include <goop/sys/platform/vulkan/Swapchain.h>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -67,19 +68,12 @@ class Renderer_Vulkan : public Renderer
 
 	void recreateSwapchain();
 
-	VkSwapchainKHR swapchain;
-	std::vector<VkImage> swapchainImages;
-	VkFormat swapchainImageFormat;
-	VkExtent2D swapchainExtent;
-	std::vector<VkImageView> swapchainImageViews;
-	VkRenderPass renderPass;
-
 	Context* ctx;
 	UniformBuffer* uniformBuffer;
 	Descriptor* descriptor;
 	Pipeline* pipeline;
+	Swapchain* swapchain;
 
-	std::vector<VkFramebuffer> swapchainFramebuffers;
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
 	std::vector<VkSemaphore> imageAvailableSemaphores;

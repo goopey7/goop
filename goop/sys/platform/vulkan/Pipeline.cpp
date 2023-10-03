@@ -34,7 +34,7 @@ VkShaderModule Pipeline::createShaderModule(const std::vector<char>& bytecode)
 	createInfo.pCode = reinterpret_cast<const uint32_t*>(bytecode.data());
 
 	VkShaderModule shaderModule;
-	if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+	if (vkCreateShaderModule(*ctx, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create shader module!");
 	}
@@ -42,15 +42,13 @@ VkShaderModule Pipeline::createShaderModule(const std::vector<char>& bytecode)
 	return shaderModule;
 }
 
-Pipeline::Pipeline(Context* ctx, VkExtent2D swapchainExtent, VkRenderPass renderPass,
-				   Descriptor* descriptor)
-	: device(ctx->getDevice())
+Pipeline::Pipeline(Context* ctx, Swapchain* swapchain, Descriptor* descriptor) : ctx(ctx)
 {
 	createPipelineLayout(descriptor->getLayout());
-	createGraphicsPipeline(swapchainExtent, renderPass);
+	createGraphicsPipeline(swapchain);
 }
 
-void Pipeline::createGraphicsPipeline(VkExtent2D swapchainExtent, VkRenderPass renderPass)
+void Pipeline::createGraphicsPipeline(Swapchain* swapchain)
 {
 	// ============ Programmable Pipeline Stages
 	std::vector<char> vertShaderBytecode = readFile("shaders/shader.vert.spv");
@@ -95,14 +93,14 @@ void Pipeline::createGraphicsPipeline(VkExtent2D swapchainExtent, VkRenderPass r
 	VkViewport viewport{};
 	viewport.x = 0.f;
 	viewport.y = 0.f;
-	viewport.width = (float)swapchainExtent.width;
-	viewport.height = (float)swapchainExtent.height;
+	viewport.width = (float)swapchain->getExtent().width;
+	viewport.height = (float)swapchain->getExtent().height;
 	viewport.minDepth = 0.f;
 	viewport.maxDepth = 1.f;
 
 	VkRect2D scissor{};
 	scissor.offset = {0, 0};
-	scissor.extent = swapchainExtent;
+	scissor.extent = swapchain->getExtent();
 
 	// dynamic states can be changed at draw time without recreating the pipeline
 	VkDynamicState dynamicStates[] = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
@@ -173,17 +171,17 @@ void Pipeline::createGraphicsPipeline(VkExtent2D swapchainExtent, VkRenderPass r
 	pipelineInfo.pDepthStencilState = nullptr;
 	pipelineInfo.pColorBlendState = &colorBlendingInfo;
 	pipelineInfo.layout = pipelineLayout;
-	pipelineInfo.renderPass = renderPass;
+	pipelineInfo.renderPass = swapchain->getRenderPass();
 	pipelineInfo.subpass = 0;
 
-	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) !=
+	if (vkCreateGraphicsPipelines(*ctx, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) !=
 		VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
 
-	vkDestroyShaderModule(device, vertShaderModule, nullptr);
-	vkDestroyShaderModule(device, fragShaderModule, nullptr);
+	vkDestroyShaderModule(*ctx, vertShaderModule, nullptr);
+	vkDestroyShaderModule(*ctx, fragShaderModule, nullptr);
 }
 
 void Pipeline::createPipelineLayout(VkDescriptorSetLayout descriptorSetLayout)
@@ -195,7 +193,7 @@ void Pipeline::createPipelineLayout(VkDescriptorSetLayout descriptorSetLayout)
 	pipelineLayoutInfo.pushConstantRangeCount = 0;
 	pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
-	if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+	if (vkCreatePipelineLayout(*ctx, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
@@ -203,6 +201,6 @@ void Pipeline::createPipelineLayout(VkDescriptorSetLayout descriptorSetLayout)
 
 Pipeline::~Pipeline()
 {
-	vkDestroyPipeline(device, pipeline, nullptr);
-	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+	vkDestroyPipeline(*ctx, pipeline, nullptr);
+	vkDestroyPipelineLayout(*ctx, pipelineLayout, nullptr);
 }

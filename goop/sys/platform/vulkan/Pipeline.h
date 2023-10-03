@@ -1,9 +1,10 @@
 // Sam Collier 2023
 #pragma once
 
+#include "Descriptor.h"
+#include "Swapchain.h"
 #include <vector>
 #include <vulkan/vulkan.h>
-#include <goop/sys/platform/vulkan/Descriptor.h>
 
 namespace goop::sys::platform::vulkan
 {
@@ -12,8 +13,7 @@ class Pipeline
   public:
 	Pipeline(const Pipeline&) = delete;
 	Pipeline& operator=(const Pipeline&) = delete;
-	Pipeline(Context* ctx, VkExtent2D swapchainExtent, VkRenderPass renderPass,
-			 Descriptor* descriptor);
+	Pipeline(Context* ctx, Swapchain* swapchain, Descriptor* descriptor);
 	~Pipeline();
 
 	VkPipeline getPipeline() const { return pipeline; }
@@ -22,9 +22,9 @@ class Pipeline
   private:
 	VkPipeline pipeline;
 	VkPipelineLayout pipelineLayout;
-	VkDevice device;
 	VkShaderModule createShaderModule(const std::vector<char>& code);
-	void createGraphicsPipeline(VkExtent2D swapchainExtent, VkRenderPass renderPass);
+	void createGraphicsPipeline(Swapchain* swapchain);
 	void createPipelineLayout(VkDescriptorSetLayout descriptorSetLayout);
+	Context* ctx;
 };
 } // namespace goop::sys::platform::vulkan
