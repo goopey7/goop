@@ -16,21 +16,12 @@ include_directories(${Vulkan_INCLUDE_DIRS})
 find_package(GLFW3 REQUIRED)
 include_directories(${GLFW3_INCLUDE_DIRS})
 
-# Find SDL package
-find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIRS})
-include_directories(${SDL2_INCLUDE_DIRS}/SDL)
-
-# Find stb package
-find_package(STB REQUIRED)
-include_directories(${STB_INCLUDE_DIRS})
-file(GLOB STB_VORBIS_SOURCE "/usr/include/stb/stb_vorbis.c")
-
 # Include soloud headers
+add_subdirectory(libs/soloud)
 include_directories("libs/soloud/include")
 
 # Recursively glob all .cpp and .h files in src/ directory
-file(GLOB_RECURSE SRC_FILES "goop/*.cpp" "goop/*.h" "libs/*.cpp" "libs/*.h")
+file(GLOB_RECURSE SRC_FILES "goop/*.cpp" "goop/*.h")
 
 # Define the C++ executable
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${STB_VORBIS_SOURCE})
@@ -40,7 +31,15 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE RENDERER_VULKAN=1)
 target_compile_definitions(${PROJECT_NAME} PRIVATE WINDOW_GLFW=1)
 target_compile_definitions(${PROJECT_NAME} PRIVATE AUDIO_SOLOUD=1)
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE WITH_SDL2_STATIC=1)
+# ##################### Build Soloud
+# Add a custom target to build Soloud using CMake
+add_custom_target(
+  build_soloud
+  SOURCES ${SOLOUD_SOURCES}
+  COMMENT "Building SoLoud...")
+
+# Add a dependency to ensure that Soloud is built before engine code
+add_dependencies(${PROJECT_NAME} build_soloud)
 
 # ##################### Build rust library Find the cargo executable
 find_program(CARGO_EXECUTABLE cargo)
@@ -73,7 +72,7 @@ endif()
 
 # Link the C++ executable
 target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL2_LIBRARY} ${RUST_LIB} ${GLFW3_LIBRARY}
-                                              ${Vulkan_LIBRARIES})
+	${Vulkan_LIBRARIES} SoLoud)
 # ##############################################################################
 
 # ##################### Build shaders
