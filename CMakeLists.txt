@@ -14,7 +14,11 @@ include_directories(${Vulkan_INCLUDE_DIRS})
 
 # Find GLFW package
 find_package(GLFW3 REQUIRED)
-include_directories(${GLFW3_INCLUDE_DIRS})
+include_directories(${GLFW3_INCLUDE_DIR})
+
+# Find SDL package
+find_package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIR})
 
 # Include soloud headers
 add_subdirectory(libs/soloud)

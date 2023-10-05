@@ -18,14 +18,12 @@ set( _glfw3_HEADER_SEARCH_DIRS
 "/usr/include"
 "/usr/local/include"
 "${CMAKE_SOURCE_DIR}/includes"
-"C:/Program Files (x86)/glfw/include" 
 "C:/glfw3/include"
 )
 set( _glfw3_LIB_SEARCH_DIRS
 "/usr/lib"
 "/usr/local/lib"
 "${CMAKE_SOURCE_DIR}/lib"
-"C:/Program Files (x86)/glfw/lib-msvc110" 
 "C:/glfw3/lib-vc2022"
 )
 
