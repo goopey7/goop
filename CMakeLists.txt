@@ -10,23 +10,37 @@ include_directories(".")
 
 # Find Vulkan package
 find_package(Vulkan REQUIRED)
+include_directories(${Vulkan_INCLUDE_DIRS})
 
 # Find GLFW package
 find_package(GLFW3 REQUIRED)
-include_directories(${GLFW3_INCLUDE_DIR})
+include_directories(${GLFW3_INCLUDE_DIRS})
 
-# Include Vulkan headers
-include_directories(${Vulkan_INCLUDE_DIRS})
+# Find SDL package
+find_package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS})
+include_directories(${SDL2_INCLUDE_DIRS}/SDL)
+
+# Find stb package
+find_package(STB REQUIRED)
+include_directories(${STB_INCLUDE_DIRS})
+file(GLOB STB_VORBIS_SOURCE "/usr/include/stb/stb_vorbis.c")
+
+# Include soloud headers
+include_directories("libs/soloud/include")
 
 # Recursively glob all .cpp and .h files in src/ directory
-file(GLOB_RECURSE SRC_FILES "goop/*.cpp" "goop/*.h")
+file(GLOB_RECURSE SRC_FILES "goop/*.cpp" "goop/*.h" "libs/*.cpp" "libs/*.h")
 
 # Define the C++ executable
-add_executable(${PROJECT_NAME} ${SRC_FILES})
+add_executable(${PROJECT_NAME} ${SRC_FILES} ${STB_VORBIS_SOURCE})
 
 # define systems
 target_compile_definitions(${PROJECT_NAME} PRIVATE RENDERER_VULKAN=1)
 target_compile_definitions(${PROJECT_NAME} PRIVATE WINDOW_GLFW=1)
+target_compile_definitions(${PROJECT_NAME} PRIVATE AUDIO_SOLOUD=1)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE WITH_SDL2_STATIC=1)
 
 # ##################### Build rust library Find the cargo executable
 find_program(CARGO_EXECUTABLE cargo)
@@ -57,8 +71,8 @@ else()
       ${CMAKE_SOURCE_DIR}/rust_lib/target/release/librust_hello_lib.so)
 endif()
 
-# Link the C++ executable with the Rust dynamic library
-target_link_libraries(${PROJECT_NAME} PRIVATE ${RUST_LIB} ${GLFW3_LIBRARY}
+# Link the C++ executable
+target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL2_LIBRARY} ${RUST_LIB} ${GLFW3_LIBRARY}
                                               ${Vulkan_LIBRARIES})
 # ##############################################################################
 

@@ -3,6 +3,7 @@
 
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Window.h>
+#include <goop/sys/Audio.h>
 #include <cstdint>
 #include <memory>
 

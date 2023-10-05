@@ -15,6 +15,9 @@ void Core::openWindow(uint32_t width, uint32_t height, const char* title, uint32
 {
 	sys::gWindow->openWindow(width, height, title, flags);
 	sys::gRenderer->initialize();
+	sys::gAudio->initialize();
+	sys::gAudio->loadSfx("beep.wav");
+	sys::gAudio->playSfx(0);
 }
 
 void Core::run()
