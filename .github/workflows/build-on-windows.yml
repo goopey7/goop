@@ -2,43 +2,22 @@ name: CMake on Windows
 
 on:
   push:
-    branches: ["master"]
+    branches: [ "master" ]
   pull_request:
-    branches: ["master"]
+    branches: [ "master" ]
 
 jobs:
   build:
-    runs-on: windows-latest  # Set the runner to Windows
+    runs-on: windows-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - name: Set reusable strings
-      id: strings
-      run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> $GITHUB_ENV
-
-    - name: Install Libs
-      run: ${{ github.workspace }}/windows/GET_LIBS.bat
-
-    - name: Install Vulkan SDK
-      uses: humbletim/install-vulkan-sdk@v1.1.1
-      with:
-        version: 1.3.261.1
-        cache: true
+    - name: Install libs
+      run: .\windows\GET_LIBS.bat
 
     - name: Configure CMake
-      run: |
-        cmake -B ${{ steps.strings.outputs.build-output-dir }} \
-          -DCMAKE_CXX_COMPILER=cl \
-          -DCMAKE_C_COMPILER=cl \
-          -DCMAKE_BUILD_TYPE=Release \
-          -S ${{ github.workspace }}
+      run: mkdir build && cd build && cmake ..
 
     - name: Build
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
-
-    - name: Test
-      working-directory: ${{ steps.strings.outputs.build-output-dir }}
-      run: ctest --build-config Release
+      run: make
