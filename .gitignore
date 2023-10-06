@@ -3,3 +3,6 @@ build
 shaders/*.spv
 .vs
 CMakeSettings.json
+windows/vulkan
+windows/sdl2
+windows/glfw

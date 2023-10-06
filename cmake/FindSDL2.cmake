@@ -17,16 +17,12 @@
 set( _sdl2_HEADER_SEARCH_DIRS
 "/usr/include"
 "/usr/local/include"
-"${CMAKE_SOURCE_DIR}/includes"
-"C:/Program Files (x86)/sdl2/include" 
-"C:/SDL2/include"
+"${CMAKE_SOURCE_DIR}/windows/sdl2/include"
 )
 set( _sdl2_LIB_SEARCH_DIRS
 "/usr/lib"
 "/usr/local/lib"
-"${CMAKE_SOURCE_DIR}/lib"
-"C:/Program Files (x86)/sdl2/lib-msvc110" 
-"C:/SDL2/lib/x64"
+"${CMAKE_SOURCE_DIR}/windows/sdl2/lib"
 )
 
 # Check environment for root search directory

@@ -17,14 +17,12 @@
 set( _glfw3_HEADER_SEARCH_DIRS
 "/usr/include"
 "/usr/local/include"
-"${CMAKE_SOURCE_DIR}/includes"
-"C:/glfw3/include"
+"${CMAKE_SOURCE_DIR}/windows/glfw/include"
 )
 set( _glfw3_LIB_SEARCH_DIRS
 "/usr/lib"
 "/usr/local/lib"
-"${CMAKE_SOURCE_DIR}/lib"
-"C:/glfw3/lib-vc2022"
+"${CMAKE_SOURCE_DIR}/windows/glfw/lib"
 )
 
 # Check environment for root search directory
