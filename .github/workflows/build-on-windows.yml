@@ -30,6 +30,8 @@ jobs:
 
     - name: Setup rust
       uses: ATiltedTree/setup-rust@v1.0.5
+      with:
+       rust-version: stable
 
     - name: Build
       run: msbuild build/goop.sln
