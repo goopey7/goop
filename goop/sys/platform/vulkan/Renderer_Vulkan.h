@@ -9,6 +9,7 @@
 #include <goop/sys/platform/vulkan/Pipeline.h>
 #include <goop/sys/platform/vulkan/Swapchain.h>
 #include <goop/sys/platform/vulkan/Buffers.h>
+#include <goop/sys/platform/vulkan/Sync.h>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -30,7 +31,6 @@ class Renderer_Vulkan : public Renderer
 	void render() final;
 
   private:
-	void createSyncObjects();
 
 	std::vector<const char*> getRequiredExtensions();
 	VkExtent2D selectExtent(const VkSurfaceCapabilitiesKHR& capabilities);
@@ -55,10 +55,8 @@ class Renderer_Vulkan : public Renderer
 	Pipeline* pipeline;
 	Swapchain* swapchain;
 	Buffers* buffers;
+	Sync* sync;
 
-	std::vector<VkSemaphore> imageAvailableSemaphores;
-	std::vector<VkSemaphore> renderFinishedSemaphores;
-	std::vector<VkFence> inFlightFences;
 	uint32_t currentFrame = 0;
 	bool frameBufferResized = false;
 };

@@ -39,7 +39,7 @@ int Renderer_Vulkan::initialize()
 	descriptor = new Descriptor(ctx, MAX_FRAMES_IN_FLIGHT, uniformBuffer);
 	pipeline = new Pipeline(ctx, swapchain, descriptor);
 	buffers = new Buffers(ctx);
-	createSyncObjects();
+	sync = new Sync(ctx, MAX_FRAMES_IN_FLIGHT);
 	return 0;
 }
 
@@ -50,12 +50,7 @@ int Renderer_Vulkan::destroy()
 	delete swapchain;
 	delete descriptor;
 	delete uniformBuffer;
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-	{
-		vkDestroyFence(*ctx, inFlightFences[i], nullptr);
-		vkDestroySemaphore(*ctx, renderFinishedSemaphores[i], nullptr);
-		vkDestroySemaphore(*ctx, imageAvailableSemaphores[i], nullptr);
-	}
+	delete sync;
 	delete pipeline;
 	delete ctx;
 	return 0;
@@ -64,12 +59,12 @@ int Renderer_Vulkan::destroy()
 void Renderer_Vulkan::render()
 {
 	// wait for the fence to signal that the frame is finished
-	vkWaitForFences(*ctx, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+	sync->waitForFrame(currentFrame);
 
 	// Acquire image from swapchain
 	uint32_t imageIndex;
 	VkResult result =
-		vkAcquireNextImageKHR(*ctx, *swapchain, UINT64_MAX, imageAvailableSemaphores[currentFrame],
+		vkAcquireNextImageKHR(*ctx, *swapchain, UINT64_MAX, sync->getImageAvailableSemaphore(currentFrame),
 							  VK_NULL_HANDLE, &imageIndex);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -84,7 +79,7 @@ void Renderer_Vulkan::render()
 
 	// Only reset the fence if we're definitely submitting work to gpu
 	// which is at this point
-	vkResetFences(*ctx, 1, &inFlightFences[currentFrame]);
+	sync->resetFrameFence(currentFrame);
 
 	updateUniformBuffer(currentFrame);
 
@@ -94,7 +89,7 @@ void Renderer_Vulkan::render()
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = &imageAvailableSemaphores[currentFrame];
+	submitInfo.pWaitSemaphores = &sync->getImageAvailableSemaphore(currentFrame);
 	VkPipelineStageFlags waitStages[] = {
 		// wait at the stage of the pipeline where we draw color
 		// this means theoretically we could start drawing geometry while we wait for the image
@@ -104,8 +99,8 @@ void Renderer_Vulkan::render()
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = ctx->getCommandBuffer(currentFrame);
 	submitInfo.signalSemaphoreCount = 1;
-	submitInfo.pSignalSemaphores = &renderFinishedSemaphores[currentFrame];
-	if (vkQueueSubmit(ctx->getGraphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
+	submitInfo.pSignalSemaphores = &sync->getRenderFinishedSemaphore(currentFrame);
+	if (vkQueueSubmit(ctx->getGraphicsQueue(), 1, &submitInfo, sync->getInFlightFence(currentFrame)) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to submit draw command buffer!");
 	}
@@ -114,7 +109,7 @@ void Renderer_Vulkan::render()
 	VkPresentInfoKHR presentInfo{};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	presentInfo.waitSemaphoreCount = 1;
-	presentInfo.pWaitSemaphores = &renderFinishedSemaphores[currentFrame];
+	presentInfo.pWaitSemaphores = &sync->getRenderFinishedSemaphore(currentFrame);
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = *swapchain;
 	presentInfo.pImageIndices = &imageIndex;
@@ -132,34 +127,6 @@ void Renderer_Vulkan::render()
 
 	// advance frame (modulo will wrap around)
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-}
-
-void Renderer_Vulkan::createSyncObjects()
-{
-	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-	renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-	inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-
-	VkSemaphoreCreateInfo semaphoreInfo{};
-	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-	VkFenceCreateInfo fenceInfo{};
-	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-
-	// start the fence signalled so that we don't wait on it indefinately on the first frame
-	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-	{
-		if (vkCreateSemaphore(*ctx, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) !=
-				VK_SUCCESS ||
-			vkCreateSemaphore(*ctx, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) !=
-				VK_SUCCESS ||
-			vkCreateFence(*ctx, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create sync objects!");
-		}
-	}
 }
 
 void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
