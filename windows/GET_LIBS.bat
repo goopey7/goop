@@ -80,7 +80,7 @@ powershell mv sdl2/include/*.h sdl2/include/SDL2/
 
 powershell -Command "Invoke-WebRequest https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip -OutFile glm.zip"
 powershell Expand-Archive glm.zip
-powershell mv glm/glm glm-include
+powershell mv glm/glm/glm glm-include
 powershell Remove-Item -Path "glm" -Recurse -Force
 powershell mkdir glm
 powershell mkdir glm/include
