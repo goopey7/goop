@@ -10,7 +10,28 @@ include_directories(".")
 
 # Find Vulkan package
 find_package(Vulkan REQUIRED)
+
+if (Vulkan_FOUND)
+    message(STATUS "Vulkan found")
+    message(STATUS "Vulkan_INCLUDE_DIRS = ${Vulkan_INCLUDE_DIRS}")
+    message(STATUS "Vulkan_LIBRARIES = ${Vulkan_LIBRARIES}")
+    message(STATUS "Vulkan_VERSION = ${Vulkan_VERSION}")
+
+    if (Vulkan_glslc_FOUND)
+        message(STATUS "glslc found")
+    endif()
+
+    if (Vulkan_glslangValidator_FOUND)
+        message(STATUS "glslangValidator found")
+    endif()
+
+    # You can also use other Vulkan-related variables and libraries here
+else()
+    message(FATAL_ERROR "Vulkan not found")
+endif()
+
 include_directories(${Vulkan_INCLUDE_DIRS})
+include_directories(${Vulkan_INCLUDE_DIR})
 
 # Find GLFW package
 find_package(GLFW3 REQUIRED)
@@ -76,7 +97,7 @@ endif()
 
 # Link the C++ executable
 target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL2_LIBRARY} ${RUST_LIB} ${GLFW3_LIBRARY}
-	${Vulkan_LIBRARIES} SoLoud)
+	${Vulkan_LIBRARIES} ${Vulkan_LIBRARY} SoLoud)
 # ##############################################################################
 
 # ##################### Build shaders
