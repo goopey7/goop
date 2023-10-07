@@ -49,8 +49,12 @@ include_directories(${GLM_INCLUDE_DIR})
 add_subdirectory(libs/soloud)
 include_directories("libs/soloud/include")
 
+# Include STB headers
+include_directories("libs/stb/")
+
 # Recursively glob all .cpp and .h files in src/ directory
 file(GLOB_RECURSE SRC_FILES "goop/*.cpp" "goop/*.h")
+file(GLOB STB_IMAGE_HEADER "libs/stb/stb_image.h")
 
 # Define the C++ executable
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${STB_VORBIS_SOURCE})

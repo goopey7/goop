@@ -17,8 +17,8 @@ void Core::openWindow(uint32_t width, uint32_t height, const char* title, uint32
 {
 	sys::gWindow->openWindow(width, height, title, flags);
 	sys::gRenderer->initialize();
-	uint32_t beep_id = sys::gAudio->loadSfx("beep.wav");
-	uint32_t lazer_id = sys::gAudio->loadSfx("blast.mp3");
+	uint32_t beep_id = sys::gAudio->loadSfx("res/beep.wav");
+	uint32_t lazer_id = sys::gAudio->loadSfx("res/blast.mp3");
 	sys::gAudio->playSfx(0.f, beep_id);
 }
 
@@ -36,8 +36,6 @@ void Core::run()
 		auto dt = std::chrono::duration<float>(now - last).count();
 
 		blastTime += dt;
-
-		printf("dt: %f\n", dt);
 
 		if (blastTime > 2.f)
 		{

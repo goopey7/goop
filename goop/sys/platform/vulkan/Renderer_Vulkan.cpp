@@ -1,6 +1,7 @@
 // Sam Collier 2023
 
 #include "Renderer_Vulkan.h"
+#include "Utils.h"
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
@@ -11,7 +12,7 @@
 #include <set>
 #include <stdexcept>
 #include <vector>
-#include "BufferHelpers.h"
+#include <vulkan/vulkan_core.h>
 
 #ifdef RENDERER_VULKAN
 goop::sys::platform::vulkan::Renderer_Vulkan gRendererVulkan;
@@ -38,6 +39,7 @@ int Renderer_Vulkan::initialize()
 	uniformBuffer = new UniformBuffer(ctx, MAX_FRAMES_IN_FLIGHT);
 	descriptor = new Descriptor(ctx, MAX_FRAMES_IN_FLIGHT, uniformBuffer);
 	pipeline = new Pipeline(ctx, swapchain, descriptor);
+	texture = new Texture(ctx, "res/texture.jpg");
 	buffers = new Buffers(ctx);
 	sync = new Sync(ctx, MAX_FRAMES_IN_FLIGHT);
 	return 0;
@@ -46,6 +48,7 @@ int Renderer_Vulkan::initialize()
 int Renderer_Vulkan::destroy()
 {
 	vkDeviceWaitIdle(*ctx);
+	delete texture;
 	delete buffers;
 	delete swapchain;
 	delete descriptor;
@@ -63,9 +66,9 @@ void Renderer_Vulkan::render()
 
 	// Acquire image from swapchain
 	uint32_t imageIndex;
-	VkResult result =
-		vkAcquireNextImageKHR(*ctx, *swapchain, UINT64_MAX, sync->getImageAvailableSemaphore(currentFrame),
-							  VK_NULL_HANDLE, &imageIndex);
+	VkResult result = vkAcquireNextImageKHR(*ctx, *swapchain, UINT64_MAX,
+											sync->getImageAvailableSemaphore(currentFrame),
+											VK_NULL_HANDLE, &imageIndex);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR)
 	{
@@ -100,7 +103,8 @@ void Renderer_Vulkan::render()
 	submitInfo.pCommandBuffers = ctx->getCommandBuffer(currentFrame);
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = &sync->getRenderFinishedSemaphore(currentFrame);
-	if (vkQueueSubmit(ctx->getGraphicsQueue(), 1, &submitInfo, sync->getInFlightFence(currentFrame)) != VK_SUCCESS)
+	if (vkQueueSubmit(ctx->getGraphicsQueue(), 1, &submitInfo,
+					  sync->getInFlightFence(currentFrame)) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to submit draw command buffer!");
 	}
@@ -202,7 +206,8 @@ void Renderer_Vulkan::updateUniformBuffer(uint32_t currentFrame)
 		glm::lookAt(glm::vec3(2.f, 2.f, 2.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
 
 	ubo.proj = glm::perspective(glm::radians(45.f),
-								swapchain->getExtent().width / (float)swapchain->getExtent().height, 0.1f, 10.f);
+								swapchain->getExtent().width / (float)swapchain->getExtent().height,
+								0.1f, 10.f);
 
 	// flip y coordinate, glm was designed for OpenGL which has an inverted y coordinate
 	ubo.proj[1][1] *= -1;

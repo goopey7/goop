@@ -10,6 +10,7 @@
 #include <goop/sys/platform/vulkan/Swapchain.h>
 #include <goop/sys/platform/vulkan/Buffers.h>
 #include <goop/sys/platform/vulkan/Sync.h>
+#include <goop/sys/platform/vulkan/Texture.h>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -35,15 +36,6 @@ class Renderer_Vulkan : public Renderer
 	std::vector<const char*> getRequiredExtensions();
 	VkExtent2D selectExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
-	bool checkValidationLayerSupport();
-	bool isDeviceSuitable(VkPhysicalDevice device);
-	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
-	bool checkDeviceCompatibility(VkPhysicalDevice device);
-	VkSurfaceFormatKHR selectSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-	VkPresentModeKHR selectPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-	void destroySwapchainDependents();
-	VkShaderModule createShaderModule(const std::vector<char>& bytecode);
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 	void updateUniformBuffer(uint32_t currentFrame);
 
@@ -54,6 +46,7 @@ class Renderer_Vulkan : public Renderer
 	Descriptor* descriptor;
 	Pipeline* pipeline;
 	Swapchain* swapchain;
+	Texture* texture;
 	Buffers* buffers;
 	Sync* sync;
 
