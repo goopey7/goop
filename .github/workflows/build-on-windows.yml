@@ -16,17 +16,11 @@ jobs:
     - name: Install libs
       run: .\windows\GET_LIBS.bat --no-vulkan
 
-    - name: Prepare Vulkan SDK
-      uses: humbletim/setup-vulkan-sdk@v1.2.0
+    - name: Install vulkan
+      uses: humbletim/install-vulkan-sdk@v1.1.1
       with:
-       vulkan-query-version: 1.3.261.1
-       vulkan-components: Vulkan-Headers, Vulkan-Loader
-       vulkan-use-cache: true
-
-    - name: Add Vulkan Bin folder to PATH
-      run: |
-       echo "Adding Bin folder to PATH"
-       echo "##[add-path]$(github.workspace)/windows/vulkan/Bin" >> $GITHUB_PATH
+       version: 1.3.261.1
+       cache: true
 
     - name: Configure CMake
       run: mkdir build && cd build && cmake ..
