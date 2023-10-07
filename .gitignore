@@ -6,3 +6,5 @@ CMakeSettings.json
 windows/vulkan
 windows/sdl2
 windows/glfw
+windows/glm/include/glm
+windows/vswhere.exe
