@@ -84,7 +84,7 @@ powershell mv glm/glm glm-include
 powershell Remove-Item -Path "glm" -Recurse -Force
 powershell mkdir glm
 powershell mkdir glm/include
-powershell mv glm-include glm/include
+powershell mv glm-include glm/include/glm
 powershell rm glm.zip
 
 powershell -Command "Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.3.261.1/windows/VulkanSDK-1.3.261.1-Installer.exe" -OutFile VulkanSDK.exe"
