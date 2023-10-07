@@ -8,6 +8,7 @@
 #include <goop/sys/platform/vulkan/Context.h>
 #include <goop/sys/platform/vulkan/Pipeline.h>
 #include <goop/sys/platform/vulkan/Swapchain.h>
+#include <goop/sys/platform/vulkan/Buffers.h>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -18,18 +19,6 @@
 
 namespace goop::sys::platform::vulkan
 {
-
-const std::vector<Vertex> vertices = {
-	{{-0.5f, -0.5f}, {1.f, 0.f, 0.f}},
-	{{0.5f, -0.5f}, {0.f, 1.f, 0.f}},
-	{{0.5f, 0.5f}, {0.f, 0.f, 1.f}},
-	{{-0.5f, 0.5f}, {1.f, 1.f, 0.f}},
-};
-
-const std::vector<uint32_t> indices = {
-	0, 1, 2, 2, 3, 0,
-};
-
 class Renderer_Vulkan : public Renderer
 {
   public:
@@ -41,10 +30,6 @@ class Renderer_Vulkan : public Renderer
 	void render() final;
 
   private:
-	void createCommandPool();
-	void createVertexBuffer();
-	void createIndexBuffer();
-	void createCommandBuffers();
 	void createSyncObjects();
 
 	std::vector<const char*> getRequiredExtensions();
@@ -69,20 +54,12 @@ class Renderer_Vulkan : public Renderer
 	Descriptor* descriptor;
 	Pipeline* pipeline;
 	Swapchain* swapchain;
+	Buffers* buffers;
 
-	VkCommandPool commandPool;
-	std::vector<VkCommandBuffer> commandBuffers;
 	std::vector<VkSemaphore> imageAvailableSemaphores;
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	std::vector<VkFence> inFlightFences;
 	uint32_t currentFrame = 0;
 	bool frameBufferResized = false;
-
-	// TODO driver developers recommend storing vertex and index buffers into a single VkBuffer and
-	// use offsets. That way the data is more cache friendly
-	VkBuffer vertexBuffer;
-	VkDeviceMemory vertexBufferMemory;
-	VkBuffer indexBuffer;
-	VkDeviceMemory indexBufferMemory;
 };
 } // namespace goop::sys::platform::vulkan

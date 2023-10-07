@@ -12,7 +12,7 @@ class Context
   public:
 	Context(const Context&) = delete;
 	Context& operator=(const Context&) = delete;
-	Context(bool enableValidationLayers);
+	Context(bool enableValidationLayers, const uint8_t maxFramesInFlight);
 	~Context();
 
 	operator VkDevice() const { return device; }
@@ -24,6 +24,8 @@ class Context
 	VkSurfaceKHR getSurface() const { return surface; }
 	VkQueue getGraphicsQueue() const { return graphicsQueue; }
 	VkQueue getPresentQueue() const { return presentQueue; }
+	VkCommandPool getCommandPool() const { return commandPool; }
+	const VkCommandBuffer* getCommandBuffer(uint8_t frame) const { return &commandBuffers[frame]; }
 
   private:
 	const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
@@ -46,6 +48,9 @@ class Context
 	void selectPhysicalDevice();
 	void createLogicalDevice(bool enableValidationLayers);
 
+	void createCommandPool();
+	void createCommandBuffers(uint8_t maxFramesInFlight);
+
 	VkInstance instance;
 	VkDebugUtilsMessengerEXT debugMessenger;
 	VkSurfaceKHR surface;
@@ -53,5 +58,8 @@ class Context
 	VkDevice device;
 	VkQueue graphicsQueue;
 	VkQueue presentQueue;
+
+	VkCommandPool commandPool;
+	std::vector<VkCommandBuffer> commandBuffers;
 };
 } // namespace goop::sys::platform::vulkan

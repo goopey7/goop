@@ -41,17 +41,20 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 	}
 }
 
-Context::Context(bool enableValidationLayers)
+Context::Context(bool enableValidationLayers, const uint8_t maxFramesInFlight)
 {
 	createInstance(enableValidationLayers);
 	createDebugMessenger(enableValidationLayers);
 	createSurface();
 	selectPhysicalDevice();
 	createLogicalDevice(enableValidationLayers);
+	createCommandPool();
+	createCommandBuffers(maxFramesInFlight);
 }
 
 Context::~Context()
 {
+	vkDestroyCommandPool(device, commandPool, nullptr);
 	vkDestroyDevice(device, nullptr);
 	if (debugMessenger != VK_NULL_HANDLE)
 	{
@@ -313,3 +316,34 @@ bool Context::checkDeviceExtensionSupport(VkPhysicalDevice device)
 
 	return requiredExtensions.empty();
 }
+
+void Context::createCommandPool()
+{
+	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice, surface);
+
+	VkCommandPoolCreateInfo poolInfo{};
+	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	poolInfo.queueFamilyIndex = queueFamilyIndices.graphics.value();
+
+	if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to create command pool!");
+	}
+}
+
+void Context::createCommandBuffers(const uint8_t maxFramesInFlight)
+{
+	commandBuffers.resize(maxFramesInFlight);
+	VkCommandBufferAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool = commandPool;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
+
+	if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to allocate command buffers!");
+	}
+}
+

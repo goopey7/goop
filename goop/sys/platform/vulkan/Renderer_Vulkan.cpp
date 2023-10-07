@@ -33,15 +33,12 @@ const bool enableValidationLayers = true;
 
 int Renderer_Vulkan::initialize()
 {
-	ctx = new Context(enableValidationLayers);
+	ctx = new Context(enableValidationLayers, MAX_FRAMES_IN_FLIGHT);
 	swapchain = new Swapchain(ctx);
 	uniformBuffer = new UniformBuffer(ctx, MAX_FRAMES_IN_FLIGHT);
 	descriptor = new Descriptor(ctx, MAX_FRAMES_IN_FLIGHT, uniformBuffer);
 	pipeline = new Pipeline(ctx, swapchain, descriptor);
-	createCommandPool();
-	createVertexBuffer();
-	createIndexBuffer();
-	createCommandBuffers();
+	buffers = new Buffers(ctx);
 	createSyncObjects();
 	return 0;
 }
@@ -49,13 +46,10 @@ int Renderer_Vulkan::initialize()
 int Renderer_Vulkan::destroy()
 {
 	vkDeviceWaitIdle(*ctx);
+	delete buffers;
 	delete swapchain;
 	delete descriptor;
 	delete uniformBuffer;
-	vkDestroyBuffer(*ctx, indexBuffer, nullptr);
-	vkFreeMemory(*ctx, indexBufferMemory, nullptr);
-	vkDestroyBuffer(*ctx, vertexBuffer, nullptr);
-	vkFreeMemory(*ctx, vertexBufferMemory, nullptr);
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
 		vkDestroyFence(*ctx, inFlightFences[i], nullptr);
@@ -63,7 +57,6 @@ int Renderer_Vulkan::destroy()
 		vkDestroySemaphore(*ctx, imageAvailableSemaphores[i], nullptr);
 	}
 	delete pipeline;
-	vkDestroyCommandPool(*ctx, commandPool, nullptr);
 	delete ctx;
 	return 0;
 }
@@ -96,8 +89,8 @@ void Renderer_Vulkan::render()
 	updateUniformBuffer(currentFrame);
 
 	// Submit command buffer
-	vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-	recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
+	vkResetCommandBuffer(*ctx->getCommandBuffer(currentFrame), 0);
+	recordCommandBuffer(*ctx->getCommandBuffer(currentFrame), imageIndex);
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.waitSemaphoreCount = 1;
@@ -109,7 +102,7 @@ void Renderer_Vulkan::render()
 	};
 	submitInfo.pWaitDstStageMask = waitStages;
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
+	submitInfo.pCommandBuffers = ctx->getCommandBuffer(currentFrame);
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = &renderFinishedSemaphores[currentFrame];
 	if (vkQueueSubmit(ctx->getGraphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
@@ -139,84 +132,6 @@ void Renderer_Vulkan::render()
 
 	// advance frame (modulo will wrap around)
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-}
-
-void Renderer_Vulkan::createCommandPool()
-{
-	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(*ctx, ctx->getSurface());
-
-	VkCommandPoolCreateInfo poolInfo{};
-	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	poolInfo.queueFamilyIndex = queueFamilyIndices.graphics.value();
-
-	if (vkCreateCommandPool(*ctx, &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
-	{
-		throw std::runtime_error("failed to create command pool!");
-	}
-}
-
-void Renderer_Vulkan::createVertexBuffer()
-{
-	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
-
-	VkBuffer stagingBuffer;
-	VkDeviceMemory stagingBufferMemory;
-	createBuffer(ctx, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-				 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-				 stagingBuffer, stagingBufferMemory);
-
-	void* data;
-	vkMapMemory(*ctx, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, vertices.data(), (size_t)bufferSize);
-	vkUnmapMemory(*ctx, stagingBufferMemory);
-
-	createBuffer(ctx, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-				 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
-
-	copyBuffer(ctx, commandPool, ctx->getGraphicsQueue(), stagingBuffer, vertexBuffer, bufferSize);
-
-	vkDestroyBuffer(*ctx, stagingBuffer, nullptr);
-	vkFreeMemory(*ctx, stagingBufferMemory, nullptr);
-}
-
-void Renderer_Vulkan::createIndexBuffer()
-{
-	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
-
-	VkBuffer stagingBuffer;
-	VkDeviceMemory stagingBufferMemory;
-	createBuffer(ctx, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-				 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-				 stagingBuffer, stagingBufferMemory);
-
-	void* data;
-	vkMapMemory(*ctx, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, indices.data(), (size_t)bufferSize);
-	vkUnmapMemory(*ctx, stagingBufferMemory);
-
-	createBuffer(ctx, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-				 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
-
-	copyBuffer(ctx, commandPool, ctx->getGraphicsQueue(), stagingBuffer, indexBuffer, bufferSize);
-
-	vkDestroyBuffer(*ctx, stagingBuffer, nullptr);
-	vkFreeMemory(*ctx, stagingBufferMemory, nullptr);
-}
-
-void Renderer_Vulkan::createCommandBuffers()
-{
-	commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-	VkCommandBufferAllocateInfo allocInfo{};
-	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	allocInfo.commandPool = commandPool;
-	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
-
-	if (vkAllocateCommandBuffers(*ctx, &allocInfo, commandBuffers.data()) != VK_SUCCESS)
-	{
-		throw std::runtime_error("failed to allocate command buffers!");
-	}
 }
 
 void Renderer_Vulkan::createSyncObjects()
@@ -273,8 +188,8 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline());
 
 	VkDeviceSize offset = 0;
-	vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &offset);
-	vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+	vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers->getVertexBuffer(), &offset);
+	vkCmdBindIndexBuffer(commandBuffer, buffers->getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
 	VkViewport viewport{};
 	viewport.x = 0.f;
