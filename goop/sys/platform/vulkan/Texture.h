@@ -16,9 +16,11 @@ class Texture
 
   private:
 	void createTextureImage(const char* path);
+	void createTextureImageView();
 
 	Context* ctx;
 	VkImage textureImage;
 	VkDeviceMemory textureImageMemory;
+	VkImageView textureImageView;
 };
 } // namespace goop::sys::platform::vulkan

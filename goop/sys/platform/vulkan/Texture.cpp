@@ -1,23 +1,24 @@
-//Sam Collier 2023
+// Sam Collier 2023
 
 #include "Texture.h"
 #include "Context.h"
-#include <stdexcept>
 #include "Utils.h"
+#include <stdexcept>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 using namespace goop::sys::platform::vulkan;
 
-Texture::Texture(Context* ctx, const char* path)
-	: ctx(ctx)
+Texture::Texture(Context* ctx, const char* path) : ctx(ctx)
 {
 	createTextureImage(path);
+	createTextureImageView();
 }
 
 Texture::~Texture()
 {
+	vkDestroyImageView(*ctx, textureImageView, nullptr);
 	vkDestroyImage(*ctx, textureImage, nullptr);
 	vkFreeMemory(*ctx, textureImageMemory, nullptr);
 }
@@ -70,3 +71,7 @@ void Texture::createTextureImage(const char* path)
 	vkFreeMemory(*ctx, stagingBufferMemory, nullptr);
 }
 
+void Texture::createTextureImageView()
+{
+	textureImageView = createImageView(ctx, textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+}

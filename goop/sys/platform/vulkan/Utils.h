@@ -226,3 +226,25 @@ inline void transitionImageLayout(goop::sys::platform::vulkan::Context* ctx, VkI
 	vkCmdPipelineBarrier(cb, sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 	endSingleTimeCommands(ctx, cb);
 }
+
+inline VkImageView createImageView(goop::sys::platform::vulkan::Context* ctx, VkImage image, VkFormat format)
+{
+	VkImageViewCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	createInfo.image = image;
+	createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	createInfo.format = format;
+	createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	createInfo.subresourceRange.baseMipLevel = 0;
+	createInfo.subresourceRange.levelCount = 1;
+	createInfo.subresourceRange.baseArrayLayer = 0;
+	createInfo.subresourceRange.layerCount = 1;
+
+	VkImageView imageView;
+	if (vkCreateImageView(*ctx, &createInfo, nullptr, &imageView) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to create texture image view!");
+	}
+
+	return imageView;
+}
