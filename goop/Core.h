@@ -23,5 +23,7 @@ class Core
 	int handleEvents();
 	void update();
 	void render();
+
+	const float blastFreq = 5.0f;
 };
 } // namespace goop

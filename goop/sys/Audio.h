@@ -10,7 +10,7 @@ class Audio : public Subsystem
 {
   public:
 	virtual uint32_t loadSfx(const char* path) = 0;
-	virtual void playSfx(uint32_t id) = 0;
+	virtual void playSfx(float dt, uint32_t id) = 0;
 
 	virtual uint32_t loadMusic(const char* path) = 0;
 	virtual void playMusic(uint32_t id) = 0;
