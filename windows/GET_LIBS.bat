@@ -17,6 +17,14 @@ if %ERRORLEVEL% EQU 0 (
 :run_script
 echo Running with administrator privileges.
 
+:: Check for --no-vulkan option
+set "no_vulkan=0"
+for %%i in (%*) do (
+    if "%%i"=="--no-vulkan" (
+        set "no_vulkan=1"
+    )
+)
+
 :menu
 cls
 echo Select your Visual Studio version:
@@ -87,7 +95,11 @@ powershell mkdir glm/include
 powershell mv glm-include glm/include/glm
 powershell rm glm.zip
 
+if "%no_vulkan%"=="0" (
 powershell -Command "Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.3.261.1/windows/VulkanSDK-1.3.261.1-Installer.exe" -OutFile VulkanSDK.exe"
 .\VulkanSDK.exe --root %~dp0\vulkan  --accept-licenses --default-answer --confirm-command install
 powershell rm VulkanSDK.exe
+) else (
+	echo Skipping Vulkan SDK installation.
+)
 pause
