@@ -26,4 +26,4 @@ jobs:
       run: mkdir build && cd build && cmake ..
 
     - name: Build
-      run: make
+      run: MSBuild.exe goop.sln
