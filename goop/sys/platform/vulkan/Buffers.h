@@ -1,9 +1,9 @@
 // Sam Collier 2023
 #pragma once
 
-#include <vulkan/vulkan.h>
-#include <vector>
 #include "Vertex.h"
+#include <vector>
+#include <vulkan/vulkan.h>
 
 namespace goop::sys::platform::vulkan
 {
@@ -11,10 +11,10 @@ namespace goop::sys::platform::vulkan
 class Context;
 
 const std::vector<Vertex> vertices = {
-	{{-0.5f, -0.5f}, {1.f, 0.f, 0.f}},
-	{{0.5f, -0.5f}, {0.f, 1.f, 0.f}},
-	{{0.5f, 0.5f}, {0.f, 0.f, 1.f}},
-	{{-0.5f, 0.5f}, {1.f, 1.f, 0.f}},
+	{{-0.5f, -0.5f}, {1.f, 0.f, 0.f}, {1.f, 0.f}},
+	{{0.5f, -0.5f}, {0.f, 1.f, 0.f}, {0.f, 0.f}},
+	{{0.5f, 0.5f}, {0.f, 0.f, 1.f}, {0.f, 1.f}},
+	{{-0.5f, 0.5f}, {1.f, 1.f, 0.f}, {1.f, 1.f}},
 };
 
 const std::vector<uint32_t> indices = {
