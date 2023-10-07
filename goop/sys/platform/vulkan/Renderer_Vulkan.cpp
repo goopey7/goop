@@ -37,9 +37,9 @@ int Renderer_Vulkan::initialize()
 	ctx = new Context(enableValidationLayers, MAX_FRAMES_IN_FLIGHT);
 	swapchain = new Swapchain(ctx);
 	uniformBuffer = new UniformBuffer(ctx, MAX_FRAMES_IN_FLIGHT);
-	descriptor = new Descriptor(ctx, MAX_FRAMES_IN_FLIGHT, uniformBuffer);
-	pipeline = new Pipeline(ctx, swapchain, descriptor);
 	texture = new Texture(ctx, "res/texture.jpg");
+	descriptor = new Descriptor(ctx, MAX_FRAMES_IN_FLIGHT, uniformBuffer, texture);
+	pipeline = new Pipeline(ctx, swapchain, descriptor);
 	buffers = new Buffers(ctx);
 	sync = new Sync(ctx, MAX_FRAMES_IN_FLIGHT);
 	return 0;

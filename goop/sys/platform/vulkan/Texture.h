@@ -14,6 +14,9 @@ class Texture
 	Texture(Context* ctx, const char* path);
 	~Texture();
 
+	VkImageView getImageView() const { return textureImageView; }
+	VkSampler getSampler() const { return textureSampler; }
+
   private:
 	void createTextureImage(const char* path);
 	void createTextureImageView();

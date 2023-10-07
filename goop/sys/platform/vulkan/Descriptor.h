@@ -1,9 +1,10 @@
 // Sam Collier 2023
 #pragma once
 
+#include "Texture.h"
+#include "UniformBuffer.h"
 #include <vector>
 #include <vulkan/vulkan.h>
-#include <goop/sys/platform/vulkan/UniformBuffer.h>
 
 namespace goop::sys::platform::vulkan
 {
@@ -12,7 +13,7 @@ class Descriptor
   public:
 	Descriptor(const Descriptor&) = delete;
 	Descriptor& operator=(const Descriptor&) = delete;
-	Descriptor(Context* ctx, uint8_t maxFramesInFlight, UniformBuffer* ub);
+	Descriptor(Context* ctx, uint8_t maxFramesInFlight, UniformBuffer* ub, Texture* texture);
 	~Descriptor();
 
 	VkDescriptorSetLayout getLayout() const { return descriptorSetLayout; }
@@ -29,5 +30,6 @@ class Descriptor
 	VkDescriptorSetLayout descriptorSetLayout;
 	VkDescriptorPool descriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
+	Texture* texture;
 };
 } // namespace goop::sys::platform::vulkan
