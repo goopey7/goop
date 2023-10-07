@@ -76,7 +76,7 @@ powershell mv sdl2/lib/x64/* sdl2/lib/
 powershell Remove-Item -Path "sdl2/lib/x64" -Recurse -Force
 
 powershell mkdir sdl2/include/SDL2
-powershell mv sdl2/include/*.h SDL2/
+powershell mv sdl2/include/*.h sdl2/include/SDL2/
 
 powershell -Command "Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.3.261.1/windows/VulkanSDK-1.3.261.1-Installer.exe" -OutFile VulkanSDK.exe"
 .\VulkanSDK.exe --root %~dp0\vulkan  --accept-licenses --default-answer --confirm-command install com.lunarg.vulkan.glm
