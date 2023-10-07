@@ -25,9 +25,6 @@ jobs:
     - name: Configure CMake
       run: mkdir build && cd build && cmake ..
 
-    - name: Dir
-      run: dir
-
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
 
@@ -35,4 +32,4 @@ jobs:
       uses: ATiltedTree/setup-rust@v1.0.5
 
     - name: Build
-      run: msbuild goop.sln
+      run: msbuild build/goop.sln
