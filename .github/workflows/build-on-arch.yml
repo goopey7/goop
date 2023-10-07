@@ -1,9 +1,8 @@
-name: Build on Arch Linux
+name: Arch Linux
 on: push
 
 jobs:
   build:
-    name: Build on Arch Linux
     runs-on: ubuntu-latest
     steps:
       - name: Login to Docker Hub
