@@ -23,6 +23,11 @@ jobs:
        vulkan-components: Vulkan-Headers, Vulkan-Loader
        vulkan-use-cache: true
 
+    - name: Add Vulkan Bin folder to PATH
+      run: |
+       echo "Adding Bin folder to PATH"
+       echo "##[add-path]$(github.workspace)/windows/vulkan/Bin" >> $GITHUB_PATH
+
     - name: Configure CMake
       run: mkdir build && cd build && cmake ..
 
