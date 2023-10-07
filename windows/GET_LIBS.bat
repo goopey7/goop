@@ -16,6 +16,7 @@ if %ERRORLEVEL% EQU 0 (
     goto :run_script
 ) else (
     echo THIS SCRIPT REQUIRES ADMIN PRIVLEDGES TO RUN THE VULKANSDK INSTALLER
+	echo IF YOU DO NOT WANT TO INSTALL THE VULKANSDK, RUN THIS SCRIPT WITH THE --no-vulkan OPTION
     echo press any key to request admin permissions
     pause
     echo Requesting admin privileges...
