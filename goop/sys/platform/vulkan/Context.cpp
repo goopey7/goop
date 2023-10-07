@@ -172,6 +172,8 @@ void Context::createLogicalDevice(bool enableValidationLayers)
 	}
 
 	VkPhysicalDeviceFeatures deviceFeatures{};
+	deviceFeatures.samplerAnisotropy = VK_TRUE;
+
 	VkDeviceCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	createInfo.pQueueCreateInfos = queueCreateInfos.data();
@@ -293,7 +295,11 @@ bool Context::checkDeviceCompatibility(VkPhysicalDevice device)
 		supportsSwapchain = !info.formats.empty() && !info.presentModes.empty();
 	}
 
-	return indices.isComplete() && supportsExtensions && supportsSwapchain;
+	VkPhysicalDeviceFeatures supportedFeatures;
+	vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+
+	return indices.isComplete() && supportsExtensions && supportsSwapchain &&
+		   supportedFeatures.samplerAnisotropy;
 }
 
 bool Context::checkDeviceExtensionSupport(VkPhysicalDevice device)
@@ -346,4 +352,3 @@ void Context::createCommandBuffers(const uint8_t maxFramesInFlight)
 		throw std::runtime_error("failed to allocate command buffers!");
 	}
 }
-
