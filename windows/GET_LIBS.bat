@@ -78,7 +78,16 @@ powershell Remove-Item -Path "sdl2/lib/x64" -Recurse -Force
 powershell mkdir sdl2/include/SDL2
 powershell mv sdl2/include/*.h sdl2/include/SDL2/
 
+powershell -Command "Invoke-WebRequest https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip -OutFile glm.zip"
+powershell Expand-Archive glm.zip
+powershell mv glm/glm glm-include
+powershell Remove-Item -Path "glm" -Recurse -Force
+powershell mkdir glm
+powershell mkdir glm/include
+powershell mv glm-include glm/include
+powershell rm glm.zip
+
 powershell -Command "Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.3.261.1/windows/VulkanSDK-1.3.261.1-Installer.exe" -OutFile VulkanSDK.exe"
-.\VulkanSDK.exe --root %~dp0\vulkan  --accept-licenses --default-answer --confirm-command install com.lunarg.vulkan.glm
+.\VulkanSDK.exe --root %~dp0\vulkan  --accept-licenses --default-answer --confirm-command install
 powershell rm VulkanSDK.exe
 pause

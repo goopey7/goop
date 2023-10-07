@@ -25,13 +25,13 @@ if (Vulkan_FOUND)
         message(STATUS "glslangValidator found")
     endif()
 
+	include_directories(${Vulkan_INCLUDE_DIRS})
+
     # You can also use other Vulkan-related variables and libraries here
 else()
     message(FATAL_ERROR "Vulkan not found")
 endif()
 
-include_directories(${Vulkan_INCLUDE_DIRS})
-include_directories(${Vulkan_INCLUDE_DIR})
 
 # Find GLFW package
 find_package(GLFW3 REQUIRED)
@@ -40,6 +40,10 @@ include_directories(${GLFW3_INCLUDE_DIR})
 # Find SDL package
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIR})
+
+# Find GLM package
+find_package(GLM REQUIRED)
+include_directories(${GLM_INCLUDE_DIR})
 
 # Include soloud headers
 add_subdirectory(libs/soloud)
@@ -97,7 +101,7 @@ endif()
 
 # Link the C++ executable
 target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL2_LIBRARY} ${RUST_LIB} ${GLFW3_LIBRARY}
-	${Vulkan_LIBRARIES} ${Vulkan_LIBRARY} SoLoud)
+	${Vulkan_LIBRARIES} SoLoud)
 # ##############################################################################
 
 # ##################### Build shaders
