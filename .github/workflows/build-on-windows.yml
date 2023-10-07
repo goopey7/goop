@@ -25,5 +25,11 @@ jobs:
     - name: Configure CMake
       run: mkdir build && cd build && cmake ..
 
+    - name: Dir
+      run: dir
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
     - name: Build
-      run: MSBuild.exe goop.sln
+      run: msbuild goop.sln
