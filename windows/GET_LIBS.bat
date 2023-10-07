@@ -1,6 +1,15 @@
 @echo off
 cd /d %~dp0
 
+:: Check for --no-vulkan option
+set "no_vulkan=0"
+for %%i in (%*) do (
+    if "%%i"=="--no-vulkan" (
+        set "no_vulkan=1"
+	goto :menu
+    )
+)
+
 :: Check for admin privileges
 NET FILE 1>NUL 2>NUL
 if %ERRORLEVEL% EQU 0 (
@@ -16,14 +25,6 @@ if %ERRORLEVEL% EQU 0 (
 
 :run_script
 echo Running with administrator privileges.
-
-:: Check for --no-vulkan option
-set "no_vulkan=0"
-for %%i in (%*) do (
-    if "%%i"=="--no-vulkan" (
-        set "no_vulkan=1"
-    )
-)
 
 :menu
 cls
