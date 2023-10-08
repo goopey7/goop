@@ -158,6 +158,14 @@ void Pipeline::createGraphicsPipeline(Swapchain* swapchain)
 	colorBlendingInfo.blendConstants[2] = 0.f;
 	colorBlendingInfo.blendConstants[3] = 0.f;
 
+	VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
+	depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+	depthStencilInfo.depthTestEnable = VK_TRUE;
+	depthStencilInfo.depthWriteEnable = VK_TRUE;
+	depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS; // lower depth is closer
+	depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
+	depthStencilInfo.stencilTestEnable = VK_FALSE;
+
 	VkGraphicsPipelineCreateInfo pipelineInfo{};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipelineInfo.stageCount = 2;
@@ -168,7 +176,7 @@ void Pipeline::createGraphicsPipeline(Swapchain* swapchain)
 	pipelineInfo.pDynamicState = &dynamicStateInfo;
 	pipelineInfo.pRasterizationState = &rasterizerInfo;
 	pipelineInfo.pMultisampleState = &multisamplingInfo;
-	pipelineInfo.pDepthStencilState = nullptr;
+	pipelineInfo.pDepthStencilState = &depthStencilInfo;
 	pipelineInfo.pColorBlendState = &colorBlendingInfo;
 	pipelineInfo.layout = pipelineLayout;
 	pipelineInfo.renderPass = swapchain->getRenderPass();

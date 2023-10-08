@@ -29,6 +29,7 @@ class Swapchain
 	VkExtent2D selectExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
 	void createImageViews();
+	void createDepthResources();
 	void createRenderPass();
 	void createFramebuffers();
 
@@ -41,6 +42,10 @@ class Swapchain
 	std::vector<VkImageView> swapchainImageViews;
 	std::vector<VkFramebuffer> swapchainFramebuffers;
 	VkRenderPass renderPass;
+
+	VkImage depthImage;
+	VkDeviceMemory depthImageMemory;
+	VkImageView depthImageView;
 
 	Context* ctx;
 };

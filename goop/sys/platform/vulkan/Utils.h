@@ -227,14 +227,15 @@ inline void transitionImageLayout(goop::sys::platform::vulkan::Context* ctx, VkI
 	endSingleTimeCommands(ctx, cb);
 }
 
-inline VkImageView createImageView(goop::sys::platform::vulkan::Context* ctx, VkImage image, VkFormat format)
+inline VkImageView createImageView(goop::sys::platform::vulkan::Context* ctx, VkImage image,
+								   VkFormat format, VkImageAspectFlags aspectFlags)
 {
 	VkImageViewCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	createInfo.image = image;
 	createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	createInfo.format = format;
-	createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	createInfo.subresourceRange.aspectMask = aspectFlags;
 	createInfo.subresourceRange.baseMipLevel = 0;
 	createInfo.subresourceRange.levelCount = 1;
 	createInfo.subresourceRange.baseArrayLayer = 0;
@@ -247,4 +248,39 @@ inline VkImageView createImageView(goop::sys::platform::vulkan::Context* ctx, Vk
 	}
 
 	return imageView;
+}
+
+inline VkFormat findSupportedFormat(goop::sys::platform::vulkan::Context* ctx,
+									const std::vector<VkFormat>& candidates, VkImageTiling tiling,
+									VkFormatFeatureFlags features)
+{
+	for (VkFormat format : candidates)
+	{
+		VkFormatProperties props;
+		vkGetPhysicalDeviceFormatProperties(*ctx, format, &props);
+
+		if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
+		{
+			return format;
+		}
+		else if (tiling == VK_IMAGE_TILING_OPTIMAL &&
+				 (props.optimalTilingFeatures & features) == features)
+		{
+			return format;
+		}
+	}
+
+	throw std::runtime_error("failed to find supported format!");
+}
+
+inline VkFormat findDepthFormat(goop::sys::platform::vulkan::Context* ctx)
+{
+	return findSupportedFormat(
+		ctx, {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+		VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+}
+
+inline bool hasStencilComponent(VkFormat format)
+{
+	return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 }

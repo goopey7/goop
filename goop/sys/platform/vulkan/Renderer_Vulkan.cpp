@@ -7,7 +7,12 @@
 #include <cstdint>
 #include <cstring>
 #include <fstream>
+
+#define GLM_FORCE_RADIANS
+// Vulkan uses a range of 0 to 1 for depth, not -1 to 1 like OpenGL
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/gtc/matrix_transform.hpp>
+
 #include <iostream>
 #include <set>
 #include <stdexcept>
@@ -151,9 +156,14 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 	renderPassInfo.framebuffer = swapchain->getFramebuffer(imageIndex);
 	renderPassInfo.renderArea.offset = {0, 0};
 	renderPassInfo.renderArea.extent = swapchain->getExtent();
-	VkClearValue clearColor = {{{0.f, 0.f, 0.f, 1.f}}};
-	renderPassInfo.clearValueCount = 1;
-	renderPassInfo.pClearValues = &clearColor;
+
+	// order of clear values must match order of attachments in render pass
+	std::array<VkClearValue, 2> clearValues{};
+	clearValues[0].color = {{0.f, 0.f, 0.f, 1.f}};
+	clearValues[1].depthStencil = {1.f, 0};
+
+	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+	renderPassInfo.pClearValues = clearValues.data();
 
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline());

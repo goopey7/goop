@@ -75,7 +75,7 @@ void Texture::createTextureImage(const char* path)
 
 void Texture::createTextureImageView()
 {
-	textureImageView = createImageView(ctx, textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+	textureImageView = createImageView(ctx, textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
 void Texture::createTextureSampler()
