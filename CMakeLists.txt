@@ -139,6 +139,7 @@ add_dependencies(${PROJECT_NAME} compile_shaders)
 # ##############################################################################
 
 # Copy the rust_hello_lib.dll to the build directory where the .exe goes
+# And copy SDL2.dll
 if(WIN32)
   add_custom_command(
     TARGET ${PROJECT_NAME}
@@ -147,4 +148,11 @@ if(WIN32)
       ${CMAKE_COMMAND} -E copy
       ${CMAKE_SOURCE_DIR}/rust_lib/target/release/rust_hello_lib.dll
       $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+  add_custom_command(
+	  TARGET ${PROJECT_NAME}
+	  POST_BUILD
+	  COMMAND
+	  ${CMAKE_COMMAND} -E copy
+	  ${CMAKE_SOURCE_DIR}/windows/sdl2/lib/SDL2.dll
+	  $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endif()
