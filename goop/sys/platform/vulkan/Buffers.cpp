@@ -87,52 +87,40 @@ void Buffers::loadModel()
 
 	const auto mesh = scene->mMeshes[0];
 
-	vertices.reserve(mesh->mNumVertices);
-	for (uint32_t i = 0; i < mesh->mNumVertices; i++)
-	{
-		vertices.push_back({{mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z},
-							{1.f, 1.f, 1.f},
-							{mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y}});
-	}
+	// aiProcess_JoinIdenticalVertices should have taken care of this
+	// But for some reason it doesn't. It does mostly, but not completely
+	std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+	std::unordered_map<uint32_t, uint32_t> dupIndexToUniqueIndex{};
 
-	uint32_t numDuplicateVertices = 0;
 	for (uint32_t i = 0; i < mesh->mNumVertices; i++)
 	{
-		const auto& vertex = vertices[i];
-		for (uint32_t j = i + 1; j < mesh->mNumVertices; j++)
+		Vertex vertex{};
+		vertex.pos = {mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
+		vertex.color = {1.f, 1.f, 1.f};
+		vertex.texCoord = {mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y};
+
+		if (uniqueVertices.count(vertex) == 0)
 		{
-			if (vertex == vertices[j])
-			{
-				// Print or log duplicate vertices for debugging
-				std::cout << "----------------------------------------------------------"
-						  << std::endl;
-				std::cout << "Duplicate vertices found at indices " << i << " and " << j
-						  << std::endl;
-				std::cout << "Position: " << vertex.pos.x << ", " << vertex.pos.y << ", "
-						  << vertex.pos.z << std::endl;
-				std::cout << "Color: " << vertex.color.r << ", " << vertex.color.g << ", "
-						  << vertex.color.b << std::endl;
-				std::cout << "Texcoord: " << vertex.texCoord.x << ", " << vertex.texCoord.y
-						  << std::endl;
-
-				std::cout << "Other Position: " << vertices[j].pos.x << ", " << vertices[j].pos.y
-						  << ", " << vertices[j].pos.z << std::endl;
-				std::cout << "Other Color: " << vertices[j].color.r << ", " << vertices[j].color.g
-						  << ", " << vertices[j].color.b << std::endl;
-				std::cout << "Other Texcoord: " << vertices[j].texCoord.x << ", "
-						  << vertices[j].texCoord.y << std::endl;
-				std::cout << "----------------------------------------------------------"
-						  << std::endl;
-				numDuplicateVertices++;
-			}
+			uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+			dupIndexToUniqueIndex[i] = static_cast<uint32_t>(vertices.size());
+			vertices.push_back(vertex);
+		}
+		else
+		{
+			dupIndexToUniqueIndex[i] = uniqueVertices[vertex];
 		}
 	}
 
-	std::cout << "Number of duplicate vertices: " << numDuplicateVertices << std::endl;
-
-	// check for duplicate vertices and throw error if found
-	std::set<Vertex> uniqueVertices(vertices.begin(), vertices.end());
-	//assert(uniqueVertices.size() == vertices.size());
+	for (uint32_t i=0; i < vertices.size(); i++)
+	{
+		for (uint32_t j = 0; j < vertices.size(); j++)
+		{
+			if (vertices[i] == vertices[j] && i != j)
+			{
+				std::cout << "Duplicate vertex found at " << i << " and " << j << std::endl;
+			}
+		}
+	}
 
 	indices.reserve(mesh->mNumFaces * 3);
 	for (uint32_t i = 0; i < mesh->mNumFaces; i++)
@@ -142,8 +130,9 @@ void Buffers::loadModel()
 		// aiProcess_Triangulate should have taken care of this
 		assert(face.mNumIndices == 3);
 
-		indices.push_back(face.mIndices[0]);
-		indices.push_back(face.mIndices[1]);
-		indices.push_back(face.mIndices[2]);
+		for (uint32_t j = 0; j < face.mNumIndices; j++)
+		{
+			indices.push_back(dupIndexToUniqueIndex[face.mIndices[j]]);
+		}
 	}
 }

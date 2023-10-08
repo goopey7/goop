@@ -47,20 +47,23 @@ struct Vertex
 		return attributeDescriptions;
 	}
 
+	// for use in std::unordered_map
 	bool operator==(const Vertex& other) const
 	{
 		return pos == other.pos && color == other.color && texCoord == other.texCoord;
 	}
-
-	bool operator<(const Vertex& other) const
-	{
-		if (pos != other.pos)
-			return glm::all(glm::lessThan(pos, other.pos));
-
-		if (color != other.color)
-			return glm::all(glm::lessThan(color, other.color));
-
-		return glm::all(glm::lessThan(texCoord, other.texCoord));
-	}
 };
 } // namespace goop::sys::platform::vulkan
+
+namespace std
+{
+using namespace goop::sys::platform::vulkan;
+template <> struct hash<Vertex>
+{
+	size_t operator()(Vertex const& vertex) const
+	{
+		return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^
+			   (hash<glm::vec2>()(vertex.texCoord) << 1);
+	}
+};
+} // namespace std
