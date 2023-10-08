@@ -2,7 +2,11 @@
 
 #include <array>
 #include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 #include <vulkan/vulkan.h>
+
+#include <functional>
 
 namespace goop::sys::platform::vulkan
 {
@@ -41,6 +45,22 @@ struct Vertex
 		attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
 
 		return attributeDescriptions;
+	}
+
+	bool operator==(const Vertex& other) const
+	{
+		return pos == other.pos && color == other.color && texCoord == other.texCoord;
+	}
+
+	bool operator<(const Vertex& other) const
+	{
+		if (pos != other.pos)
+			return glm::all(glm::lessThan(pos, other.pos));
+
+		if (color != other.color)
+			return glm::all(glm::lessThan(color, other.color));
+
+		return glm::all(glm::lessThan(texCoord, other.texCoord));
 	}
 };
 } // namespace goop::sys::platform::vulkan

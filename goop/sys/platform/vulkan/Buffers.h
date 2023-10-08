@@ -5,27 +5,12 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
+#include <assimp/Importer.hpp>
+
 namespace goop::sys::platform::vulkan
 {
 
 class Context;
-
-const std::vector<Vertex> vertices = {
-	{{-0.5f, -0.5f, 0.f}, {1.f, 0.f, 0.f}, {1.f, 0.f}},
-	{{0.5f, -0.5f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f}},
-	{{0.5f, 0.5f, 0.f}, {0.f, 0.f, 1.f}, {0.f, 1.f}},
-	{{-0.5f, 0.5f, 0.f}, {1.f, 1.f, 0.f}, {1.f, 1.f}},
-
-	{{-0.5f, -0.5f, -0.5f}, {1.f, 0.f, 0.f}, {1.f, 0.f}},
-	{{0.5f, -0.5f, -0.5f}, {0.f, 1.f, 0.f}, {0.f, 0.f}},
-	{{0.5f, 0.5f, -0.5f}, {0.f, 0.f, 1.f}, {0.f, 1.f}},
-	{{-0.5f, 0.5f, -0.5f}, {1.f, 1.f, 0.f}, {1.f, 1.f}},
-};
-
-const std::vector<uint32_t> indices = {
-	0, 1, 2, 2, 3, 0,
-	4, 5, 6, 6, 7, 4,
-};
 
 class Buffers
 {
@@ -38,7 +23,11 @@ class Buffers
 	const VkBuffer* getVertexBuffer() const { return &vertexBuffer; }
 	VkBuffer getIndexBuffer() const { return indexBuffer; }
 
+	uint32_t getVertexCount() const { return vertices.size(); }
+	uint32_t getIndexCount() const { return indices.size(); }
+
   private:
+	void loadModel();
 	void createVertexBuffer();
 	void createIndexBuffer();
 
@@ -49,6 +38,11 @@ class Buffers
 	VkBuffer indexBuffer;
 	VkDeviceMemory indexBufferMemory;
 
+	Assimp::Importer importer;
+
 	Context* ctx;
+
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
 };
 } // namespace goop::sys::platform::vulkan

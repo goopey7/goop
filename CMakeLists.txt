@@ -45,6 +45,10 @@ include_directories(${SDL2_INCLUDE_DIR})
 find_package(GLM REQUIRED)
 include_directories(${GLM_INCLUDE_DIR})
 
+# Find Assimp package
+find_package(assimp REQUIRED)
+include_directories(${ASSIMP_INCLUDE_DIR})
+
 # Include soloud headers
 add_subdirectory(libs/soloud)
 include_directories("libs/soloud/include")
@@ -105,7 +109,7 @@ endif()
 
 # Link the C++ executable
 target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL2_LIBRARY} ${RUST_LIB} ${GLFW3_LIBRARY}
-	${Vulkan_LIBRARIES} SoLoud)
+	${Vulkan_LIBRARIES} ${ASSIMP_LIBRARY} SoLoud)
 # ##############################################################################
 
 # ##################### Build shaders

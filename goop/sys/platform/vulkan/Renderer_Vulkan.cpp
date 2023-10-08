@@ -42,7 +42,7 @@ int Renderer_Vulkan::initialize()
 	ctx = new Context(enableValidationLayers, MAX_FRAMES_IN_FLIGHT);
 	swapchain = new Swapchain(ctx);
 	uniformBuffer = new UniformBuffer(ctx, MAX_FRAMES_IN_FLIGHT);
-	texture = new Texture(ctx, "res/texture.jpg");
+	texture = new Texture(ctx, "res/viking_room.png");
 	descriptor = new Descriptor(ctx, MAX_FRAMES_IN_FLIGHT, uniformBuffer, texture);
 	pipeline = new Pipeline(ctx, swapchain, descriptor);
 	buffers = new Buffers(ctx);
@@ -190,7 +190,7 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 							pipeline->getPipelineLayout(), 0, 1, descriptor->getSet(currentFrame),
 							0, nullptr);
 
-	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+	vkCmdDrawIndexed(commandBuffer, buffers->getIndexCount(), 1, 0, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffer);
 
@@ -210,10 +210,10 @@ void Renderer_Vulkan::updateUniformBuffer(uint32_t currentFrame)
 
 	UniformBufferObject ubo{};
 
-	ubo.model = glm::rotate(glm::mat4(1.f), time + glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
+	ubo.model = glm::rotate(glm::mat4(1.f), time + glm::radians(90.f), glm::vec3(0.f, 1.f, 0.f));
 
 	ubo.view =
-		glm::lookAt(glm::vec3(2.f, 2.f, 2.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
+		glm::lookAt(glm::vec3(2.f, 2.f, 2.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
 
 	ubo.proj = glm::perspective(glm::radians(45.f),
 								swapchain->getExtent().width / (float)swapchain->getExtent().height,
