@@ -97,6 +97,10 @@ powershell mkdir glm/include
 powershell mv glm-include glm/include/glm
 powershell rm glm.zip
 
+powershell -Command "Invoke-WebRequest 'https://drive.google.com/uc?export=download&id=1V6SwbnuC8cfvvl3lpNlFpv_rDQuuBXYI' -OutFile 'assimp.zip'"
+powershell Expand-Archive assimp.zip
+powershell rm assimp.zip
+
 if "%no_vulkan%"=="0" (
 powershell -Command "Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.3.261.1/windows/VulkanSDK-1.3.261.1-Installer.exe" -OutFile VulkanSDK.exe"
 .\VulkanSDK.exe --root %~dp0\vulkan  --accept-licenses --default-answer --confirm-command install

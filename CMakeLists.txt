@@ -159,4 +159,33 @@ if(WIN32)
 	  ${CMAKE_COMMAND} -E copy
 	  ${CMAKE_SOURCE_DIR}/windows/sdl2/lib/SDL2.dll
 	  $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+  add_custom_command(
+	  TARGET ${PROJECT_NAME}
+	  POST_BUILD
+	  COMMAND
+	  ${CMAKE_COMMAND} -E copy
+	  ${CMAKE_SOURCE_DIR}/windows/assimp/lib/assimp-vc143-mt.dll
+	  $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+  add_custom_command(
+	  TARGET ${PROJECT_NAME}
+	  POST_BUILD
+	  COMMAND
+	  ${CMAKE_COMMAND} -E copy_directory
+	  ${CMAKE_SOURCE_DIR}/res
+	  $<TARGET_FILE_DIR:${PROJECT_NAME}>/res)
+  add_custom_command(
+	  TARGET ${PROJECT_NAME}
+	  POST_BUILD
+	  COMMAND
+	  ${CMAKE_COMMAND} -E copy_directory
+	  ${CMAKE_SOURCE_DIR}/res
+	  ${CMAKE_BINARY_DIR}/res)
+  add_custom_command(
+	  TARGET ${PROJECT_NAME}
+	  POST_BUILD
+	  COMMAND
+	  ${CMAKE_COMMAND} -E copy_directory
+	  ${CMAKE_SOURCE_DIR}/shaders
+	  $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders)
+
 endif()

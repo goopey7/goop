@@ -8,3 +8,4 @@ windows/sdl2
 windows/glfw
 windows/glm/include/glm
 windows/vswhere.exe
+windows/assimp
