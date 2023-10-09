@@ -46,7 +46,7 @@ find_package(GLM REQUIRED)
 include_directories(${GLM_INCLUDE_DIR})
 
 # Find Assimp package
-find_package(assimp REQUIRED)
+find_package(ASSIMP REQUIRED)
 include_directories(${ASSIMP_INCLUDE_DIR})
 
 # Include soloud headers
