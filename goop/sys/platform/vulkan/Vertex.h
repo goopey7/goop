@@ -8,7 +8,7 @@
 
 #include <functional>
 
-namespace goop::sys::platform::vulkan
+namespace goop::sys
 {
 struct Vertex
 {
@@ -53,11 +53,11 @@ struct Vertex
 		return pos == other.pos && color == other.color && texCoord == other.texCoord;
 	}
 };
-} // namespace goop::sys::platform::vulkan
+} // namespace goop::sys
 
 namespace std
 {
-using namespace goop::sys::platform::vulkan;
+using namespace goop::sys;
 template <> struct hash<Vertex>
 {
 	size_t operator()(Vertex const& vertex) const

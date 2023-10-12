@@ -12,9 +12,8 @@
 
 using namespace goop::sys::platform::vulkan;
 
-Buffers::Buffers(Context* ctx) : ctx(ctx)
+Buffers::Buffers(Context* ctx, const MeshLoader* ml) : ctx(ctx), ml(ml)
 {
-	loadModel();
 	createVertexBuffer();
 	createIndexBuffer();
 }
@@ -29,6 +28,18 @@ Buffers::~Buffers()
 
 void Buffers::createVertexBuffer()
 {
+	vertices.reserve(ml->getData().vertices.size());
+	for (const auto& vert : ml->getData().vertices)
+	{
+		Vertex vertex;
+		vertex.pos = {vert.x, vert.y, vert.z};
+		vertex.color = {1.f, 1.f, 1.f};
+		vertex.texCoord = {vert.u, vert.v};
+		vertices.push_back(vertex);
+	}
+
+	std::cout << "VERTEX BUFFER SIZE: "<< vertices.size() << std::endl;
+
 	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
 	VkBuffer stagingBuffer;
@@ -55,7 +66,7 @@ void Buffers::createVertexBuffer()
 
 void Buffers::createIndexBuffer()
 {
-	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+	VkDeviceSize bufferSize = sizeof(ml->getData().indices[0]) * ml->getData().indices.size();
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
@@ -65,7 +76,7 @@ void Buffers::createIndexBuffer()
 
 	void* data;
 	vkMapMemory(*ctx, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, indices.data(), (size_t)bufferSize);
+	memcpy(data, ml->getData().indices.data(), (size_t)bufferSize);
 	vkUnmapMemory(*ctx, stagingBufferMemory);
 
 	createBuffer(ctx, bufferSize,
@@ -77,62 +88,4 @@ void Buffers::createIndexBuffer()
 
 	vkDestroyBuffer(*ctx, stagingBuffer, nullptr);
 	vkFreeMemory(*ctx, stagingBufferMemory, nullptr);
-}
-
-void Buffers::loadModel()
-{
-	const aiScene* scene =
-		importer.ReadFile("res/viking_room.obj", aiProcess_Triangulate | aiProcess_FlipUVs |
-													 aiProcess_JoinIdenticalVertices);
-
-	const auto mesh = scene->mMeshes[0];
-
-	// aiProcess_JoinIdenticalVertices should have taken care of this
-	// But for some reason it doesn't. It does mostly, but not completely
-	std::unordered_map<Vertex, uint32_t> uniqueVertices{};
-	std::unordered_map<uint32_t, uint32_t> dupIndexToUniqueIndex{};
-
-	for (uint32_t i = 0; i < mesh->mNumVertices; i++)
-	{
-		Vertex vertex{};
-		vertex.pos = {mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
-		vertex.color = {1.f, 1.f, 1.f};
-		vertex.texCoord = {mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y};
-
-		if (uniqueVertices.count(vertex) == 0)
-		{
-			uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-			dupIndexToUniqueIndex[i] = static_cast<uint32_t>(vertices.size());
-			vertices.push_back(vertex);
-		}
-		else
-		{
-			dupIndexToUniqueIndex[i] = uniqueVertices[vertex];
-		}
-	}
-
-	for (uint32_t i=0; i < vertices.size(); i++)
-	{
-		for (uint32_t j = 0; j < vertices.size(); j++)
-		{
-			if (vertices[i] == vertices[j] && i != j)
-			{
-				std::cout << "Duplicate vertex found at " << i << " and " << j << std::endl;
-			}
-		}
-	}
-
-	indices.reserve(mesh->mNumFaces * 3);
-	for (uint32_t i = 0; i < mesh->mNumFaces; i++)
-	{
-		const auto& face = mesh->mFaces[i];
-
-		// aiProcess_Triangulate should have taken care of this
-		assert(face.mNumIndices == 3);
-
-		for (uint32_t j = 0; j < face.mNumIndices; j++)
-		{
-			indices.push_back(dupIndexToUniqueIndex[face.mIndices[j]]);
-		}
-	}
 }

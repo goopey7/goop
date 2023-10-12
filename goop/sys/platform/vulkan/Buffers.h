@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Vertex.h"
+#include <goop/sys/MeshLoader.h>
 #include <vector>
 #include <vulkan/vulkan.h>
 
@@ -17,17 +18,16 @@ class Buffers
   public:
 	Buffers(const Buffers&) = delete;
 	Buffers& operator=(const Buffers&) = delete;
-	Buffers(Context* ctx);
+	Buffers(Context* ctx, const MeshLoader* ml);
 	~Buffers();
 
 	const VkBuffer* getVertexBuffer() const { return &vertexBuffer; }
 	VkBuffer getIndexBuffer() const { return indexBuffer; }
 
-	uint32_t getVertexCount() const { return vertices.size(); }
-	uint32_t getIndexCount() const { return indices.size(); }
+	uint32_t getVertexCount() const { return ml->getData().vertices.size(); }
+	uint32_t getIndexCount() const { return ml->getData().indices.size(); }
 
   private:
-	void loadModel();
 	void createVertexBuffer();
 	void createIndexBuffer();
 
@@ -38,11 +38,9 @@ class Buffers
 	VkBuffer indexBuffer;
 	VkDeviceMemory indexBufferMemory;
 
-	Assimp::Importer importer;
+	std::vector<Vertex> vertices;
 
 	Context* ctx;
-
-	std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
+	const MeshLoader* ml;
 };
 } // namespace goop::sys::platform::vulkan

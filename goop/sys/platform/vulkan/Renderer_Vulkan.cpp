@@ -2,6 +2,7 @@
 
 #include "Renderer_Vulkan.h"
 #include "Utils.h"
+#include "goop/sys/MeshLoader.h"
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
@@ -45,7 +46,7 @@ int Renderer_Vulkan::initialize()
 	texture = new Texture(ctx, "res/viking_room.png");
 	descriptor = new Descriptor(ctx, MAX_FRAMES_IN_FLIGHT, uniformBuffer, texture);
 	pipeline = new Pipeline(ctx, swapchain, descriptor);
-	buffers = new Buffers(ctx);
+	buffers = new Buffers(ctx, goop::sys::gMeshLoader.get());
 	sync = new Sync(ctx, MAX_FRAMES_IN_FLIGHT);
 	return 0;
 }

@@ -67,6 +67,7 @@ add_executable(${PROJECT_NAME} ${SRC_FILES} ${STB_VORBIS_SOURCE})
 target_compile_definitions(${PROJECT_NAME} PRIVATE RENDERER_VULKAN=1)
 target_compile_definitions(${PROJECT_NAME} PRIVATE WINDOW_GLFW=1)
 target_compile_definitions(${PROJECT_NAME} PRIVATE AUDIO_SOLOUD=1)
+target_compile_definitions(${PROJECT_NAME} PRIVATE ML_ASSIMP=1)
 
 # ##################### Build Soloud
 # Add a custom target to build Soloud using CMake

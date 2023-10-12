@@ -11,6 +11,8 @@ Core::Core()
 	sys::gAudio->initialize();
 	sys::gWindow->initialize();
 	sys::gWindow->openWindow(800, 600, "Goop", GOOP_WINDOW_DEFAULT);
+	sys::gMeshLoader->initialize();
+	sys::gMeshLoader->loadModel("res/viking_room.obj");
 	sys::gRenderer->initialize();
 	uint32_t beep_id = sys::gAudio->loadSfx("res/beep.wav");
 	uint32_t lazer_id = sys::gAudio->loadSfx("res/blast.mp3");
