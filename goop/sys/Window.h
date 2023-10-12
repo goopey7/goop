@@ -3,6 +3,7 @@
 
 #include "Subsystem.h"
 #include <cstdint>
+#include <memory>
 
 #ifndef RENDERER_VULKAN
 class VkInstance;
@@ -41,5 +42,5 @@ class Window : public Subsystem
 };
 
 // Global pointer to goop's window
-extern Window* gWindow;
+extern std::unique_ptr<Window> gWindow;
 } // namespace goop::sys

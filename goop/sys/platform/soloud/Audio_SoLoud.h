@@ -24,6 +24,6 @@ class Audio_SoLoud : public Audio
 
   private:
 	  SoLoud::Soloud engine;
-	  std::vector<SoLoud::Wav*> sfx;
+	  std::vector<std::unique_ptr<SoLoud::Wav>> sfx;
 };
 } // namespace goop::sys::platform::soloud

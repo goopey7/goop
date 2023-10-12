@@ -9,8 +9,7 @@
 #include <stdexcept>
 
 #ifdef WINDOW_GLFW
-goop::sys::platform::glfw::Window_GLFW gWindow_GLFW;
-goop::sys::Window* goop::sys::gWindow = &gWindow_GLFW;
+std::unique_ptr<goop::sys::Window> goop::sys::gWindow = std::make_unique<goop::sys::platform::glfw::Window_GLFW>();
 #endif
 
 using namespace goop::sys::platform::glfw;
@@ -46,7 +45,7 @@ void Window_GLFW::createVulkanSurface(VkInstance instance, VkSurfaceKHR* surface
 		throw std::runtime_error("failed to create window surface!");
 	}
 #else
-	throw std::runtime_error("Vulkan not enabled!");
+	throw std::runtime_error("Vulkan not enabled at compile time!");
 #endif
 }
 

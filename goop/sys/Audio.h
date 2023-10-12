@@ -3,6 +3,7 @@
 
 #include "Subsystem.h"
 #include <cstdint>
+#include <memory>
 
 namespace goop::sys
 {
@@ -18,5 +19,5 @@ class Audio : public Subsystem
   private:
 };
 // Global pointer to goop's audio
-extern Audio* gAudio;
+extern std::unique_ptr<Audio> gAudio;
 } // namespace goop::sys
