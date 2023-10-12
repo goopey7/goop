@@ -48,6 +48,7 @@ int Renderer_Vulkan::initialize()
 	pipeline = new Pipeline(ctx, swapchain, descriptor);
 	buffers = new Buffers(ctx, goop::sys::gMeshLoader.get());
 	sync = new Sync(ctx, MAX_FRAMES_IN_FLIGHT);
+	bIsInitialized = true;
 	return 0;
 }
 
@@ -62,6 +63,7 @@ int Renderer_Vulkan::destroy()
 	delete sync;
 	delete pipeline;
 	delete ctx;
+	bIsInitialized = false;
 	return 0;
 }
 

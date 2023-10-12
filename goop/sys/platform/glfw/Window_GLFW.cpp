@@ -17,6 +17,7 @@ using namespace goop::sys::platform::glfw;
 int Window_GLFW::initialize()
 {
 	glfwInit();
+	bIsInitialized = true;
 	return 0;
 }
 
@@ -24,6 +25,7 @@ int Window_GLFW::destroy()
 {
 	glfwDestroyWindow(window);
 	glfwTerminate();
+	bIsInitialized = false;
 	return 0;
 }
 

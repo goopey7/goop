@@ -9,6 +9,7 @@
 #include <assimp/scene.h>
 #include <iostream>
 #include <set>
+#include <stdexcept>
 
 using namespace goop::sys::platform::vulkan;
 
@@ -28,6 +29,12 @@ Buffers::~Buffers()
 
 void Buffers::createVertexBuffer()
 {
+	if (!ml->isInitialized())
+	{
+		throw std::runtime_error(
+			"mesh loader not initialized. mesh loader must be initialized before the renderer");
+	}
+
 	vertices.reserve(ml->getData().vertices.size());
 	for (const auto& vert : ml->getData().vertices)
 	{
@@ -38,7 +45,7 @@ void Buffers::createVertexBuffer()
 		vertices.push_back(vertex);
 	}
 
-	std::cout << "VERTEX BUFFER SIZE: "<< vertices.size() << std::endl;
+	std::cout << "VERTEX BUFFER SIZE: " << vertices.size() << std::endl;
 
 	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 

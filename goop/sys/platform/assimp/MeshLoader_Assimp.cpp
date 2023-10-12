@@ -13,9 +13,13 @@ std::unique_ptr<goop::sys::MeshLoader> goop::sys::gMeshLoader = std::make_unique
 
 using namespace goop::sys::platform::assimp;
 
-int MeshLoader_Assimp::initialize() { return 0; }
+int MeshLoader_Assimp::initialize() { 
+	bIsInitialized = true;
+	return 0; }
 
-int MeshLoader_Assimp::destroy() { return 0; }
+int MeshLoader_Assimp::destroy() { 
+	bIsInitialized = false;
+	return 0; }
 
 void MeshLoader_Assimp::loadModel(const std::string& path)
 {

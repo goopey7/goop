@@ -14,6 +14,7 @@ int Audio_SoLoud::initialize()
 {
 	int sdl_result = SDL_Init(SDL_INIT_AUDIO);
 	int soloud_result = engine.init();
+	bIsInitialized = true;
 	return sdl_result || soloud_result;
 }
 
@@ -21,6 +22,7 @@ int Audio_SoLoud::destroy()
 {
 	engine.deinit();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
+	bIsInitialized = false;
 	return 0;
 }
 
