@@ -13,10 +13,19 @@
 
 using namespace goop::sys::platform::vulkan;
 
-Buffers::Buffers(Context* ctx, const MeshLoader* ml) : ctx(ctx), ml(ml)
+Buffers::Buffers(Context* ctx) : ctx(ctx)
 {
-	createVertexBuffer();
-	createIndexBuffer();
+	if (!goop::sys::gMeshLoader->isInitialized())
+	{
+		throw std::runtime_error(
+			"mesh loader not initialized. mesh loader must be initialized before the renderer");
+	}
+	std::unique_ptr<MeshImportData> mid = goop::sys::gMeshLoader->takeData();
+	vertexCount = mid->vertices.size();
+	indexCount = mid->indices.size();
+	createVertexBuffer(mid.get());
+	createIndexBuffer(mid.get());
+	goop::sys::gMeshLoader->returnData(std::move(mid));
 }
 
 Buffers::~Buffers()
@@ -27,27 +36,11 @@ Buffers::~Buffers()
 	vkFreeMemory(*ctx, vertexBufferMemory, nullptr);
 }
 
-void Buffers::createVertexBuffer()
+void Buffers::createVertexBuffer(const MeshImportData* mid)
 {
-	if (!ml->isInitialized())
-	{
-		throw std::runtime_error(
-			"mesh loader not initialized. mesh loader must be initialized before the renderer");
-	}
+	std::cout << "VERTEX BUFFER SIZE: " << mid->vertices.size() << std::endl;
 
-	vertices.reserve(ml->getData().vertices.size());
-	for (const auto& vert : ml->getData().vertices)
-	{
-		Vertex vertex;
-		vertex.pos = {vert.x, vert.y, vert.z};
-		vertex.color = {1.f, 1.f, 1.f};
-		vertex.texCoord = {vert.u, vert.v};
-		vertices.push_back(vertex);
-	}
-
-	std::cout << "VERTEX BUFFER SIZE: " << vertices.size() << std::endl;
-
-	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+	VkDeviceSize bufferSize = sizeof(mid->vertices[0]) * mid->vertices.size();
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
@@ -57,7 +50,7 @@ void Buffers::createVertexBuffer()
 
 	void* data;
 	vkMapMemory(*ctx, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, vertices.data(), (size_t)bufferSize);
+	memcpy(data, mid->vertices.data(), (size_t)bufferSize);
 	vkUnmapMemory(*ctx, stagingBufferMemory);
 
 	createBuffer(ctx, bufferSize,
@@ -71,9 +64,9 @@ void Buffers::createVertexBuffer()
 	vkFreeMemory(*ctx, stagingBufferMemory, nullptr);
 }
 
-void Buffers::createIndexBuffer()
+void Buffers::createIndexBuffer(const MeshImportData* mid)
 {
-	VkDeviceSize bufferSize = sizeof(ml->getData().indices[0]) * ml->getData().indices.size();
+	VkDeviceSize bufferSize = sizeof(mid->indices[0]) * mid->indices.size();
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
@@ -83,7 +76,7 @@ void Buffers::createIndexBuffer()
 
 	void* data;
 	vkMapMemory(*ctx, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, ml->getData().indices.data(), (size_t)bufferSize);
+	memcpy(data, mid->indices.data(), (size_t)bufferSize);
 	vkUnmapMemory(*ctx, stagingBufferMemory);
 
 	createBuffer(ctx, bufferSize,

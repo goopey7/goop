@@ -1,7 +1,7 @@
 // Sam Collier 2023
 
 #include "Pipeline.h"
-#include "Vertex.h"
+#include <goop/sys/Vertex.h>
 #include <fstream>
 
 using namespace goop::sys::platform::vulkan;

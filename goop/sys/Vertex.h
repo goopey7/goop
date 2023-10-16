@@ -8,6 +8,7 @@
 
 #include <functional>
 
+#ifdef RENDERER_VULKAN
 namespace goop::sys
 {
 struct Vertex
@@ -67,3 +68,4 @@ template <> struct hash<Vertex>
 	}
 };
 } // namespace std
+#endif

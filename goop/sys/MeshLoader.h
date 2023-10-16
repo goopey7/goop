@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <functional>
 #include <goop/sys/Subsystem.h>
+#include <goop/sys/Vertex.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -11,50 +12,25 @@
 namespace goop::sys
 {
 
-struct Vert
-{
-	float x;
-	float y;
-	float z;
-	float u;
-	float v;
-
-	bool operator==(const Vert& other) const
-	{
-		return x == other.x && y == other.y & z == other.z && u == other.u && v == other.v;
-	}
-};
-
 struct MeshImportData
 {
-	std::vector<Vert> vertices;
+	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 };
 
 class MeshLoader : public Subsystem
 {
   public:
+	virtual int initialize() override;
 	virtual void loadModel(const std::string& path) = 0;
-	const MeshImportData& getData() const;
+	std::unique_ptr<MeshImportData> takeData() { return std::move(data); }
+	void returnData(std::unique_ptr<MeshImportData> mid) { data = std::move(mid); }
 
   protected:
-	MeshImportData data;
+	std::unique_ptr<MeshImportData> data;
 };
 
 // Global pointer to goop's window
 extern std::unique_ptr<MeshLoader> gMeshLoader;
 
 } // namespace goop::sys
-
-namespace std
-{
-using namespace goop::sys;
-template <> struct hash<Vert>
-{
-	size_t operator()(Vert const& vertex) const
-	{
-		return ((hash<float>()(vertex.x) ^ (hash<float>()(vertex.y) << 1)) >> 1) ^
-			   (hash<float>()(vertex.z) << 1);
-	}
-};
-} // namespace std

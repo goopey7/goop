@@ -46,7 +46,7 @@ int Renderer_Vulkan::initialize()
 	texture = new Texture(ctx, "res/viking_room.png");
 	descriptor = new Descriptor(ctx, MAX_FRAMES_IN_FLIGHT, uniformBuffer, texture);
 	pipeline = new Pipeline(ctx, swapchain, descriptor);
-	buffers = new Buffers(ctx, goop::sys::gMeshLoader.get());
+	buffers = new Buffers(ctx);
 	sync = new Sync(ctx, MAX_FRAMES_IN_FLIGHT);
 	bIsInitialized = true;
 	return 0;

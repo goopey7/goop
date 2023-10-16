@@ -4,8 +4,9 @@
 
 using namespace goop::sys;
 
-const MeshImportData& MeshLoader::getData() const
+int MeshLoader::initialize()
 {
-	return data;
+	data = std::make_unique<MeshImportData>();
+	return 0;
 }
 

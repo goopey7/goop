@@ -1,7 +1,7 @@
 // Sam Collier 2023
 #pragma once
 
-#include "Vertex.h"
+#include <goop/sys/Vertex.h>
 #include <goop/sys/MeshLoader.h>
 #include <vector>
 #include <vulkan/vulkan.h>
@@ -18,18 +18,18 @@ class Buffers
   public:
 	Buffers(const Buffers&) = delete;
 	Buffers& operator=(const Buffers&) = delete;
-	Buffers(Context* ctx, const MeshLoader* ml);
+	Buffers(Context* ctx);
 	~Buffers();
 
 	const VkBuffer* getVertexBuffer() const { return &vertexBuffer; }
 	VkBuffer getIndexBuffer() const { return indexBuffer; }
 
-	uint32_t getVertexCount() const { return ml->getData().vertices.size(); }
-	uint32_t getIndexCount() const { return ml->getData().indices.size(); }
+	uint32_t getVertexCount() const { return vertexCount; }
+	uint32_t getIndexCount() const { return indexCount; }
 
   private:
-	void createVertexBuffer();
-	void createIndexBuffer();
+	void createVertexBuffer(const MeshImportData* mid);
+	void createIndexBuffer(const MeshImportData* mid);
 
 	// TODO driver developers recommend storing vertex and index buffers into a single VkBuffer and
 	// use offsets. That way the data is more cache friendly
@@ -38,9 +38,9 @@ class Buffers
 	VkBuffer indexBuffer;
 	VkDeviceMemory indexBufferMemory;
 
-	std::vector<Vertex> vertices;
+	uint32_t vertexCount = 0;
+	uint32_t indexCount = 0;
 
 	Context* ctx;
-	const MeshLoader* ml;
 };
 } // namespace goop::sys::platform::vulkan

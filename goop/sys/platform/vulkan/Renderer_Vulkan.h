@@ -1,7 +1,7 @@
 // Sam Collier 2023
 #pragma once
 
-#include "Vertex.h"
+#include <goop/sys/Vertex.h>
 #include <array>
 #include <glm/glm.hpp>
 #include <goop/sys/Renderer.h>
