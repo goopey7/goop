@@ -20,12 +20,11 @@ Buffers::Buffers(Context* ctx) : ctx(ctx)
 		throw std::runtime_error(
 			"mesh loader not initialized. mesh loader must be initialized before the renderer");
 	}
-	std::unique_ptr<MeshImportData> mid = goop::sys::gMeshLoader->takeData();
+	const MeshImportData* mid = goop::sys::gMeshLoader->getData();
 	vertexCount = mid->vertices.size();
 	indexCount = mid->indices.size();
-	createVertexBuffer(mid.get());
-	createIndexBuffer(mid.get());
-	goop::sys::gMeshLoader->returnData(std::move(mid));
+	createVertexBuffer(mid);
+	createIndexBuffer(mid);
 }
 
 Buffers::~Buffers()

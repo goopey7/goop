@@ -23,8 +23,7 @@ class MeshLoader : public Subsystem
   public:
 	virtual int initialize() override;
 	virtual void loadModel(const std::string& path) = 0;
-	std::unique_ptr<MeshImportData> takeData() { return std::move(data); }
-	void returnData(std::unique_ptr<MeshImportData> mid) { data = std::move(mid); }
+	const MeshImportData* getData() const { return data.get(); }
 
   protected:
 	std::unique_ptr<MeshImportData> data;
