@@ -6,7 +6,7 @@ using namespace goop::sys;
 
 int MeshLoader::initialize()
 {
-	data = std::make_unique<MeshImportData>();
+	data = std::make_unique<std::vector<MeshImportData>>();
 	return 0;
 }
 

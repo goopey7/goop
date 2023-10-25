@@ -4,9 +4,8 @@
 #include "Context.h"
 #include "Utils.h"
 #include <cstring>
+#include <goop/sys/ResourceManager.h>
 
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
 #include <iostream>
 #include <set>
 #include <stdexcept>
@@ -15,12 +14,21 @@ using namespace goop::sys::platform::vulkan;
 
 Buffers::Buffers(Context* ctx) : ctx(ctx)
 {
-	if (!goop::sys::gMeshLoader->isInitialized())
+	/*
+	if (!goop::sys::gResourceManager->getMeshLoader()->isInitialized())
 	{
 		throw std::runtime_error(
 			"mesh loader not initialized. mesh loader must be initialized before the renderer");
 	}
-	const MeshImportData* mid = goop::sys::gMeshLoader->getData();
+	*/
+	if (!goop::sys::gResourceManager->getMeshLoader())
+	{
+		throw std::runtime_error(
+			"mesh loader not initialized. mesh loader must be initialized before the renderer");
+	}
+	const MeshImportData* mid = &goop::sys::gResourceManager->getMeshLoader()
+									 ->getData()
+									 ->data()[goop::res::mesh::VIKING_ROOM];
 	vertexCount = mid->vertices.size();
 	indexCount = mid->indices.size();
 	createVertexBuffer(mid);

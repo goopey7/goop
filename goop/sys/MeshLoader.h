@@ -1,12 +1,11 @@
 // Sam Collier 2023
 #pragma once
 
+#include <goop/sys/ResourceSubsystem.h>
 #include <cstdint>
 #include <functional>
-#include <goop/sys/Subsystem.h>
 #include <goop/sys/Vertex.h>
 #include <memory>
-#include <string>
 #include <vector>
 
 namespace goop::sys
@@ -18,18 +17,14 @@ struct MeshImportData
 	std::vector<uint32_t> indices;
 };
 
-class MeshLoader : public Subsystem
+class MeshLoader : public ResourceSubsystem
 {
   public:
 	virtual int initialize() override;
-	virtual void loadModel(const std::string& path) = 0;
-	const MeshImportData* getData() const { return data.get(); }
+	const std::vector<MeshImportData>* getData() const { return data.get(); }
 
   protected:
-	std::unique_ptr<MeshImportData> data;
+	std::unique_ptr<std::vector<MeshImportData>> data;
+
 };
-
-// Global pointer to goop's window
-extern std::unique_ptr<MeshLoader> gMeshLoader;
-
 } // namespace goop::sys

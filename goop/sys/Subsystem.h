@@ -10,6 +10,7 @@ class Subsystem
 	virtual int initialize() = 0;
 	virtual int destroy() = 0;
 	bool isInitialized() const { return bIsInitialized; }
+
   protected:
 	bool bIsInitialized = false;
 };

@@ -7,10 +7,6 @@
 #include <unordered_map>
 #include <iostream>
 
-#ifdef ML_ASSIMP
-std::unique_ptr<goop::sys::MeshLoader> goop::sys::gMeshLoader = std::make_unique<goop::sys::platform::assimp::MeshLoader_Assimp>();
-#endif
-
 using namespace goop::sys::platform::assimp;
 
 int MeshLoader_Assimp::initialize() { 
@@ -22,8 +18,10 @@ int MeshLoader_Assimp::destroy() {
 	bIsInitialized = false;
 	return 0; }
 
-void MeshLoader_Assimp::loadModel(const std::string& path)
+bool MeshLoader_Assimp::load(const std::string& path)
 {
+	int index = data->size();
+
 	const aiScene* scene =
 		importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs |
 													 aiProcess_JoinIdenticalVertices);
@@ -34,7 +32,10 @@ void MeshLoader_Assimp::loadModel(const std::string& path)
 	std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 	std::unordered_map<uint32_t, uint32_t> dupIndexToUniqueIndex{};
 
-	data->vertices.reserve(mesh->mNumVertices);
+	MeshImportData* mid = &data->emplace_back();
+
+	mid->vertices.reserve(mesh->mNumVertices);
+
 	for (uint32_t i = 0; i < mesh->mNumVertices; i++)
 	{
 		Vertex vertex{};
@@ -43,29 +44,29 @@ void MeshLoader_Assimp::loadModel(const std::string& path)
 
 		if (uniqueVertices.count(vertex) == 0)
 		{
-			uniqueVertices[vertex] = static_cast<uint32_t>(data->vertices.size());
-			dupIndexToUniqueIndex[i] = static_cast<uint32_t>(data->vertices.size());
-			data->vertices.push_back(vertex);
+			uniqueVertices[vertex] = static_cast<uint32_t>(mid->vertices.size());
+			dupIndexToUniqueIndex[i] = static_cast<uint32_t>(mid->vertices.size());
+			mid->vertices.push_back(vertex);
 		}
 		else
 		{
 			dupIndexToUniqueIndex[i] = uniqueVertices[vertex];
 		}
 	}
-	data->vertices.resize(data->vertices.size());
+	mid->vertices.resize(mid->vertices.size());
 
-	for (uint32_t i=0; i < data->vertices.size(); i++)
+	for (uint32_t i=0; i < mid->vertices.size(); i++)
 	{
-		for (uint32_t j = 0; j < data->vertices.size(); j++)
+		for (uint32_t j = 0; j < mid->vertices.size(); j++)
 		{
-			if (data->vertices[i] == data->vertices[j] && i != j)
+			if (mid->vertices[i] == mid->vertices[j] && i != j)
 			{
 				std::cout << "Duplicate vertex found at " << i << " and " << j << std::endl;
 			}
 		}
 	}
 
-	data->indices.reserve(mesh->mNumFaces * 3);
+	mid->indices.reserve(mesh->mNumFaces * 3);
 	for (uint32_t i = 0; i < mesh->mNumFaces; i++)
 	{
 		const auto& face = mesh->mFaces[i];
@@ -75,9 +76,11 @@ void MeshLoader_Assimp::loadModel(const std::string& path)
 
 		for (uint32_t j = 0; j < face.mNumIndices; j++)
 		{
-			data->indices.push_back(dupIndexToUniqueIndex[face.mIndices[j]]);
+			mid->indices.push_back(dupIndexToUniqueIndex[face.mIndices[j]]);
 		}
 	}
+
+	return true;
 }
 
 MeshLoader_Assimp::MeshLoader_Assimp()
