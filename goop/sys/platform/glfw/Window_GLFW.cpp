@@ -9,7 +9,7 @@
 #include <stdexcept>
 
 #ifdef WINDOW_GLFW
-std::unique_ptr<goop::sys::Window> goop::sys::gWindow = std::make_unique<goop::sys::platform::glfw::Window_GLFW>();
+const std::unique_ptr<goop::sys::Window> goop::sys::gWindow = std::make_unique<goop::sys::platform::glfw::Window_GLFW>();
 #endif
 
 using namespace goop::sys::platform::glfw;

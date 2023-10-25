@@ -4,7 +4,7 @@
 #include <SDL2/SDL.h>
 
 #ifdef AUDIO_SOLOUD
-std::unique_ptr<goop::sys::Audio> goop::sys::gAudio =
+const std::unique_ptr<goop::sys::Audio> goop::sys::gAudio =
 	std::make_unique<goop::sys::platform::soloud::Audio_SoLoud>();
 #endif
 

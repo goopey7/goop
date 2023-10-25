@@ -19,5 +19,5 @@ class Audio : public Subsystem
   private:
 };
 // Global pointer to goop's audio
-extern std::unique_ptr<Audio> gAudio;
+extern const std::unique_ptr<Audio> gAudio;
 } // namespace goop::sys

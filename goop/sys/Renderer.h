@@ -14,5 +14,5 @@ class Renderer : public Subsystem
 };
 
 // global pointer to goop's renderer
-extern Renderer* gRenderer;
+extern const std::unique_ptr<Renderer> gRenderer;
 } // namespace goop::sys

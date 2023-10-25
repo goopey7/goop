@@ -42,5 +42,5 @@ class Window : public Subsystem
 };
 
 // Global pointer to goop's window
-extern std::unique_ptr<Window> gWindow;
+extern const std::unique_ptr<Window> gWindow;
 } // namespace goop::sys

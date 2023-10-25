@@ -6,7 +6,7 @@
 #include <goop/sys/platform/assimp/MeshLoader_Assimp.h>
 #endif
 
-std::unique_ptr<goop::sys::ResourceManager> goop::sys::gResourceManager =
+const std::unique_ptr<goop::sys::ResourceManager> goop::sys::gResourceManager =
 	std::make_unique<goop::sys::ResourceManager>();
 
 using namespace goop::sys;

@@ -21,8 +21,7 @@
 #include <vulkan/vulkan_core.h>
 
 #ifdef RENDERER_VULKAN
-goop::sys::platform::vulkan::Renderer_Vulkan gRendererVulkan;
-goop::sys::Renderer* goop::sys::gRenderer = &gRendererVulkan;
+const std::unique_ptr<goop::sys::Renderer> goop::sys::gRenderer = std::make_unique<goop::sys::platform::vulkan::Renderer_Vulkan>();
 #endif
 
 using namespace goop::sys::platform::vulkan;
