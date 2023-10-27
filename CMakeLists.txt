@@ -56,12 +56,12 @@ include_directories("libs/soloud/include")
 # Include STB headers
 include_directories("libs/stb/")
 
-# Recursively glob all .cpp and .h files in src/ directory
-file(GLOB_RECURSE SRC_FILES "goop/*.cpp" "goop/*.h")
+# Add engine source files
+file(GLOB_RECURSE ENGINE_SRC_FILES "goop/*.cpp" "goop/*.h")
 file(GLOB STB_IMAGE_HEADER "libs/stb/stb_image.h")
 
 # Define the C++ executable
-add_executable(${PROJECT_NAME} ${SRC_FILES} ${STB_VORBIS_SOURCE})
+add_executable(${PROJECT_NAME} ${ENGINE_SRC_FILES} ${STB_VORBIS_SOURCE})
 
 # define systems
 target_compile_definitions(${PROJECT_NAME} PRIVATE RENDERER_VULKAN=1)
@@ -109,8 +109,9 @@ else()
 endif()
 
 # Link the C++ executable
+add_subdirectory(app)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL2_LIBRARY} ${RUST_LIB} ${GLFW3_LIBRARY}
-	${Vulkan_LIBRARIES} ${ASSIMP_LIBRARY} SoLoud)
+	${Vulkan_LIBRARIES} ${ASSIMP_LIBRARY} SoLoud app_lib)
 # ##############################################################################
 
 # ##################### Build shaders

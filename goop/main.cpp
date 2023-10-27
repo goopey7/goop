@@ -3,9 +3,9 @@
 #include <exception>
 #include <iostream>
 
-int main()
+int main(int argc, char** argv)
 {
-	goop::Core core;
+	goop::Core core(argc, argv);
 
 	try
 	{
