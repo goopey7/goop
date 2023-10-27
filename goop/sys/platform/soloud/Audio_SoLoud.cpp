@@ -12,7 +12,7 @@ using namespace goop::sys::platform::soloud;
 
 int Audio_SoLoud::initialize()
 {
-	int sdl_result = SDL_Init(SDL_INIT_AUDIO);
+	int sdl_result = SDL_InitSubSystem(SDL_INIT_AUDIO);
 	int soloud_result = engine.init();
 	bIsInitialized = true;
 	return sdl_result || soloud_result;

@@ -36,5 +36,4 @@ class ResourceManager : public Subsystem
 	friend class goop::sys::platform::vulkan::Buffers;
 #endif
 };
-extern const std::unique_ptr<ResourceManager> gResourceManager;
 } // namespace goop::sys

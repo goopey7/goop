@@ -29,4 +29,5 @@ class Core
 
 	App* app;
 };
+extern const std::unique_ptr<sys::ResourceManager> rm;
 } // namespace goop

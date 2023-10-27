@@ -6,17 +6,15 @@
 
 using namespace goop;
 
-Core::Core(int argc, char** argv)
-	: app(createApp(argc, argv))
+const std::unique_ptr<goop::sys::ResourceManager> goop::rm =
+	std::make_unique<goop::sys::ResourceManager>();
+
+Core::Core(int argc, char** argv) : app(createApp(argc, argv))
 {
 	sys::gAudio->initialize();
 	sys::gWindow->initialize();
 	sys::gWindow->openWindow(800, 600, "Goop", GOOP_WINDOW_DEFAULT);
-	sys::gResourceManager->initialize();
-	//sys::gResourceManager->loadMesh("res/viking_room.obj");
-	//uint32_t beep_id = sys::gAudio->loadSfx("res/beep.wav");
-	//uint32_t lazer_id = sys::gAudio->loadSfx("res/blast.mp3");
-	//sys::gAudio->playSfx(0.f, beep_id);
+	rm->initialize();
 
 	app->init();
 }

@@ -3,9 +3,8 @@
 #include "Buffers.h"
 #include "Context.h"
 #include "Utils.h"
+#include <goop/Core.h>
 #include <cstring>
-#include <goop/sys/ResourceManager.h>
-
 #include <iostream>
 #include <set>
 #include <stdexcept>
@@ -21,12 +20,12 @@ Buffers::Buffers(Context* ctx) : ctx(ctx)
 			"mesh loader not initialized. mesh loader must be initialized before the renderer");
 	}
 	*/
-	if (!goop::sys::gResourceManager->getMeshLoader())
+	if (!goop::rm->getMeshLoader())
 	{
 		throw std::runtime_error(
 			"mesh loader not initialized. mesh loader must be initialized before the renderer");
 	}
-	const MeshImportData* mid = &goop::sys::gResourceManager->getMeshLoader()
+	const MeshImportData* mid = &goop::rm->getMeshLoader()
 									 ->getData()
 									 ->data()[goop::res::VIKING_ROOM];
 	vertexCount = mid->vertices.size();
