@@ -28,7 +28,7 @@ Buffers::Buffers(Context* ctx) : ctx(ctx)
 	}
 	const MeshImportData* mid = &goop::sys::gResourceManager->getMeshLoader()
 									 ->getData()
-									 ->data()[goop::res::mesh::VIKING_ROOM];
+									 ->data()[goop::res::VIKING_ROOM];
 	vertexCount = mid->vertices.size();
 	indexCount = mid->indices.size();
 	createVertexBuffer(mid);
