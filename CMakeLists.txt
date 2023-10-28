@@ -34,6 +34,9 @@ include_directories("libs/stb/")
 # include volk headers
 include_directories("libs/volk/")
 
+# include vulkan headers
+include_directories("libs/vulkan/include")
+
 # Add engine source files
 file(GLOB_RECURSE ENGINE_SRC_FILES "goop/*.cpp" "goop/*.h")
 file(GLOB STB_IMAGE_HEADER "libs/stb/stb_image.h")
@@ -94,7 +97,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE volk ${SDL2_LIBRARY} ${RUST_LIB} $
 # ##############################################################################
 
 # ##################### Build shaders
-find_program(GLSLC_EXECUTABLE glslc)
+
+if(WIN32)
+	find_program(GLSLC_EXECUTABLE NAMES glslc
+    PATHS ${CMAKE_SOURCE_DIR}/windows/glslc)
+else()
+	find_program(GLSLC_EXECUTABLE glslc)
+endif()
 if(NOT GLSLC_EXECUTABLE)
   message(
     FATAL_ERROR "glslc not found. Make sure it is installed and in your PATH.")
