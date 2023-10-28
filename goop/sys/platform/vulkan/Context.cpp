@@ -43,13 +43,21 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 
 Context::Context(bool enableValidationLayers, const uint8_t maxFramesInFlight)
 {
-	createInstance(enableValidationLayers);
-	createDebugMessenger(enableValidationLayers);
-	createSurface();
-	selectPhysicalDevice();
-	createLogicalDevice(enableValidationLayers);
-	createCommandPool();
-	createCommandBuffers(maxFramesInFlight);
+	if (volkInitialize() == VK_SUCCESS)
+	{
+		createInstance(enableValidationLayers);
+		volkLoadInstance(instance);
+		createDebugMessenger(enableValidationLayers);
+		createSurface();
+		selectPhysicalDevice();
+		createLogicalDevice(enableValidationLayers);
+		createCommandPool();
+		createCommandBuffers(maxFramesInFlight);
+	}
+	else
+	{
+		throw std::runtime_error("failed to initialize volk!");
+	}
 }
 
 Context::~Context()

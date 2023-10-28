@@ -9,7 +9,6 @@
 #include <goop/sys/Window.h>
 #include <limits>
 #include <stdexcept>
-#include <vulkan/vulkan_core.h>
 
 using namespace goop::sys::platform::vulkan;
 

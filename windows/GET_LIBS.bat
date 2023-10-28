@@ -1,32 +1,6 @@
 @echo off
 cd /d %~dp0
 
-:: Check for --no-vulkan option
-set "no_vulkan=0"
-for %%i in (%*) do (
-    if "%%i"=="--no-vulkan" (
-        set "no_vulkan=1"
-	goto :menu
-    )
-)
-
-:: Check for admin privileges
-NET FILE 1>NUL 2>NUL
-if %ERRORLEVEL% EQU 0 (
-    goto :run_script
-) else (
-    echo THIS SCRIPT REQUIRES ADMIN PRIVLEDGES TO RUN THE VULKANSDK INSTALLER
-	echo IF YOU DO NOT WANT TO INSTALL THE VULKANSDK, RUN THIS SCRIPT WITH THE --no-vulkan OPTION
-    echo press any key to request admin permissions
-    pause
-    echo Requesting admin privileges...
-    powershell Start-Process -FilePath "%0" -Verb RunAs
-    exit /b
-)
-
-:run_script
-echo Running with administrator privileges.
-
 :menu
 cls
 echo Select your Visual Studio version:
@@ -101,11 +75,4 @@ powershell -Command "Invoke-WebRequest 'https://drive.google.com/uc?export=downl
 powershell Expand-Archive assimp.zip
 powershell rm assimp.zip
 
-if "%no_vulkan%"=="0" (
-powershell -Command "Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.3.261.1/windows/VulkanSDK-1.3.261.1-Installer.exe" -OutFile VulkanSDK.exe"
-.\VulkanSDK.exe --root %~dp0\vulkan  --accept-licenses --default-answer --confirm-command install
-powershell rm VulkanSDK.exe
-) else (
-	echo Skipping Vulkan SDK installation.
-)
 pause

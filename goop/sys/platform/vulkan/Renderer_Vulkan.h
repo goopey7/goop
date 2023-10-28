@@ -14,7 +14,8 @@
 #include <memory>
 #include <optional>
 #include <vector>
-#include <vulkan/vulkan_core.h>
+
+#include <volk.h>
 
 #include <goop/sys/platform/vulkan/QueueFamilyIndices.h>
 #include <goop/sys/platform/vulkan/SwapchainSupportInfo.h>

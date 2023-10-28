@@ -2,7 +2,7 @@
 #pragma once
 
 #include <vector>
-#include <vulkan/vulkan.h>
+#include <volk.h>
 
 namespace goop::sys::platform::vulkan
 {

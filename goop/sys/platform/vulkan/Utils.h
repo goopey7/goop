@@ -2,7 +2,7 @@
 
 #include <goop/sys/platform/vulkan/Context.h>
 #include <stdexcept>
-#include <vulkan/vulkan_core.h>
+#include <volk.h>
 
 inline VkCommandBuffer beginSingleTimeCommands(goop::sys::platform::vulkan::Context* ctx)
 {

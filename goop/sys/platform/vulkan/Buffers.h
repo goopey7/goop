@@ -4,7 +4,7 @@
 #include <goop/sys/Vertex.h>
 #include <goop/sys/MeshLoader.h>
 #include <vector>
-#include <vulkan/vulkan.h>
+#include <volk.h>
 
 #include <assimp/Importer.hpp>
 

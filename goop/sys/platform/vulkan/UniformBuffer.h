@@ -4,7 +4,7 @@
 #include <goop/sys/platform/vulkan/Context.h>
 #include <cstdint>
 #include <vector>
-#include <vulkan/vulkan_core.h>
+#include <volk.h>
 #include <glm/glm.hpp>
 namespace goop::sys::platform::vulkan
 {

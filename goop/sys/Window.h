@@ -9,7 +9,7 @@
 class VkInstance;
 class VkSurfaceKHR;
 #else
-#include <vulkan/vulkan_core.h>
+#include <volk.h>
 #endif
 
 namespace goop

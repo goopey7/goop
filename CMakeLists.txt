@@ -8,31 +8,6 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 include_directories(".")
 
-# Find Vulkan package
-find_package(Vulkan REQUIRED)
-
-if (Vulkan_FOUND)
-    message(STATUS "Vulkan found")
-    message(STATUS "Vulkan_INCLUDE_DIRS = ${Vulkan_INCLUDE_DIRS}")
-    message(STATUS "Vulkan_LIBRARIES = ${Vulkan_LIBRARIES}")
-    message(STATUS "Vulkan_VERSION = ${Vulkan_VERSION}")
-
-    if (Vulkan_glslc_FOUND)
-        message(STATUS "glslc found")
-    endif()
-
-    if (Vulkan_glslangValidator_FOUND)
-        message(STATUS "glslangValidator found")
-    endif()
-
-	include_directories(${Vulkan_INCLUDE_DIRS})
-
-    # You can also use other Vulkan-related variables and libraries here
-else()
-    message(FATAL_ERROR "Vulkan not found")
-endif()
-
-
 # Find GLFW package
 find_package(GLFW3 REQUIRED)
 include_directories(${GLFW3_INCLUDE_DIR})
@@ -55,6 +30,9 @@ include_directories("libs/soloud/include")
 
 # Include STB headers
 include_directories("libs/stb/")
+
+# include volk headers
+include_directories("libs/volk/")
 
 # Add engine source files
 file(GLOB_RECURSE ENGINE_SRC_FILES "goop/*.cpp" "goop/*.h")
@@ -109,9 +87,10 @@ else()
 endif()
 
 # Link the C++ executable
+add_subdirectory(libs/volk)
 add_subdirectory(app)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL2_LIBRARY} ${RUST_LIB} ${GLFW3_LIBRARY}
-	${Vulkan_LIBRARIES} ${ASSIMP_LIBRARY} SoLoud app_lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE volk ${SDL2_LIBRARY} ${RUST_LIB} ${GLFW3_LIBRARY}
+	${ASSIMP_LIBRARY} SoLoud app_lib)
 # ##############################################################################
 
 # ##################### Build shaders

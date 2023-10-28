@@ -18,7 +18,8 @@
 #include <set>
 #include <stdexcept>
 #include <vector>
-#include <vulkan/vulkan_core.h>
+
+#include <volk.h>
 
 #ifdef RENDERER_VULKAN
 const std::unique_ptr<goop::sys::Renderer> goop::sys::gRenderer = std::make_unique<goop::sys::platform::vulkan::Renderer_Vulkan>();

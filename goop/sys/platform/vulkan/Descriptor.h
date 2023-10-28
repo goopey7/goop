@@ -4,7 +4,7 @@
 #include "Texture.h"
 #include "UniformBuffer.h"
 #include <vector>
-#include <vulkan/vulkan.h>
+#include <volk.h>
 
 namespace goop::sys::platform::vulkan
 {
