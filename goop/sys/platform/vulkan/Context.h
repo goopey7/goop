@@ -12,7 +12,7 @@ class Context
   public:
 	Context(const Context&) = delete;
 	Context& operator=(const Context&) = delete;
-	Context(bool enableValidationLayers, const uint8_t maxFramesInFlight);
+	Context(const uint8_t maxFramesInFlight);
 	~Context();
 
 	operator VkDevice() const { return device; }
@@ -28,11 +28,17 @@ class Context
 	const VkCommandBuffer* getCommandBuffer(uint8_t frame) const { return &commandBuffers[frame]; }
 
   private:
-	const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
 	const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
+#ifndef NDEBUG
+	const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
 	bool checkValidationLayerSupport();
 	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
-	std::vector<const char*> getRequiredExtensions(bool enableValidationLayers);
+	void createDebugMessenger();
+	VkDebugUtilsMessengerEXT debugMessenger;
+#endif
+
+	std::vector<const char*> getRequiredExtensions();
 
 	static VKAPI_ATTR VkBool32 VKAPI_CALL
 	debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -42,17 +48,15 @@ class Context
 	bool checkDeviceCompatibility(VkPhysicalDevice device);
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 
-	void createInstance(bool enableValidationLayers);
-	void createDebugMessenger(bool enableValidationLayers);
+	void createInstance();
 	void createSurface();
 	void selectPhysicalDevice();
-	void createLogicalDevice(bool enableValidationLayers);
+	void createLogicalDevice();
 
 	void createCommandPool();
 	void createCommandBuffers(uint8_t maxFramesInFlight);
 
 	VkInstance instance;
-	VkDebugUtilsMessengerEXT debugMessenger;
 	VkSurfaceKHR surface;
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 	VkDevice device;

@@ -12,6 +12,7 @@
 
 using namespace goop::sys::platform::vulkan;
 
+#ifndef NDEBUG
 VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
 									  const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
 									  const VkAllocationCallbacks* pAllocator,
@@ -40,17 +41,20 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 		func(instance, debugMessenger, pAllocator);
 	}
 }
+#endif
 
-Context::Context(bool enableValidationLayers, const uint8_t maxFramesInFlight)
+Context::Context(const uint8_t maxFramesInFlight)
 {
 	if (volkInitialize() == VK_SUCCESS)
 	{
-		createInstance(enableValidationLayers);
+		createInstance();
 		volkLoadInstance(instance);
-		createDebugMessenger(enableValidationLayers);
+#ifndef NDEBUG
+		createDebugMessenger();
+#endif
 		createSurface();
 		selectPhysicalDevice();
-		createLogicalDevice(enableValidationLayers);
+		createLogicalDevice();
 		createCommandPool();
 		createCommandBuffers(maxFramesInFlight);
 	}
@@ -64,20 +68,24 @@ Context::~Context()
 {
 	vkDestroyCommandPool(device, commandPool, nullptr);
 	vkDestroyDevice(device, nullptr);
+#ifndef NDEBUG
 	if (debugMessenger != VK_NULL_HANDLE)
 	{
 		DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 	}
+#endif
 	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyInstance(instance, nullptr);
 }
 
-void Context::createInstance(bool enableValidationLayers)
+void Context::createInstance()
 {
-	if (enableValidationLayers && !checkValidationLayerSupport())
+#ifndef NDEBUG
+	if (!checkValidationLayerSupport())
 	{
 		throw std::runtime_error("validation layers requested, but not available");
 	}
+#endif
 
 	VkApplicationInfo appInfo{};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -91,23 +99,21 @@ void Context::createInstance(bool enableValidationLayers)
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	createInfo.pApplicationInfo = &appInfo;
 
-	auto extensions = getRequiredExtensions(enableValidationLayers);
+	auto extensions = getRequiredExtensions();
 	createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
 	createInfo.ppEnabledExtensionNames = extensions.data();
 
 	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-	if (enableValidationLayers)
-	{
-		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-		createInfo.ppEnabledLayerNames = validationLayers.data();
 
-		populateDebugMessengerCreateInfo(debugCreateInfo);
-		createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
-	}
-	else
-	{
-		createInfo.enabledLayerCount = 0;
-	}
+#ifndef NDEBUG
+	createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+	createInfo.ppEnabledLayerNames = validationLayers.data();
+
+	populateDebugMessengerCreateInfo(debugCreateInfo);
+	createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+#else
+	createInfo.enabledLayerCount = 0;
+#endif
 
 	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
 	{
@@ -115,11 +121,9 @@ void Context::createInstance(bool enableValidationLayers)
 	}
 }
 
-void Context::createDebugMessenger(bool enableValidationLayers)
+#ifndef NDEBUG
+void Context::createDebugMessenger()
 {
-	if (!enableValidationLayers)
-		return;
-
 	VkDebugUtilsMessengerCreateInfoEXT createInfo;
 	populateDebugMessengerCreateInfo(createInfo);
 
@@ -128,6 +132,7 @@ void Context::createDebugMessenger(bool enableValidationLayers)
 		throw std::runtime_error("failed to setup debug messenger!");
 	}
 }
+#endif
 
 void Context::createSurface() { sys::gWindow->createVulkanSurface(instance, &surface); }
 
@@ -159,7 +164,7 @@ void Context::selectPhysicalDevice()
 	}
 }
 
-void Context::createLogicalDevice(bool enableValidationLayers)
+void Context::createLogicalDevice()
 {
 	QueueFamilyIndices indices = findQueueFamilies(physicalDevice, surface);
 
@@ -190,15 +195,12 @@ void Context::createLogicalDevice(bool enableValidationLayers)
 	createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-	if (enableValidationLayers)
-	{
-		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-		createInfo.ppEnabledLayerNames = validationLayers.data();
-	}
-	else
-	{
-		createInfo.enabledLayerCount = 0;
-	}
+#ifndef NDEBUG
+	createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+	createInfo.ppEnabledLayerNames = validationLayers.data();
+#else
+	createInfo.enabledLayerCount = 0;
+#endif
 
 	if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS)
 	{
@@ -209,6 +211,7 @@ void Context::createLogicalDevice(bool enableValidationLayers)
 	vkGetDeviceQueue(device, indices.present.value(), 0, &presentQueue);
 }
 
+#ifndef NDEBUG
 bool Context::checkValidationLayerSupport()
 {
 	uint32_t layerCount;
@@ -238,8 +241,9 @@ bool Context::checkValidationLayerSupport()
 
 	return true;
 }
+#endif
 
-std::vector<const char*> Context::getRequiredExtensions(bool enableValidationLayers)
+std::vector<const char*> Context::getRequiredExtensions()
 {
 	uint32_t glfwExtensionCount = 0;
 	const char** glfwExtensionNames;
@@ -248,14 +252,14 @@ std::vector<const char*> Context::getRequiredExtensions(bool enableValidationLay
 	std::vector<const char*> extensions(glfwExtensionNames,
 										glfwExtensionNames + glfwExtensionCount);
 
-	if (enableValidationLayers)
-	{
-		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-	}
+#ifndef NDEBUG
+	extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif
 
 	return extensions;
 }
 
+#ifndef NDEBUG
 void Context::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
 {
 	createInfo = {};
@@ -290,6 +294,7 @@ VkBool32 Context::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSe
 	}
 	return VK_FALSE;
 }
+#endif
 
 bool Context::checkDeviceCompatibility(VkPhysicalDevice device)
 {

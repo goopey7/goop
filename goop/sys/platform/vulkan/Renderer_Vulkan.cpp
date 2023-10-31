@@ -40,7 +40,7 @@ const bool enableValidationLayers = true;
 
 int Renderer_Vulkan::initialize()
 {
-	ctx = new Context(enableValidationLayers, MAX_FRAMES_IN_FLIGHT);
+	ctx = new Context(MAX_FRAMES_IN_FLIGHT);
 	swapchain = new Swapchain(ctx);
 	uniformBuffer = new UniformBuffer(ctx, MAX_FRAMES_IN_FLIGHT);
 	texture = new Texture(ctx, "res/viking_room.png");
