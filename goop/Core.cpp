@@ -11,9 +11,9 @@ const std::unique_ptr<goop::sys::ResourceManager> goop::rm =
 
 Core::Core(int argc, char** argv) : app(createApp(argc, argv))
 {
-	sys::gAudio->initialize();
 	sys::gWindow->initialize();
 	sys::gWindow->openWindow(800, 600, "Goop", GOOP_WINDOW_DEFAULT);
+	//sys::gRenderer->initialize();
 	rm->initialize();
 
 	app->init();
@@ -40,7 +40,7 @@ void Core::run()
 		last = now;
 	}
 
-	sys::gAudio->destroy();
 	sys::gRenderer->destroy();
 	sys::gWindow->destroy();
+	rm->destroy();
 }

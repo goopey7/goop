@@ -4,7 +4,7 @@
 #include <goop/App.h>
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Window.h>
-#include <goop/sys/Audio.h>
+#include <goop/sys/Sfx.h>
 #include <goop/sys/ResourceManager.h>
 #include <cstdint>
 #include <memory>

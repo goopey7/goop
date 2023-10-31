@@ -4,7 +4,7 @@
 #define RENDERER_VULKAN
 #include <goop/Core.h>
 #include <goop/sys/Renderer.h>
-#include <goop/sys/Audio.h>
+#include <goop/sys/Sfx.h>
 
 goop::App* goop::createApp(int argc, char** argv) { return new EditorApp(); }
 
@@ -17,9 +17,8 @@ void EditorApp::init()
 	goop::rm->loadMesh("res/viking_room.obj");
 	goop::sys::gRenderer->initialize(); // TODO once that's done move this to Core.cpp
 
-	uint32_t beep_id = goop::sys::gAudio->loadSfx("res/beep.wav");
-	uint32_t lazer_id = goop::sys::gAudio->loadSfx("res/blast.mp3");
-	goop::sys::gAudio->playSfx(0.f, lazer_id);
+	goop::rm->loadSfx("res/blast.mp3");
+	goop::rm->playSfx(goop::res::LAZER);
 }
 
 void EditorApp::update(float dt)
