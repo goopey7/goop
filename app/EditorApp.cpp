@@ -19,6 +19,14 @@ void EditorApp::init()
 
 	goop::rm->loadSfx("res/blast.mp3");
 	goop::rm->playSfx(goop::res::LAZER);
+
+	/* TODO -------------
+	   - store EVERYTHING contiguously - decide on a data structure - (week 7)
+	   - dynamically generate a header file for resource enums
+	   
+	   - End user should not worry about loading / unloading resources
+	   		- should be abstracted once ECS is in -- but sfx??
+   */
 }
 
 void EditorApp::update(float dt)
