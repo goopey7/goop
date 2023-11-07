@@ -7,4 +7,4 @@ project(app_lib)
 file(GLOB_RECURSE APP_SRC_FILES "*.cpp" "*.h")
 
 # Create a library for the "app" source files
-add_library(${PROJECT_NAME} SHARED ${APP_SRC_FILES})
+add_library(${PROJECT_NAME} ${APP_SRC_FILES})
