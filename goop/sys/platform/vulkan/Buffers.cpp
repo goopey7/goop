@@ -25,6 +25,8 @@ Buffers::Buffers(Context* ctx) : ctx(ctx)
 		throw std::runtime_error(
 			"mesh loader not initialized. mesh loader must be initialized before the renderer");
 	}
+
+	/*
 	const MeshImportData* mid = &goop::rm->getMeshLoader()
 									 ->getData()
 									 ->data()[goop::res::VIKING_ROOM];
@@ -32,14 +34,27 @@ Buffers::Buffers(Context* ctx) : ctx(ctx)
 	indexCount = mid->indices.size();
 	createVertexBuffer(mid);
 	createIndexBuffer(mid);
+	*/
 }
 
 Buffers::~Buffers()
 {
-	vkDestroyBuffer(*ctx, indexBuffer, nullptr);
-	vkFreeMemory(*ctx, indexBufferMemory, nullptr);
-	vkDestroyBuffer(*ctx, vertexBuffer, nullptr);
-	vkFreeMemory(*ctx, vertexBufferMemory, nullptr);
+	if (vertexBuffer != VK_NULL_HANDLE)
+	{
+		vkDestroyBuffer(*ctx, vertexBuffer, nullptr);
+	}
+	if (vertexBufferMemory != VK_NULL_HANDLE)
+	{
+		vkFreeMemory(*ctx, vertexBufferMemory, nullptr);
+	}
+	if (indexBuffer != VK_NULL_HANDLE)
+	{
+		vkDestroyBuffer(*ctx, indexBuffer, nullptr);
+	}
+	if (indexBufferMemory != VK_NULL_HANDLE)
+	{
+		vkFreeMemory(*ctx, indexBufferMemory, nullptr);
+	}
 }
 
 void Buffers::createVertexBuffer(const MeshImportData* mid)

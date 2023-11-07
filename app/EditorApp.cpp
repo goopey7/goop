@@ -14,7 +14,7 @@ void EditorApp::init()
 
 	// TODO dynamically load and unload meshes and handle instances etc
 	// TODO user should never be using goop::sys
-	goop::rm->loadMesh("res/viking_room.obj");
+	//goop::rm->loadMesh("res/viking_room.obj");
 	goop::sys::gRenderer->initialize(); // TODO once that's done move this to Core.cpp
 
 	goop::rm->loadSfx("res/blast.mp3");

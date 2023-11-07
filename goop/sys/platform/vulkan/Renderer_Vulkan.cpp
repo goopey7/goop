@@ -22,7 +22,8 @@
 #include <volk.h>
 
 #ifdef RENDERER_VULKAN
-const std::unique_ptr<goop::sys::Renderer> goop::sys::gRenderer = std::make_unique<goop::sys::platform::vulkan::Renderer_Vulkan>();
+const std::unique_ptr<goop::sys::Renderer> goop::sys::gRenderer =
+	std::make_unique<goop::sys::platform::vulkan::Renderer_Vulkan>();
 #endif
 
 using namespace goop::sys::platform::vulkan;
@@ -171,9 +172,12 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline());
 
-	VkDeviceSize offset = 0;
-	vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers->getVertexBuffer(), &offset);
-	vkCmdBindIndexBuffer(commandBuffer, buffers->getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+	if (buffers->getIndexCount() != 0)
+	{
+		VkDeviceSize offset = 0;
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers->getVertexBuffer(), &offset);
+		vkCmdBindIndexBuffer(commandBuffer, buffers->getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+	}
 
 	VkViewport viewport{};
 	viewport.x = 0.f;
@@ -193,7 +197,10 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 							pipeline->getPipelineLayout(), 0, 1, descriptor->getSet(currentFrame),
 							0, nullptr);
 
-	vkCmdDrawIndexed(commandBuffer, buffers->getIndexCount(), 1, 0, 0, 0);
+	if (buffers->getIndexCount() != 0)
+	{
+		vkCmdDrawIndexed(commandBuffer, buffers->getIndexCount(), 1, 0, 0, 0);
+	}
 
 	vkCmdEndRenderPass(commandBuffer);
 

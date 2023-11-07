@@ -33,10 +33,10 @@ class Buffers
 
 	// TODO driver developers recommend storing vertex and index buffers into a single VkBuffer and
 	// use offsets. That way the data is more cache friendly
-	VkBuffer vertexBuffer;
-	VkDeviceMemory vertexBufferMemory;
-	VkBuffer indexBuffer;
-	VkDeviceMemory indexBufferMemory;
+	VkBuffer vertexBuffer = VK_NULL_HANDLE;
+	VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
+	VkBuffer indexBuffer = VK_NULL_HANDLE;
+	VkDeviceMemory indexBufferMemory = VK_NULL_HANDLE;
 
 	uint32_t vertexCount = 0;
 	uint32_t indexCount = 0;
