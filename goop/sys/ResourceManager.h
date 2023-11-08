@@ -15,6 +15,7 @@ namespace goop::res
 	enum mesh
 	{
 		VIKING_ROOM,
+		COW,
 	};
 	enum sfx
 	{
@@ -36,11 +37,13 @@ class ResourceManager : public Subsystem
 
 	void playSfx(uint32_t id) const;
 
+	const MeshLoader* getMeshLoader() const { return meshLoader.get(); }
+	MeshLoader* getMeshLoader() { return meshLoader.get(); }
+
   private:
 	std::unique_ptr<MeshLoader> meshLoader;
 	std::unique_ptr<Sfx> sfx;
 
-	const MeshLoader* getMeshLoader() const { return meshLoader.get(); }
 
 #ifdef RENDERER_VULKAN
 	friend class goop::sys::platform::vulkan::Buffers;

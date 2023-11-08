@@ -14,8 +14,10 @@ void EditorApp::init()
 
 	// TODO dynamically load and unload meshes and handle instances etc
 	// TODO user should never be using goop::sys
-	//goop::rm->loadMesh("res/viking_room.obj");
-	goop::sys::gRenderer->initialize(); // TODO once that's done move this to Core.cpp
+	goop::rm->loadMesh("res/viking_room.obj");
+	goop::rm->loadMesh("res/cow.obj");
+	goop::sys::gRenderer->addToRenderQueue(goop::res::VIKING_ROOM, goop::rm->getMeshLoader());
+	goop::sys::gRenderer->addToRenderQueue(goop::res::COW, goop::rm->getMeshLoader());
 
 	goop::rm->loadSfx("res/blast.mp3");
 	goop::rm->playSfx(goop::res::LAZER);
@@ -31,5 +33,5 @@ void EditorApp::init()
 
 void EditorApp::update(float dt)
 {
-	std::cout << "delta time: " << dt << std::endl;
+	//std::cout << "delta time: " << dt << std::endl;
 }

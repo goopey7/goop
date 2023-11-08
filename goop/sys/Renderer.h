@@ -3,14 +3,22 @@
 
 #include "Subsystem.h"
 #include "Window.h"
+#include "goop/sys/MeshLoader.h"
+#include "goop/sys/ResourceManager.h"
+#include <queue>
 
 namespace goop::sys
 {
 class Renderer : public Subsystem
 {
   public:
-	virtual ~Renderer() = default;
+	Renderer() = default;
 	virtual void render() = 0;
+	virtual void addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader);
+
+  protected:
+	std::queue<goop::res::mesh> meshQueue;
+	MeshLoader* meshLoader;
 };
 
 // global pointer to goop's renderer

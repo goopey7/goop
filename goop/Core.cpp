@@ -13,9 +13,8 @@ Core::Core(int argc, char** argv) : app(createApp(argc, argv))
 {
 	sys::gWindow->initialize();
 	sys::gWindow->openWindow(800, 600, "Goop", GOOP_WINDOW_DEFAULT);
-	//sys::gRenderer->initialize();
 	rm->initialize();
-
+	sys::gRenderer->initialize();
 	app->init();
 }
 

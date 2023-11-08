@@ -50,6 +50,7 @@ int Renderer_Vulkan::initialize()
 	buffers = new Buffers(ctx);
 	sync = new Sync(ctx, MAX_FRAMES_IN_FLIGHT);
 	bIsInitialized = true;
+	updateBuffers = std::thread(&Renderer_Vulkan::updateBuffersThread, this);
 	return 0;
 }
 
@@ -70,6 +71,8 @@ int Renderer_Vulkan::destroy()
 
 void Renderer_Vulkan::render()
 {
+	buffers->swapBuffers();
+
 	// wait for the fence to signal that the frame is finished
 	sync->waitForFrame(currentFrame);
 
@@ -251,4 +254,38 @@ void Renderer_Vulkan::recreateSwapchain()
 
 	// the new swapchain will handle destroying the old one
 	swapchain = new Swapchain(ctx, swapchain);
+}
+
+void Renderer_Vulkan::addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader)
+{
+	Renderer::addToRenderQueue(mesh, meshLoader);
+}
+
+void Renderer_Vulkan::updateBuffersThread()
+{
+	while (bIsInitialized)
+	{
+		if (!meshQueue.empty() && meshLoader != nullptr)
+		{
+			MeshImportData combinedMesh;
+			while (!meshQueue.empty())
+			{
+				goop::res::mesh id = meshQueue.front();
+				MeshImportData mesh = (*meshLoader->getData())[id];
+
+				for (uint32_t i = 0; i < mesh.indices.size(); i++)
+				{
+					mesh.indices[i] += combinedMesh.vertices.size();
+				}
+
+				combinedMesh.vertices.insert(combinedMesh.vertices.end(), mesh.vertices.begin(),
+											 mesh.vertices.end());
+				combinedMesh.indices.insert(combinedMesh.indices.end(), mesh.indices.begin(),
+											mesh.indices.end());
+				meshQueue.pop();
+			}
+			buffers->updateBuffers(combinedMesh.vertices.data(), combinedMesh.vertices.size(),
+								   combinedMesh.indices.data(), combinedMesh.indices.size());
+		}
+	}
 }

@@ -4,27 +4,30 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <cassert>
-#include <unordered_map>
 #include <iostream>
+#include <unordered_map>
 
 using namespace goop::sys::platform::assimp;
 
-int MeshLoader_Assimp::initialize() { 
+int MeshLoader_Assimp::initialize()
+{
 	MeshLoader::initialize();
 	bIsInitialized = true;
-	return 0; }
+	return 0;
+}
 
-int MeshLoader_Assimp::destroy() { 
+int MeshLoader_Assimp::destroy()
+{
 	bIsInitialized = false;
-	return 0; }
+	return 0;
+}
 
 bool MeshLoader_Assimp::load(const std::string& path)
 {
 	int index = data->size();
 
-	const aiScene* scene =
-		importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs |
-													 aiProcess_JoinIdenticalVertices);
+	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs |
+													   aiProcess_JoinIdenticalVertices);
 	const auto mesh = scene->mMeshes[0];
 
 	// aiProcess_JoinIdenticalVertices should have taken care of this
@@ -40,7 +43,10 @@ bool MeshLoader_Assimp::load(const std::string& path)
 	{
 		Vertex vertex{};
 		vertex.pos = {mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
-		vertex.texCoord = {mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y};
+		if (mesh->mTextureCoords[0] != nullptr)
+		{
+			vertex.texCoord = {mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y};
+		}
 
 		if (uniqueVertices.count(vertex) == 0)
 		{
@@ -55,7 +61,7 @@ bool MeshLoader_Assimp::load(const std::string& path)
 	}
 	mid->vertices.resize(mid->vertices.size());
 
-	for (uint32_t i=0; i < mid->vertices.size(); i++)
+	for (uint32_t i = 0; i < mid->vertices.size(); i++)
 	{
 		for (uint32_t j = 0; j < mid->vertices.size(); j++)
 		{
@@ -83,11 +89,6 @@ bool MeshLoader_Assimp::load(const std::string& path)
 	return true;
 }
 
-MeshLoader_Assimp::MeshLoader_Assimp()
-{
-}
+MeshLoader_Assimp::MeshLoader_Assimp() {}
 
-MeshLoader_Assimp::~MeshLoader_Assimp()
-{
-}
-
+MeshLoader_Assimp::~MeshLoader_Assimp() {}

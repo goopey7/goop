@@ -13,6 +13,7 @@
 #include <goop/sys/platform/vulkan/Texture.h>
 #include <memory>
 #include <optional>
+#include <thread>
 #include <vector>
 
 #include <volk.h>
@@ -31,9 +32,10 @@ class Renderer_Vulkan : public Renderer
 
 	// Renderer interface
 	void render() final;
+	void addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader) final;
+	void updateBuffersThread();
 
   private:
-
 	std::vector<const char*> getRequiredExtensions();
 	VkExtent2D selectExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
@@ -53,5 +55,8 @@ class Renderer_Vulkan : public Renderer
 
 	uint32_t currentFrame = 0;
 	bool frameBufferResized = false;
+
+	std::thread updateBuffers;
+	std::mutex meshQueueMutex;
 };
 } // namespace goop::sys::platform::vulkan
