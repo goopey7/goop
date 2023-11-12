@@ -8,7 +8,7 @@
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 
-#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui_impl_glfw.h>
 
 #ifdef WINDOW_GLFW
 const std::unique_ptr<goop::sys::Window> goop::sys::gWindow =

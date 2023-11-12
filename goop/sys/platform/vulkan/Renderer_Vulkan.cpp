@@ -11,7 +11,7 @@
 #include <cstring>
 #include <fstream>
 #include <imgui.h>
-#include <imgui/backends/imgui_impl_vulkan.h>
+#include <imgui_impl_vulkan.h>
 
 #define GLM_FORCE_RADIANS
 // Vulkan uses a range of 0 to 1 for depth, not -1 to 1 like OpenGL
