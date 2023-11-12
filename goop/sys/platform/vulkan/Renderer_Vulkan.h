@@ -14,6 +14,7 @@
 #include <memory>
 #include <optional>
 #include <thread>
+#include <mutex>
 #include <vector>
 
 #include <volk.h>

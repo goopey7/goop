@@ -43,10 +43,9 @@ include_directories("libs/imgui/")
 # Add engine source files
 file(GLOB_RECURSE ENGINE_SRC_FILES "goop/*.cpp" "goop/*.h")
 file(GLOB STB_IMAGE_HEADER "libs/stb/stb_image.h")
-file(GLOB IMGUI_FILES "libs/imgui/*.h" "libs/imgui/*.cpp")
 
 # Define the C++ executable
-add_executable(${PROJECT_NAME} ${ENGINE_SRC_FILES} ${STB_VORBIS_SOURCE} ${IMGUI_FILES})
+add_executable(${PROJECT_NAME} ${ENGINE_SRC_FILES} ${STB_VORBIS_SOURCE})
 
 # define systems
 target_compile_definitions(${PROJECT_NAME} PRIVATE RENDERER_VULKAN=1)
@@ -96,8 +95,9 @@ endif()
 # Link the C++ executable
 add_subdirectory(libs/volk)
 add_subdirectory(app)
+add_subdirectory(libs/imgui)
 target_link_libraries(${PROJECT_NAME} PRIVATE volk ${SDL2_LIBRARY} ${RUST_LIB} ${GLFW3_LIBRARY}
-	${ASSIMP_LIBRARY} SoLoud app_lib)
+	${ASSIMP_LIBRARY} SoLoud imgui_lib app_lib)
 # ##############################################################################
 
 # ##################### Build shaders

@@ -3,7 +3,7 @@
 
 #include <goop/sys/Window.h>
 
-class GLFWwindow;
+struct GLFWwindow;
 
 namespace goop::sys::platform::glfw
 {
