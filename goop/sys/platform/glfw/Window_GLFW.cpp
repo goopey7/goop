@@ -26,6 +26,7 @@ int Window_GLFW::initialize()
 
 int Window_GLFW::destroy()
 {
+	ImGui_ImplGlfw_Shutdown();
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	bIsInitialized = false;

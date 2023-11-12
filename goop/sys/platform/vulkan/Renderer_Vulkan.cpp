@@ -108,8 +108,8 @@ int Renderer_Vulkan::initialize()
 int Renderer_Vulkan::destroy()
 {
 	vkDeviceWaitIdle(*ctx);
-	vkDestroyDescriptorPool(*ctx, imguiPool, nullptr);
 	ImGui_ImplVulkan_Shutdown();
+	vkDestroyDescriptorPool(*ctx, imguiPool, nullptr);
 	delete texture;
 	delete buffers;
 	delete swapchain;
