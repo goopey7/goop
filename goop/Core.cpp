@@ -14,6 +14,8 @@ Core::Core(int argc, char** argv) : app(createApp(argc, argv))
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+	auto& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	sys::gWindow->initialize();
 	sys::gWindow->openWindow(800, 600, "Goop", GOOP_WINDOW_DEFAULT);
 	rm->initialize();
@@ -40,6 +42,7 @@ void Core::run()
 
 		sys::gRenderer->beginFrame();
 		ImGui::NewFrame();
+
 		ImGui::ShowDemoWindow();
 
 		ImGui::Render();
