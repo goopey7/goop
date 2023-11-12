@@ -37,6 +37,12 @@ void Core::run()
 
 		app->update(dt);
 
+
+		sys::gRenderer->beginFrame();
+		ImGui::NewFrame();
+		ImGui::ShowDemoWindow();
+
+		ImGui::Render();
 		sys::gRenderer->render();
 
 		last = now;

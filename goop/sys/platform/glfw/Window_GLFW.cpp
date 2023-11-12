@@ -73,4 +73,8 @@ void Window_GLFW::waitEvents() { glfwWaitEvents(); }
 
 bool Window_GLFW::shouldClose() { return glfwWindowShouldClose(window); }
 
-void Window_GLFW::pollEvents() { glfwPollEvents(); }
+void Window_GLFW::pollEvents()
+{
+	glfwPollEvents();
+	ImGui_ImplGlfw_NewFrame();
+}

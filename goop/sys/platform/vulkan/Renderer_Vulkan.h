@@ -31,6 +31,7 @@ class Renderer_Vulkan : public Renderer
 	int destroy() final;
 
 	// Renderer interface
+	void beginFrame() final;
 	void render() final;
 	void addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader) final;
 	void updateBuffersThread();

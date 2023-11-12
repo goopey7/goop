@@ -122,6 +122,11 @@ int Renderer_Vulkan::destroy()
 	return 0;
 }
 
+void Renderer_Vulkan::beginFrame()
+{
+	ImGui_ImplVulkan_NewFrame();
+}
+
 void Renderer_Vulkan::render()
 {
 	buffers->swapBuffers();
@@ -257,6 +262,8 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 	{
 		vkCmdDrawIndexed(commandBuffer, buffers->getIndexCount(), 1, 0, 0, 0);
 	}
+
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 
 	vkCmdEndRenderPass(commandBuffer);
 
