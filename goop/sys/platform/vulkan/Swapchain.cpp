@@ -282,4 +282,3 @@ void Swapchain::createDepthResources()
 
 	depthImageView = createImageView(ctx, depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 }
-

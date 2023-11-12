@@ -2,7 +2,9 @@
 #pragma once
 
 #include <vector>
-#include <volk.h>
+
+#define VK_NO_PROTOTYPES
+#include <vulkan/vulkan.h>
 
 namespace goop::sys::platform::vulkan
 {
@@ -19,6 +21,7 @@ class Context
 	operator VkInstance() const { return instance; }
 	operator VkPhysicalDevice() const { return physicalDevice; }
 
+	VkInstance getInstance() const { return instance; }
 	VkDevice getDevice() const { return device; }
 	VkPhysicalDevice getPhysicalDevice() const { return physicalDevice; }
 	VkSurfaceKHR getSurface() const { return surface; }
@@ -56,12 +59,12 @@ class Context
 	void createCommandPool();
 	void createCommandBuffers(uint8_t maxFramesInFlight);
 
-	VkInstance instance;
-	VkSurfaceKHR surface;
+	VkInstance instance = VK_NULL_HANDLE;
+	VkSurfaceKHR surface = VK_NULL_HANDLE;
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-	VkDevice device;
-	VkQueue graphicsQueue;
-	VkQueue presentQueue;
+	VkDevice device = VK_NULL_HANDLE;
+	VkQueue graphicsQueue = VK_NULL_HANDLE;
+	VkQueue presentQueue = VK_NULL_HANDLE;
 
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;

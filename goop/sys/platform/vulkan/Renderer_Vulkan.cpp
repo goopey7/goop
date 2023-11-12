@@ -3,11 +3,15 @@
 #include "Renderer_Vulkan.h"
 #include "Utils.h"
 #include "goop/sys/MeshLoader.h"
+#include "goop/sys/platform/vulkan/QueueFamilyIndices.h"
+#include "goop/sys/platform/vulkan/SwapchainSupportInfo.h"
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
+#include <imgui.h>
+#include <imgui/backends/imgui_impl_vulkan.h>
 
 #define GLM_FORCE_RADIANS
 // Vulkan uses a range of 0 to 1 for depth, not -1 to 1 like OpenGL
@@ -39,6 +43,52 @@ const bool enableValidationLayers = false;
 const bool enableValidationLayers = true;
 #endif
 
+void init_imgui(Context* ctx, VkDescriptorPool& imguiPool, VkRenderPass renderPass)
+{
+	VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
+										 {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+										 {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
+										 {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
+										 {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
+										 {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
+										 {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
+										 {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
+										 {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+										 {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+										 {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}};
+
+	VkDescriptorPoolCreateInfo pool_info = {};
+	pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+	pool_info.maxSets = 1000;
+	pool_info.poolSizeCount = std::size(pool_sizes);
+	pool_info.pPoolSizes = pool_sizes;
+	if (vkCreateDescriptorPool(*ctx, &pool_info, nullptr, &imguiPool) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to create imgui descriptor pool!");
+	}
+
+	ImGui_ImplVulkan_InitInfo init_info{};
+	init_info.DescriptorPool = imguiPool;
+	SwapchainSupportInfo swapchainSupport =
+		getSwapchainSupportInfo(ctx->getPhysicalDevice(), ctx->getSurface());
+	init_info.MinImageCount = swapchainSupport.capabilities.minImageCount;
+	init_info.ImageCount = init_info.MinImageCount;
+	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+
+	auto funcLoader = [](const char* funcName, void* ctx_ptr)
+	{
+		Context* ctx = reinterpret_cast<Context*>(ctx_ptr);
+		PFN_vkVoidFunction instanceAddr =
+			vkGetInstanceProcAddr(ctx->getInstance(), funcName);
+		PFN_vkVoidFunction deviceAddr = vkGetDeviceProcAddr(ctx->getDevice(), funcName);
+		return deviceAddr ? deviceAddr : instanceAddr;
+	};
+	const bool funcsLoaded = ImGui_ImplVulkan_LoadFunctions(funcLoader, ctx);
+
+	ImGui_ImplVulkan_Init(ctx, &init_info, renderPass);
+}
+
 int Renderer_Vulkan::initialize()
 {
 	ctx = new Context(MAX_FRAMES_IN_FLIGHT);
@@ -51,12 +101,15 @@ int Renderer_Vulkan::initialize()
 	sync = new Sync(ctx, MAX_FRAMES_IN_FLIGHT);
 	bIsInitialized = true;
 	updateBuffers = std::thread(&Renderer_Vulkan::updateBuffersThread, this);
+	init_imgui(ctx, imguiPool, swapchain->getRenderPass());
 	return 0;
 }
 
 int Renderer_Vulkan::destroy()
 {
 	vkDeviceWaitIdle(*ctx);
+	vkDestroyDescriptorPool(*ctx, imguiPool, nullptr);
+	ImGui_ImplVulkan_Shutdown();
 	delete texture;
 	delete buffers;
 	delete swapchain;

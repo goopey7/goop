@@ -2,6 +2,7 @@
 #include "Core.h"
 
 #include <chrono>
+#include <imgui.h>
 #include <rustlib.h>
 
 using namespace goop;
@@ -11,6 +12,8 @@ const std::unique_ptr<goop::sys::ResourceManager> goop::rm =
 
 Core::Core(int argc, char** argv) : app(createApp(argc, argv))
 {
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
 	sys::gWindow->initialize();
 	sys::gWindow->openWindow(800, 600, "Goop", GOOP_WINDOW_DEFAULT);
 	rm->initialize();

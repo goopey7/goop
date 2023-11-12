@@ -8,8 +8,11 @@
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 
+#include <imgui/backends/imgui_impl_glfw.h>
+
 #ifdef WINDOW_GLFW
-const std::unique_ptr<goop::sys::Window> goop::sys::gWindow = std::make_unique<goop::sys::platform::glfw::Window_GLFW>();
+const std::unique_ptr<goop::sys::Window> goop::sys::gWindow =
+	std::make_unique<goop::sys::platform::glfw::Window_GLFW>();
 #endif
 
 using namespace goop::sys::platform::glfw;
@@ -34,8 +37,13 @@ int Window_GLFW::openWindow(uint32_t width, uint32_t height, const char* title, 
 #ifndef RENDERER_OPENGL
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 #endif
+
 	glfwWindowHint(GLFW_RESIZABLE, (flags & GOOP_WINDOW_RESIZABLE) ? GLFW_TRUE : GLFW_FALSE);
 	window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+
+#ifdef RENDERER_VULKAN
+	ImGui_ImplGlfw_InitForVulkan(window, true);
+#endif
 	return 0;
 }
 
@@ -61,18 +69,8 @@ void Window_GLFW::getFramebufferSize(int* width, int* height)
 	glfwGetFramebufferSize(window, width, height);
 }
 
-void Window_GLFW::waitEvents()
-{
-	glfwWaitEvents();
-}
+void Window_GLFW::waitEvents() { glfwWaitEvents(); }
 
-bool Window_GLFW::shouldClose()
-{
-	return glfwWindowShouldClose(window);
-}
+bool Window_GLFW::shouldClose() { return glfwWindowShouldClose(window); }
 
-void Window_GLFW::pollEvents()
-{
-	glfwPollEvents();
-}
-
+void Window_GLFW::pollEvents() { glfwPollEvents(); }

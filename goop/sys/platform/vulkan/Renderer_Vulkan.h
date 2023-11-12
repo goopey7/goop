@@ -58,5 +58,6 @@ class Renderer_Vulkan : public Renderer
 
 	std::thread updateBuffers;
 	std::mutex meshQueueMutex;
+	VkDescriptorPool imguiPool;
 };
 } // namespace goop::sys::platform::vulkan

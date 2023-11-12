@@ -2,6 +2,7 @@
 
 #include "Context.h"
 #include <cstring>
+#include <volk.h>
 #include <goop/sys/Window.h>
 #include <iostream>
 #include <set>
