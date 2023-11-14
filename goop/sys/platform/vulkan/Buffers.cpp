@@ -13,11 +13,6 @@ using namespace goop::sys::platform::vulkan;
 
 Buffers::Buffers(Context* ctx) : ctx(ctx)
 {
-	if (!goop::rm->getMeshLoader())
-	{
-		throw std::runtime_error(
-			"mesh loader not initialized. mesh loader must be initialized before the renderer");
-	}
 }
 
 void Buffers::swapBuffers()

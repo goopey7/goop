@@ -1,4 +1,5 @@
 #include "EditorApp.h"
+#include <imgui.h>
 #include <iostream>
 
 #define RENDERER_VULKAN
@@ -35,3 +36,11 @@ void EditorApp::update(float dt)
 {
 	//std::cout << "delta time: " << dt << std::endl;
 }
+
+void EditorApp::gui()
+{
+	ImGui::Begin("Editor");
+	ImGui::Text("Hello from the editor!");
+	ImGui::End();
+}
+

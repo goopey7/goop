@@ -18,8 +18,8 @@ Core::Core(int argc, char** argv) : app(createApp(argc, argv))
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	sys::gWindow->initialize();
 	sys::gWindow->openWindow(800, 600, "Goop", GOOP_WINDOW_DEFAULT);
-	rm->initialize();
 	sys::gRenderer->initialize();
+	rm->initialize();
 	app->init();
 }
 
@@ -39,11 +39,10 @@ void Core::run()
 
 		app->update(dt);
 
-
 		sys::gRenderer->beginFrame();
 		ImGui::NewFrame();
 
-		ImGui::ShowDemoWindow();
+		app->gui();
 
 		ImGui::Render();
 		sys::gRenderer->render();
