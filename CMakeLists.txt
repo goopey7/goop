@@ -39,6 +39,7 @@ include_directories("libs/vulkan/include")
 
 # include imgui headers
 include_directories("libs/imgui/")
+include_directories("libs/imgui/backends")
 
 # Add engine source files
 file(GLOB_RECURSE ENGINE_SRC_FILES "goop/*.cpp" "goop/*.h")

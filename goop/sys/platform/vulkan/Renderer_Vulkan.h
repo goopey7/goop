@@ -38,6 +38,7 @@ class Renderer_Vulkan : public Renderer
 	void updateBuffersThread();
 
   private:
+	void initImGui();
 	std::vector<const char*> getRequiredExtensions();
 	VkExtent2D selectExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 

@@ -16,6 +16,8 @@ Core::Core(int argc, char** argv) : app(createApp(argc, argv))
 	ImGui::CreateContext();
 	auto& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 	sys::gWindow->initialize();
 	sys::gWindow->openWindow(800, 600, "Goop", GOOP_WINDOW_DEFAULT);
 	sys::gRenderer->initialize();
@@ -46,6 +48,9 @@ void Core::run()
 
 		ImGui::Render();
 		sys::gRenderer->render();
+
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
 
 		last = now;
 	}

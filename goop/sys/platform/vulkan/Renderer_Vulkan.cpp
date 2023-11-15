@@ -43,7 +43,7 @@ const bool enableValidationLayers = false;
 const bool enableValidationLayers = true;
 #endif
 
-void init_imgui(Context* ctx, VkDescriptorPool& imguiPool, VkRenderPass renderPass)
+void Renderer_Vulkan::initImGui()
 {
 	VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
 										 {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
@@ -86,7 +86,7 @@ void init_imgui(Context* ctx, VkDescriptorPool& imguiPool, VkRenderPass renderPa
 	};
 	const bool funcsLoaded = ImGui_ImplVulkan_LoadFunctions(funcLoader, ctx);
 
-	ImGui_ImplVulkan_Init(ctx, &init_info, renderPass);
+	ImGui_ImplVulkan_Init(ctx, &init_info, swapchain->getRenderPass());
 }
 
 int Renderer_Vulkan::initialize()
@@ -101,7 +101,7 @@ int Renderer_Vulkan::initialize()
 	sync = new Sync(ctx, MAX_FRAMES_IN_FLIGHT);
 	bIsInitialized = true;
 	updateBuffers = std::thread(&Renderer_Vulkan::updateBuffersThread, this);
-	init_imgui(ctx, imguiPool, swapchain->getRenderPass());
+	initImGui();
 	return 0;
 }
 
