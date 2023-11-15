@@ -48,6 +48,11 @@ void Core::run()
 		ImGui::ShowDemoWindow();
 
 		ImGui::Render();
+
+		if (sys::gRenderer->isMeshQueueEmpty())
+		{
+			app->render();
+		}
 		sys::gRenderer->render();
 
 		ImGui::UpdatePlatformWindows();

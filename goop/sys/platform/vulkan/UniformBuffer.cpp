@@ -7,8 +7,8 @@
 
 using namespace goop::sys::platform::vulkan;
 
-UniformBuffer::UniformBuffer(Context* ctx, uint8_t maxFramesInFlight)
-	: ctx(ctx), maxFramesInFlight(maxFramesInFlight)
+UniformBuffer::UniformBuffer(Context* ctx)
+	: ctx(ctx), maxFramesInFlight(ctx->getMaxFramesInFlight())
 {
 	createUniformBuffers();
 }

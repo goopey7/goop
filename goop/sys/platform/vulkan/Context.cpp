@@ -44,7 +44,7 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 }
 #endif
 
-Context::Context(const uint8_t maxFramesInFlight)
+Context::Context()
 {
 	if (volkInitialize() == VK_SUCCESS)
 	{

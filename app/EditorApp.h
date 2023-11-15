@@ -6,4 +6,8 @@ public:
 	void init() final;
 	void update(float dt) final;
 	void gui() final;
+	void render() final;
+private:
+	bool shouldSpawnHouse = false;
+	bool shouldSpawnCow = false;
 };

@@ -6,8 +6,8 @@
 
 using namespace goop::sys::platform::vulkan;
 
-Sync::Sync(Context* ctx, uint8_t maxFramesInFlight)
-	: ctx(ctx), maxFramesInFlight(maxFramesInFlight)
+Sync::Sync(Context* ctx)
+	: ctx(ctx), maxFramesInFlight(ctx->getMaxFramesInFlight())
 {
 	createSyncObjects();
 }

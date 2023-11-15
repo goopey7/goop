@@ -18,34 +18,40 @@ class Buffers
 	Buffers(Context* ctx);
 	~Buffers();
 
-	const VkBuffer* getVertexBuffer() const { return &vertexBuffer; }
-	VkBuffer getIndexBuffer() const { return indexBuffer; }
-	uint32_t getVertexCount() const { return vertexCount; }
-	uint32_t getIndexCount() const { return indexCount; }
+	const VkBuffer* getVertexBuffer(uint32_t currentFrame) const
+	{
+		return &vertexBuffers[currentFrame];
+	}
+	VkBuffer getIndexBuffer(uint32_t currentFrame) const { return indexBuffers[currentFrame]; }
+	uint32_t getVertexCount(uint32_t currentFrame) const { return vertexCounts[currentFrame]; }
+	uint32_t getIndexCount(uint32_t currentFrame) const { return indexCounts[currentFrame]; }
 
-	void swapBuffers();
-	void updateBuffers(const Vertex* vertices, uint32_t vertexCount, const uint32_t* indices,
-					   uint32_t indexCount);
+	void swapBuffers(uint32_t currentFrame);
+	void updateBuffers(uint32_t currentFrame, const Vertex* vertices, uint32_t vertexCount,
+					   const uint32_t* indices, uint32_t indexCount);
 	bool isReadyToSwap() const { return bReadyToSwap; }
 
   private:
-	void createVertexBuffer(const Vertex* vertices, uint32_t vertexCount);
-	void createIndexBuffer(const uint32_t* indices, uint32_t indexCount);
+	void createVertexBuffer(uint32_t currentFrame, const Vertex* vertices, uint32_t vertexCount);
+	void createIndexBuffer(uint32_t currentFrame, const uint32_t* indices, uint32_t indexCount);
 	void clearBuffers();
 
 	// TODO driver developers recommend storing vertex and index buffers into a single VkBuffer and
 	// use offsets. That way the data is more cache friendly
-	VkBuffer vertexBuffer = VK_NULL_HANDLE;
-	VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
-	VkBuffer indexBuffer = VK_NULL_HANDLE;
-	VkDeviceMemory indexBufferMemory = VK_NULL_HANDLE;
+	std::vector<VkBuffer> vertexBuffers;
+	std::vector<VkDeviceMemory> vertexBufferMemories;
+	std::vector<VkBuffer> indexBuffers;
+	std::vector<VkDeviceMemory> indexBufferMemories;
 
-	VkBuffer vertexBufferStaging = VK_NULL_HANDLE;
-	VkDeviceMemory vertexBufferMemoryStaging = VK_NULL_HANDLE;
-	VkBuffer indexBufferStaging = VK_NULL_HANDLE;
-	VkDeviceMemory indexBufferMemoryStaging = VK_NULL_HANDLE;
-	uint32_t vertexCount = 0;
-	uint32_t indexCount = 0;
+	std::vector<VkBuffer> vertexBufferStaging;
+	std::vector<VkDeviceMemory> vertexBufferMemoryStaging;
+	std::vector<VkBuffer> indexBufferStaging;
+	std::vector<VkDeviceMemory> indexBufferMemoryStaging;
+
+	std::vector<uint32_t> vertexCounts;
+	std::vector<uint32_t> indexCounts;
+	std::vector<uint32_t> oldVertexCounts;
+	std::vector<uint32_t> oldIndexCounts;
 
 	VkDeviceSize vertexBufferSize = 0;
 	VkDeviceSize indexBufferSize = 0;

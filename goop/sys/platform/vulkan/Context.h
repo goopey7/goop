@@ -14,7 +14,7 @@ class Context
   public:
 	Context(const Context&) = delete;
 	Context& operator=(const Context&) = delete;
-	Context(const uint8_t maxFramesInFlight);
+	Context();
 	~Context();
 
 	operator VkDevice() const { return device; }
@@ -29,6 +29,7 @@ class Context
 	VkQueue getPresentQueue() const { return presentQueue; }
 	VkCommandPool getCommandPool() const { return commandPool; }
 	const VkCommandBuffer* getCommandBuffer(uint8_t frame) const { return &commandBuffers[frame]; }
+	const uint8_t getMaxFramesInFlight() const { return maxFramesInFlight; }
 
   private:
 	const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
@@ -68,5 +69,8 @@ class Context
 
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
+
+	const uint8_t maxFramesInFlight = 2;
+
 };
 } // namespace goop::sys::platform::vulkan

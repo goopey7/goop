@@ -19,7 +19,7 @@ class UniformBuffer
   public:
 	UniformBuffer(const UniformBuffer&) = delete;
 	UniformBuffer& operator=(const UniformBuffer&) = delete;
-	UniformBuffer(Context* ctx, uint8_t maxFramesInFlight);
+	UniformBuffer(Context* ctx);
 	~UniformBuffer();
 
 	void update(uint8_t currentFrame, const UniformBufferObject& ubo);

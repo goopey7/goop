@@ -12,7 +12,7 @@ class Sync
   public:
 	Sync(const Sync&) = delete;
 	Sync& operator=(const Sync&) = delete;
-	Sync(Context* ctx, uint8_t maxFramesInFlight);
+	Sync(Context* ctx);
 	~Sync();
 
 	inline VkSemaphore& getImageAvailableSemaphore(uint8_t index)

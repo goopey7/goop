@@ -13,37 +13,90 @@ using namespace goop::sys::platform::vulkan;
 
 Buffers::Buffers(Context* ctx) : ctx(ctx)
 {
+	vertexBuffers.resize(ctx->getMaxFramesInFlight());
+	vertexBufferMemories.resize(ctx->getMaxFramesInFlight());
+	indexBuffers.resize(ctx->getMaxFramesInFlight());
+	indexBufferMemories.resize(ctx->getMaxFramesInFlight());
+
+	vertexBufferStaging.resize(ctx->getMaxFramesInFlight());
+	vertexBufferMemoryStaging.resize(ctx->getMaxFramesInFlight());
+	indexBufferStaging.resize(ctx->getMaxFramesInFlight());
+	indexBufferMemoryStaging.resize(ctx->getMaxFramesInFlight());
+
+	vertexCounts.resize(ctx->getMaxFramesInFlight());
+	indexCounts.resize(ctx->getMaxFramesInFlight());
+	oldVertexCounts.resize(ctx->getMaxFramesInFlight());
+	oldIndexCounts.resize(ctx->getMaxFramesInFlight());
+
+	for (size_t i = 0; i < oldVertexCounts.size(); i++)
+	{
+		oldVertexCounts[i] = -1;
+		oldIndexCounts[i] = -1;
+	}
 }
 
-void Buffers::swapBuffers()
+void Buffers::swapBuffers(uint32_t currentFrame)
 {
 	if (!bReadyToSwap)
 	{
 		return;
 	}
-	vertexBuffer = vertexBufferStaging;
-	vertexBufferMemory = vertexBufferMemoryStaging;
-	indexBuffer = indexBufferStaging;
-	indexBufferMemory = indexBufferMemoryStaging;
 
-	vertexBufferStaging = VK_NULL_HANDLE;
-	vertexBufferMemoryStaging = VK_NULL_HANDLE;
-	indexBufferStaging = VK_NULL_HANDLE;
-	indexBufferMemoryStaging = VK_NULL_HANDLE;
+	if (vertexBuffers[currentFrame] != VK_NULL_HANDLE)
+	{
+		vkDestroyBuffer(*ctx, vertexBuffers[currentFrame], nullptr);
+	}
+	if (vertexBufferMemories[currentFrame] != VK_NULL_HANDLE)
+	{
+		vkFreeMemory(*ctx, vertexBufferMemories[currentFrame], nullptr);
+	}
+	if (indexBuffers[currentFrame] != VK_NULL_HANDLE)
+	{
+		vkDestroyBuffer(*ctx, indexBuffers[currentFrame], nullptr);
+	}
+	if (indexBufferMemories[currentFrame] != VK_NULL_HANDLE)
+	{
+		vkFreeMemory(*ctx, indexBufferMemories[currentFrame], nullptr);
+	}
+
+	vertexBuffers[currentFrame] = vertexBufferStaging[currentFrame];
+	vertexBufferMemories[currentFrame] = vertexBufferMemoryStaging[currentFrame];
+	indexBuffers[currentFrame] = indexBufferStaging[currentFrame];
+	indexBufferMemories[currentFrame] = indexBufferMemoryStaging[currentFrame];
+
+	vertexBufferStaging[currentFrame] = VK_NULL_HANDLE;
+	vertexBufferMemoryStaging[currentFrame] = VK_NULL_HANDLE;
+	indexBufferStaging[currentFrame] = VK_NULL_HANDLE;
+	indexBufferMemoryStaging[currentFrame] = VK_NULL_HANDLE;
 	bReadyToSwap = false;
 }
 
-void Buffers::updateBuffers(const Vertex* vertices, uint32_t vertexCount, const uint32_t* indices,
-							uint32_t indexCount)
+void Buffers::updateBuffers(uint32_t currentFrame, const Vertex* vertices, uint32_t vertexCount,
+							const uint32_t* indices, uint32_t indexCount)
 {
-	if (bReadyToSwap)
+	if (vertexCount == oldVertexCounts[currentFrame] && indexCount == oldIndexCounts[currentFrame])
 	{
-		clearBuffers();
+		return;
 	}
-	createVertexBuffer(vertices, vertexCount);
-	createIndexBuffer(indices, indexCount);
-	this->vertexCount = vertexCount;
-	this->indexCount = indexCount;
+	oldVertexCounts[currentFrame] = vertexCount;
+	oldIndexCounts[currentFrame] = indexCount;
+	if (vertexCount == 0 || indexCount == 0)
+	{
+		Vertex v{};
+		v.pos = glm::vec3(0.0f);
+		v.color = glm::vec3(0.0f);
+		v.texCoord = glm::vec2(0.0f);
+		uint32_t i = 0;
+		createVertexBuffer(currentFrame, &v, 1);
+		createIndexBuffer(currentFrame, &i, 1);
+	}
+	else
+	{
+		createVertexBuffer(currentFrame, vertices, vertexCount);
+		createIndexBuffer(currentFrame, indices, indexCount);
+	}
+	this->vertexCounts[currentFrame] = vertexCount;
+	this->indexCounts[currentFrame] = indexCount;
 	bReadyToSwap = true;
 }
 
@@ -51,42 +104,29 @@ Buffers::~Buffers() { clearBuffers(); }
 
 void Buffers::clearBuffers()
 {
-	if (vertexBuffer != VK_NULL_HANDLE)
+	for (size_t i = 0; i < vertexBuffers.size(); i++)
 	{
-		vkDestroyBuffer(*ctx, vertexBuffer, nullptr);
-	}
-	if (vertexBufferMemory != VK_NULL_HANDLE)
-	{
-		vkFreeMemory(*ctx, vertexBufferMemory, nullptr);
-	}
-	if (indexBuffer != VK_NULL_HANDLE)
-	{
-		vkDestroyBuffer(*ctx, indexBuffer, nullptr);
-	}
-	if (indexBufferMemory != VK_NULL_HANDLE)
-	{
-		vkFreeMemory(*ctx, indexBufferMemory, nullptr);
-	}
-
-	if (vertexBufferStaging != VK_NULL_HANDLE)
-	{
-		vkDestroyBuffer(*ctx, vertexBufferStaging, nullptr);
-	}
-	if (vertexBufferMemoryStaging != VK_NULL_HANDLE)
-	{
-		vkFreeMemory(*ctx, vertexBufferMemoryStaging, nullptr);
-	}
-	if (indexBufferStaging != VK_NULL_HANDLE)
-	{
-		vkDestroyBuffer(*ctx, indexBufferStaging, nullptr);
-	}
-	if (indexBufferMemoryStaging != VK_NULL_HANDLE)
-	{
-		vkFreeMemory(*ctx, indexBufferMemoryStaging, nullptr);
+		if (vertexBuffers[i] != VK_NULL_HANDLE)
+		{
+			vkDestroyBuffer(*ctx, vertexBuffers[i], nullptr);
+		}
+		if (vertexBufferMemories[i] != VK_NULL_HANDLE)
+		{
+			vkFreeMemory(*ctx, vertexBufferMemories[i], nullptr);
+		}
+		if (indexBuffers[i] != VK_NULL_HANDLE)
+		{
+			vkDestroyBuffer(*ctx, indexBuffers[i], nullptr);
+		}
+		if (indexBufferMemories[i] != VK_NULL_HANDLE)
+		{
+			vkFreeMemory(*ctx, indexBufferMemories[i], nullptr);
+		}
 	}
 }
 
-void Buffers::createVertexBuffer(const Vertex* vertices, uint32_t vertexCount)
+void Buffers::createVertexBuffer(uint32_t currentFrame, const Vertex* vertices,
+								 uint32_t vertexCount)
 {
 	std::cout << "VERTEX COUNT: " << vertexCount << std::endl;
 
@@ -105,16 +145,17 @@ void Buffers::createVertexBuffer(const Vertex* vertices, uint32_t vertexCount)
 
 	createBuffer(ctx, vertexBufferSize,
 				 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-				 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBufferStaging, vertexBufferMemoryStaging);
+				 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBufferStaging[currentFrame],
+				 vertexBufferMemoryStaging[currentFrame]);
 
 	copyBuffer(ctx, ctx->getCommandPool(), ctx->getGraphicsQueue(), stagingBuffer,
-			   vertexBufferStaging, vertexBufferSize);
+			   vertexBufferStaging[currentFrame], vertexBufferSize);
 
 	vkDestroyBuffer(*ctx, stagingBuffer, nullptr);
 	vkFreeMemory(*ctx, stagingBufferMemory, nullptr);
 }
 
-void Buffers::createIndexBuffer(const uint32_t* indices, uint32_t indexCount)
+void Buffers::createIndexBuffer(uint32_t currentFrame, const uint32_t* indices, uint32_t indexCount)
 {
 	indexBufferSize = sizeof(indices[0]) * indexCount;
 
@@ -131,12 +172,12 @@ void Buffers::createIndexBuffer(const uint32_t* indices, uint32_t indexCount)
 
 	createBuffer(ctx, indexBufferSize,
 				 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-				 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBufferStaging, indexBufferMemoryStaging);
+				 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBufferStaging[currentFrame],
+				 indexBufferMemoryStaging[currentFrame]);
 
 	copyBuffer(ctx, ctx->getCommandPool(), ctx->getGraphicsQueue(), stagingBuffer,
-			   indexBufferStaging, indexBufferSize);
+			   indexBufferStaging[currentFrame], indexBufferSize);
 
 	vkDestroyBuffer(*ctx, stagingBuffer, nullptr);
 	vkFreeMemory(*ctx, stagingBufferMemory, nullptr);
 }
-

@@ -13,7 +13,7 @@ class Descriptor
   public:
 	Descriptor(const Descriptor&) = delete;
 	Descriptor& operator=(const Descriptor&) = delete;
-	Descriptor(Context* ctx, uint8_t maxFramesInFlight, UniformBuffer* ub, Texture* texture);
+	Descriptor(Context* ctx, UniformBuffer* ub, Texture* texture);
 	~Descriptor();
 
 	VkDescriptorSetLayout getLayout() const { return descriptorSetLayout; }

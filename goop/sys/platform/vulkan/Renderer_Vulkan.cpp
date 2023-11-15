@@ -35,8 +35,6 @@ using namespace goop::sys::platform::vulkan;
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-const uint8_t MAX_FRAMES_IN_FLIGHT = 2;
-
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
 #else
@@ -94,21 +92,20 @@ void Renderer_Vulkan::initImGui()
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 
 	imgSet = ImGui_ImplVulkan_AddTexture(texture->getSampler(), texture->getImageView(),
-								VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+										 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 int Renderer_Vulkan::initialize()
 {
-	ctx = new Context(MAX_FRAMES_IN_FLIGHT);
+	ctx = new Context();
 	swapchain = new Swapchain(ctx);
-	uniformBuffer = new UniformBuffer(ctx, MAX_FRAMES_IN_FLIGHT);
+	uniformBuffer = new UniformBuffer(ctx);
 	texture = new Texture(ctx, "res/viking_room.png");
-	descriptor = new Descriptor(ctx, MAX_FRAMES_IN_FLIGHT, uniformBuffer, texture);
+	descriptor = new Descriptor(ctx, uniformBuffer, texture);
 	pipeline = new Pipeline(ctx, swapchain, descriptor);
 	buffers = new Buffers(ctx);
-	sync = new Sync(ctx, MAX_FRAMES_IN_FLIGHT);
+	sync = new Sync(ctx);
 	bIsInitialized = true;
-	updateBuffers = std::thread(&Renderer_Vulkan::updateBuffersThread, this);
 	initImGui();
 	return 0;
 }
@@ -134,7 +131,7 @@ void Renderer_Vulkan::beginFrame() { ImGui_ImplVulkan_NewFrame(); }
 
 void Renderer_Vulkan::render()
 {
-	buffers->swapBuffers();
+	buffers->swapBuffers(currentFrame);
 
 	// wait for the fence to signal that the frame is finished
 	sync->waitForFrame(currentFrame);
@@ -205,7 +202,8 @@ void Renderer_Vulkan::render()
 	}
 
 	// advance frame (modulo will wrap around)
-	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+	currentFrame = (currentFrame + 1) % ctx->getMaxFramesInFlight();
+	updateBuffers();
 }
 
 void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
@@ -238,11 +236,15 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline());
 
-	if (buffers->getIndexCount() != 0)
+	if (buffers->getVertexCount(currentFrame) && buffers->getIndexCount(currentFrame) != 0 &&
+		buffers->getVertexBuffer(currentFrame) != VK_NULL_HANDLE &&
+		buffers->getIndexBuffer(currentFrame) != VK_NULL_HANDLE)
 	{
 		VkDeviceSize offset = 0;
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers->getVertexBuffer(), &offset);
-		vkCmdBindIndexBuffer(commandBuffer, buffers->getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers->getVertexBuffer(currentFrame),
+							   &offset);
+		vkCmdBindIndexBuffer(commandBuffer, buffers->getIndexBuffer(currentFrame), 0,
+							 VK_INDEX_TYPE_UINT32);
 	}
 
 	VkViewport viewport{};
@@ -263,9 +265,9 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 							pipeline->getPipelineLayout(), 0, 1, descriptor->getSet(currentFrame),
 							0, nullptr);
 
-	if (buffers->getIndexCount() != 0)
+	if (buffers->getIndexCount(currentFrame) != 0)
 	{
-		vkCmdDrawIndexed(commandBuffer, buffers->getIndexCount(), 1, 0, 0, 0);
+		vkCmdDrawIndexed(commandBuffer, buffers->getIndexCount(currentFrame), 1, 0, 0, 0);
 	}
 
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
@@ -326,31 +328,34 @@ void Renderer_Vulkan::addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoa
 	Renderer::addToRenderQueue(mesh, meshLoader);
 }
 
-void Renderer_Vulkan::updateBuffersThread()
+void Renderer_Vulkan::updateBuffers()
 {
-	while (bIsInitialized)
+	if (meshLoader != nullptr)
 	{
-		if (!meshQueue.empty() && meshLoader != nullptr)
+		oldQueue = meshQueue;
+		MeshImportData combinedMesh;
+		while (!meshQueue.empty())
 		{
-			MeshImportData combinedMesh;
-			while (!meshQueue.empty())
+			goop::res::mesh id = meshQueue.front();
+			MeshImportData mesh = (*meshLoader->getData())[id];
+
+			for (uint32_t i = 0; i < mesh.indices.size(); i++)
 			{
-				goop::res::mesh id = meshQueue.front();
-				MeshImportData mesh = (*meshLoader->getData())[id];
-
-				for (uint32_t i = 0; i < mesh.indices.size(); i++)
-				{
-					mesh.indices[i] += combinedMesh.vertices.size();
-				}
-
-				combinedMesh.vertices.insert(combinedMesh.vertices.end(), mesh.vertices.begin(),
-											 mesh.vertices.end());
-				combinedMesh.indices.insert(combinedMesh.indices.end(), mesh.indices.begin(),
-											mesh.indices.end());
-				meshQueue.pop();
+				mesh.indices[i] += combinedMesh.vertices.size();
 			}
-			buffers->updateBuffers(combinedMesh.vertices.data(), combinedMesh.vertices.size(),
-								   combinedMesh.indices.data(), combinedMesh.indices.size());
+
+			combinedMesh.vertices.insert(combinedMesh.vertices.end(), mesh.vertices.begin(),
+										 mesh.vertices.end());
+			combinedMesh.indices.insert(combinedMesh.indices.end(), mesh.indices.begin(),
+										mesh.indices.end());
+			meshQueue.pop();
 		}
+		buffers->updateBuffers(currentFrame, combinedMesh.vertices.data(),
+							   combinedMesh.vertices.size(), combinedMesh.indices.data(),
+							   combinedMesh.indices.size());
+	}
+	for (size_t i = 0; i < meshQueue.size(); i++)
+	{
+		meshQueue.pop();
 	}
 }
