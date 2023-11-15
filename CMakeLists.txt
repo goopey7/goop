@@ -48,11 +48,14 @@ file(GLOB STB_IMAGE_HEADER "libs/stb/stb_image.h")
 # Define the C++ executable
 add_executable(${PROJECT_NAME} ${ENGINE_SRC_FILES} ${STB_VORBIS_SOURCE})
 
+#define app type
+target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_APPTYPE_EDITOR=1)
+
 # define systems
-target_compile_definitions(${PROJECT_NAME} PRIVATE RENDERER_VULKAN=1)
-target_compile_definitions(${PROJECT_NAME} PRIVATE WINDOW_GLFW=1)
-target_compile_definitions(${PROJECT_NAME} PRIVATE AUDIO_SOLOUD=1)
-target_compile_definitions(${PROJECT_NAME} PRIVATE ML_ASSIMP=1)
+target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_RENDERER_VULKAN=1)
+target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_WINDOW_GLFW=1)
+target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_AUDIO_SOLOUD=1)
+target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_MESHLOADER_ASSIMP=1)
 
 # ##################### Build Soloud
 # Add a custom target to build Soloud using CMake

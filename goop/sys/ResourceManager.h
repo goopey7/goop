@@ -6,10 +6,6 @@
 #include <goop/sys/Subsystem.h>
 #include <string>
 
-#ifdef RENDERER_VULKAN
-#include <goop/sys/platform/vulkan/Buffers.h>
-#endif
-
 namespace goop::res
 {
 	enum mesh
@@ -43,10 +39,5 @@ class ResourceManager : public Subsystem
   private:
 	std::unique_ptr<MeshLoader> meshLoader;
 	std::unique_ptr<Sfx> sfx;
-
-
-#ifdef RENDERER_VULKAN
-	friend class goop::sys::platform::vulkan::Buffers;
-#endif
 };
 } // namespace goop::sys

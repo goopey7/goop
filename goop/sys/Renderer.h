@@ -3,7 +3,7 @@
 
 #include "Subsystem.h"
 #include "Window.h"
-#include "goop/sys/MeshLoader.h"
+#include <goop/sys/MeshLoader.h>
 #include "goop/sys/ResourceManager.h"
 #include <queue>
 

@@ -8,7 +8,7 @@
 
 #include <functional>
 
-#ifdef RENDERER_VULKAN
+#ifdef GOOP_RENDERER_VULKAN
 namespace goop::sys
 {
 struct Vertex

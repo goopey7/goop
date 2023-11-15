@@ -25,7 +25,7 @@
 
 #include <volk.h>
 
-#ifdef RENDERER_VULKAN
+#ifdef GOOP_RENDERER_VULKAN
 const std::unique_ptr<goop::sys::Renderer> goop::sys::gRenderer =
 	std::make_unique<goop::sys::platform::vulkan::Renderer_Vulkan>();
 #endif

@@ -5,9 +5,9 @@
 #include <cstdint>
 #include <memory>
 
-#ifndef RENDERER_VULKAN
-class VkInstance;
-class VkSurfaceKHR;
+#ifndef GOOP_RENDERER_VULKAN
+struct VkInstance;
+struct VkSurfaceKHR;
 #else
 #include <volk.h>
 #endif
