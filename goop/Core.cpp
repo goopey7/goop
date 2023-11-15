@@ -19,7 +19,7 @@ Core::Core(int argc, char** argv) : app(createApp(argc, argv))
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 	sys::gWindow->initialize();
-	sys::gWindow->openWindow(800, 600, "Goop", GOOP_WINDOW_DEFAULT);
+	sys::gWindow->openWindow(1280, 720, "Goop", 0);
 	sys::gRenderer->initialize();
 	rm->initialize();
 	app->init();

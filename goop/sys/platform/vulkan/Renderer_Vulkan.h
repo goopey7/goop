@@ -22,6 +22,8 @@
 #include <goop/sys/platform/vulkan/QueueFamilyIndices.h>
 #include <goop/sys/platform/vulkan/SwapchainSupportInfo.h>
 
+struct ImGui_ImplVulkan_InitInfo;
+
 namespace goop::sys::platform::vulkan
 {
 class Renderer_Vulkan : public Renderer

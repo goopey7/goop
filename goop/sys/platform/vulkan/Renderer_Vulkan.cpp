@@ -68,7 +68,7 @@ void Renderer_Vulkan::initImGui()
 		throw std::runtime_error("failed to create imgui descriptor pool!");
 	}
 
-	ImGui_ImplVulkan_InitInfo init_info{};
+	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.DescriptorPool = imguiPool;
 	SwapchainSupportInfo swapchainSupport =
 		getSwapchainSupportInfo(ctx->getPhysicalDevice(), ctx->getSurface());
@@ -79,14 +79,19 @@ void Renderer_Vulkan::initImGui()
 	auto funcLoader = [](const char* funcName, void* ctx_ptr)
 	{
 		Context* ctx = reinterpret_cast<Context*>(ctx_ptr);
-		PFN_vkVoidFunction instanceAddr =
-			vkGetInstanceProcAddr(ctx->getInstance(), funcName);
+		PFN_vkVoidFunction instanceAddr = vkGetInstanceProcAddr(ctx->getInstance(), funcName);
 		PFN_vkVoidFunction deviceAddr = vkGetDeviceProcAddr(ctx->getDevice(), funcName);
 		return deviceAddr ? deviceAddr : instanceAddr;
 	};
 	const bool funcsLoaded = ImGui_ImplVulkan_LoadFunctions(funcLoader, ctx);
 
 	ImGui_ImplVulkan_Init(ctx, &init_info, swapchain->getRenderPass());
+
+	// Upload the fonts for DearImgui
+	VkCommandBuffer cb = beginSingleTimeCommands(ctx);
+	ImGui_ImplVulkan_CreateFontsTexture(cb);
+	endSingleTimeCommands(ctx, cb);
+	ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
 int Renderer_Vulkan::initialize()
@@ -122,10 +127,7 @@ int Renderer_Vulkan::destroy()
 	return 0;
 }
 
-void Renderer_Vulkan::beginFrame()
-{
-	ImGui_ImplVulkan_NewFrame();
-}
+void Renderer_Vulkan::beginFrame() { ImGui_ImplVulkan_NewFrame(); }
 
 void Renderer_Vulkan::render()
 {
