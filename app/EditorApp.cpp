@@ -6,6 +6,7 @@
 #include <goop/Core.h>
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Sfx.h>
+#include "goop/sys/platform/vulkan/Renderer_Vulkan.h"
 
 goop::App* goop::createApp(int argc, char** argv) { return new EditorApp(); }
 
@@ -39,8 +40,10 @@ void EditorApp::update(float dt)
 
 void EditorApp::gui()
 {
-	ImGui::Begin("Editor");
-	ImGui::Text("Hello from the editor!");
+	auto r = (goop::sys::platform::vulkan::Renderer_Vulkan*)goop::sys::gRenderer.get();
+	ImGui::Begin("Viewport");
+	ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+	ImGui::Image(r->getImageDescriptorSet(), viewportSize);
 	ImGui::End();
 }
 

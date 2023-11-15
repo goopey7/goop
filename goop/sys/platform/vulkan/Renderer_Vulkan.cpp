@@ -92,6 +92,9 @@ void Renderer_Vulkan::initImGui()
 	ImGui_ImplVulkan_CreateFontsTexture(cb);
 	endSingleTimeCommands(ctx, cb);
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
+
+	imgSet = ImGui_ImplVulkan_AddTexture(texture->getSampler(), texture->getImageView(),
+								VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 int Renderer_Vulkan::initialize()

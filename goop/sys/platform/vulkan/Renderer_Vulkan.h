@@ -38,6 +38,7 @@ class Renderer_Vulkan : public Renderer
 	void render() final;
 	void addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader) final;
 	void updateBuffersThread();
+	VkDescriptorSet getImageDescriptorSet() { return imgSet; }
 
   private:
 	void initImGui();
@@ -64,5 +65,6 @@ class Renderer_Vulkan : public Renderer
 	std::thread updateBuffers;
 	std::mutex meshQueueMutex;
 	VkDescriptorPool imguiPool;
+	VkDescriptorSet imgSet;
 };
 } // namespace goop::sys::platform::vulkan
