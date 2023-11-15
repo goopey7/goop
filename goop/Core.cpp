@@ -45,6 +45,7 @@ void Core::run()
 		ImGui::NewFrame();
 
 		app->gui();
+		ImGui::ShowDemoWindow();
 
 		ImGui::Render();
 		sys::gRenderer->render();

@@ -94,7 +94,7 @@
 //  2016-08-27: Vulkan: Fix Vulkan example for use when a depth buffer is active.
 
 #include "imgui_impl_vulkan.h"
-#include "goop/sys/platform/vulkan/Context.h"
+#include <goop/sys/platform/vulkan/Context.h>
 #include <stdio.h>
 
 // Visual Studio warnings
@@ -153,7 +153,8 @@ struct ImGui_ImplVulkan_Data
 	VkPipeline PipelineMultiView; // pipeline for multiview windows render pass
 	uint32_t Subpass;
 	VkShaderModule ShaderModuleVert;
-	VkShaderModule ShaderModuleFrag;
+	VkShaderModule ShaderModuleFragOutsideWindow;
+	VkShaderModule ShaderModuleFragInsideWindow;
 
 	// Font data
 	VkSampler FontSampler;
@@ -367,7 +368,7 @@ void main()
 	fColor = In.Color * texture(sTexture, In.UV.st);
 }
 */
-static uint32_t __glsl_shader_frag_spv[] = {
+static uint32_t __glsl_shader_frag_outside_window_spv[] = {
 	0x07230203, 0x00010000, 0x00080001, 0x0000001e, 0x00000000, 0x00020011, 0x00000001, 0x0006000b,
 	0x00000001, 0x4c534c47, 0x6474732e, 0x3035342e, 0x00000000, 0x0003000e, 0x00000000, 0x00000001,
 	0x0007000f, 0x00000004, 0x00000004, 0x6e69616d, 0x00000000, 0x00000009, 0x0000000d, 0x00030010,
@@ -393,6 +394,45 @@ static uint32_t __glsl_shader_frag_spv[] = {
 	0x0000001b, 0x0000001a, 0x00050057, 0x00000007, 0x0000001c, 0x00000017, 0x0000001b, 0x00050085,
 	0x00000007, 0x0000001d, 0x00000012, 0x0000001c, 0x0003003e, 0x00000009, 0x0000001d, 0x000100fd,
 	0x00010038};
+
+static uint32_t __glsl_shader_frag_inside_window_spv[] = {
+	// 1113.0.0
+	0x07230203, 0x00010000, 0x0008000b, 0x0000002f, 0x00000000, 0x00020011, 0x00000001, 0x0006000b,
+	0x00000001, 0x4c534c47, 0x6474732e, 0x3035342e, 0x00000000, 0x0003000e, 0x00000000, 0x00000001,
+	0x0007000f, 0x00000004, 0x00000004, 0x6e69616d, 0x00000000, 0x0000000d, 0x0000001f, 0x00030010,
+	0x00000004, 0x00000007, 0x00030003, 0x00000002, 0x000001c2, 0x00040005, 0x00000004, 0x6e69616d,
+	0x00000000, 0x00050005, 0x00000009, 0x616e6966, 0x6c6f436c, 0x0000726f, 0x00030005, 0x0000000b,
+	0x00000000, 0x00050006, 0x0000000b, 0x00000000, 0x6f6c6f43, 0x00000072, 0x00040006, 0x0000000b,
+	0x00000001, 0x00005655, 0x00030005, 0x0000000d, 0x00006e49, 0x00050005, 0x00000016, 0x78655473,
+	0x65727574, 0x00000000, 0x00040005, 0x0000001f, 0x6c6f4366, 0x0000726f, 0x00040047, 0x0000000d,
+	0x0000001e, 0x00000000, 0x00040047, 0x00000016, 0x00000022, 0x00000000, 0x00040047, 0x00000016,
+	0x00000021, 0x00000000, 0x00040047, 0x0000001f, 0x0000001e, 0x00000000, 0x00020013, 0x00000002,
+	0x00030021, 0x00000003, 0x00000002, 0x00030016, 0x00000006, 0x00000020, 0x00040017, 0x00000007,
+	0x00000006, 0x00000004, 0x00040020, 0x00000008, 0x00000007, 0x00000007, 0x00040017, 0x0000000a,
+	0x00000006, 0x00000002, 0x0004001e, 0x0000000b, 0x00000007, 0x0000000a, 0x00040020, 0x0000000c,
+	0x00000001, 0x0000000b, 0x0004003b, 0x0000000c, 0x0000000d, 0x00000001, 0x00040015, 0x0000000e,
+	0x00000020, 0x00000001, 0x0004002b, 0x0000000e, 0x0000000f, 0x00000000, 0x00040020, 0x00000010,
+	0x00000001, 0x00000007, 0x00090019, 0x00000013, 0x00000006, 0x00000001, 0x00000000, 0x00000000,
+	0x00000000, 0x00000001, 0x00000000, 0x0003001b, 0x00000014, 0x00000013, 0x00040020, 0x00000015,
+	0x00000000, 0x00000014, 0x0004003b, 0x00000015, 0x00000016, 0x00000000, 0x0004002b, 0x0000000e,
+	0x00000018, 0x00000001, 0x00040020, 0x00000019, 0x00000001, 0x0000000a, 0x00040020, 0x0000001e,
+	0x00000003, 0x00000007, 0x0004003b, 0x0000001e, 0x0000001f, 0x00000003, 0x00040017, 0x00000020,
+	0x00000006, 0x00000003, 0x0004002b, 0x00000006, 0x00000023, 0x400ccccd, 0x0006002c, 0x00000020,
+	0x00000024, 0x00000023, 0x00000023, 0x00000023, 0x00040015, 0x00000026, 0x00000020, 0x00000000,
+	0x0004002b, 0x00000026, 0x00000027, 0x00000003, 0x00040020, 0x00000028, 0x00000007, 0x00000006,
+	0x00050036, 0x00000002, 0x00000004, 0x00000000, 0x00000003, 0x000200f8, 0x00000005, 0x0004003b,
+	0x00000008, 0x00000009, 0x00000007, 0x00050041, 0x00000010, 0x00000011, 0x0000000d, 0x0000000f,
+	0x0004003d, 0x00000007, 0x00000012, 0x00000011, 0x0004003d, 0x00000014, 0x00000017, 0x00000016,
+	0x00050041, 0x00000019, 0x0000001a, 0x0000000d, 0x00000018, 0x0004003d, 0x0000000a, 0x0000001b,
+	0x0000001a, 0x00050057, 0x00000007, 0x0000001c, 0x00000017, 0x0000001b, 0x00050085, 0x00000007,
+	0x0000001d, 0x00000012, 0x0000001c, 0x0003003e, 0x00000009, 0x0000001d, 0x0004003d, 0x00000007,
+	0x00000021, 0x00000009, 0x0008004f, 0x00000020, 0x00000022, 0x00000021, 0x00000021, 0x00000000,
+	0x00000001, 0x00000002, 0x0007000c, 0x00000020, 0x00000025, 0x00000001, 0x0000001a, 0x00000022,
+	0x00000024, 0x00050041, 0x00000028, 0x00000029, 0x00000009, 0x00000027, 0x0004003d, 0x00000006,
+	0x0000002a, 0x00000029, 0x00050051, 0x00000006, 0x0000002b, 0x00000025, 0x00000000, 0x00050051,
+	0x00000006, 0x0000002c, 0x00000025, 0x00000001, 0x00050051, 0x00000006, 0x0000002d, 0x00000025,
+	0x00000002, 0x00070050, 0x00000007, 0x0000002e, 0x0000002b, 0x0000002c, 0x0000002d, 0x0000002a,
+	0x0003003e, 0x0000001f, 0x0000002e, 0x000100fd, 0x00010038};
 
 //-----------------------------------------------------------------------------
 // FUNCTIONS
@@ -852,7 +892,8 @@ bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
 }
 
 static void ImGui_ImplVulkan_CreateShaderModules(VkDevice device,
-												 const VkAllocationCallbacks* allocator)
+												 const VkAllocationCallbacks* allocator,
+												 bool isOutsideWindow)
 {
 	// Create the shader modules
 	ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
@@ -865,13 +906,24 @@ static void ImGui_ImplVulkan_CreateShaderModules(VkDevice device,
 		VkResult err = vkCreateShaderModule(device, &vert_info, allocator, &bd->ShaderModuleVert);
 		check_vk_result(err);
 	}
-	if (bd->ShaderModuleFrag == VK_NULL_HANDLE)
+	if (isOutsideWindow && bd->ShaderModuleFragOutsideWindow == VK_NULL_HANDLE)
 	{
 		VkShaderModuleCreateInfo frag_info = {};
 		frag_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		frag_info.codeSize = sizeof(__glsl_shader_frag_spv);
-		frag_info.pCode = (uint32_t*)__glsl_shader_frag_spv;
-		VkResult err = vkCreateShaderModule(device, &frag_info, allocator, &bd->ShaderModuleFrag);
+		frag_info.codeSize = sizeof(__glsl_shader_frag_outside_window_spv);
+		frag_info.pCode = (uint32_t*)__glsl_shader_frag_outside_window_spv;
+		VkResult err =
+			vkCreateShaderModule(device, &frag_info, allocator, &bd->ShaderModuleFragOutsideWindow);
+		check_vk_result(err);
+	}
+	else if (!isOutsideWindow && bd->ShaderModuleFragInsideWindow == VK_NULL_HANDLE)
+	{
+		VkShaderModuleCreateInfo frag_info = {};
+		frag_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		frag_info.codeSize = sizeof(__glsl_shader_frag_inside_window_spv);
+		frag_info.pCode = (uint32_t*)__glsl_shader_frag_inside_window_spv;
+		VkResult err =
+			vkCreateShaderModule(device, &frag_info, allocator, &bd->ShaderModuleFragInsideWindow);
 		check_vk_result(err);
 	}
 }
@@ -879,10 +931,10 @@ static void ImGui_ImplVulkan_CreateShaderModules(VkDevice device,
 static void ImGui_ImplVulkan_CreatePipeline(VkDevice device, const VkAllocationCallbacks* allocator,
 											VkPipelineCache pipelineCache, VkRenderPass renderPass,
 											VkSampleCountFlagBits MSAASamples, VkPipeline* pipeline,
-											uint32_t subpass)
+											uint32_t subpass, bool isOutsideWindow)
 {
 	ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-	ImGui_ImplVulkan_CreateShaderModules(device, allocator);
+	ImGui_ImplVulkan_CreateShaderModules(device, allocator, isOutsideWindow);
 
 	VkPipelineShaderStageCreateInfo stage[2] = {};
 	stage[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -891,7 +943,8 @@ static void ImGui_ImplVulkan_CreatePipeline(VkDevice device, const VkAllocationC
 	stage[0].pName = "main";
 	stage[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	stage[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	stage[1].module = bd->ShaderModuleFrag;
+	stage[1].module =
+		isOutsideWindow ? bd->ShaderModuleFragOutsideWindow : bd->ShaderModuleFragInsideWindow;
 	stage[1].pName = "main";
 
 	VkVertexInputBindingDescription binding_desc[1] = {};
@@ -1044,7 +1097,7 @@ bool ImGui_ImplVulkan_CreateDeviceObjects()
 	}
 
 	ImGui_ImplVulkan_CreatePipeline(v->Device, v->Allocator, v->PipelineCache, bd->RenderPass,
-									v->MSAASamples, &bd->Pipeline, bd->Subpass);
+									v->MSAASamples, &bd->Pipeline, bd->Subpass, false);
 
 	return true;
 }
@@ -1077,10 +1130,15 @@ void ImGui_ImplVulkan_DestroyDeviceObjects()
 		vkDestroyShaderModule(v->Device, bd->ShaderModuleVert, v->Allocator);
 		bd->ShaderModuleVert = VK_NULL_HANDLE;
 	}
-	if (bd->ShaderModuleFrag)
+	if (bd->ShaderModuleFragOutsideWindow)
 	{
-		vkDestroyShaderModule(v->Device, bd->ShaderModuleFrag, v->Allocator);
-		bd->ShaderModuleFrag = VK_NULL_HANDLE;
+		vkDestroyShaderModule(v->Device, bd->ShaderModuleFragOutsideWindow, v->Allocator);
+		bd->ShaderModuleFragOutsideWindow = VK_NULL_HANDLE;
+	}
+	if (bd->ShaderModuleFragInsideWindow)
+	{
+		vkDestroyShaderModule(v->Device, bd->ShaderModuleFragInsideWindow, v->Allocator);
+		bd->ShaderModuleFragInsideWindow = VK_NULL_HANDLE;
 	}
 	if (bd->FontView)
 	{
@@ -1148,7 +1206,8 @@ bool ImGui_ImplVulkan_LoadFunctions(PFN_vkVoidFunction (*loader_func)(const char
 	return true;
 }
 
-bool ImGui_ImplVulkan_Init(goop::sys::platform::vulkan::Context* ctx, ImGui_ImplVulkan_InitInfo* info, VkRenderPass render_pass)
+bool ImGui_ImplVulkan_Init(goop::sys::platform::vulkan::Context* ctx,
+						   ImGui_ImplVulkan_InitInfo* info, VkRenderPass render_pass)
 {
 	IM_ASSERT(g_FunctionsLoaded && "Need to call ImGui_ImplVulkan_LoadFunctions() if "
 								   "IMGUI_IMPL_VULKAN_NO_PROTOTYPES or VK_NO_PROTOTYPES are set!");
@@ -1642,8 +1701,10 @@ void ImGui_ImplVulkanH_CreateOrResizeWindow(VkInstance instance, VkPhysicalDevic
 											min_image_count);
 	ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
 	if (bd->PipelineMultiView == VK_NULL_HANDLE)
+	{
 		ImGui_ImplVulkan_CreatePipeline(device, allocator, VK_NULL_HANDLE, wd->RenderPass,
-										VK_SAMPLE_COUNT_1_BIT, &bd->PipelineMultiView, 0);
+										VK_SAMPLE_COUNT_1_BIT, &bd->PipelineMultiView, 0, true);
+	}
 	ImGui_ImplVulkanH_CreateWindowCommandBuffers(physical_device, device, wd, queue_family,
 												 allocator);
 }
