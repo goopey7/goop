@@ -270,7 +270,6 @@ void Renderer_Vulkan::render()
 	sync->waitForFrame(currentFrame);
 
 	// Acquire image from swapchain
-	uint32_t imageIndex;
 	VkResult result = vkAcquireNextImageKHR(*ctx, *swapchain, UINT64_MAX,
 											sync->getImageAvailableSemaphore(currentFrame),
 											VK_NULL_HANDLE, &imageIndex);
@@ -291,12 +290,11 @@ void Renderer_Vulkan::render()
 
 	if (renderScene(1280, 720, imageIndex))
 	{
-		// ImGui_ImplVulkan_RemoveTexture(imgSet);
+		ImGui_ImplVulkan_RemoveTexture(imgSet);
 		imgSet = ImGui_ImplVulkan_AddTexture(texture->getSampler(),
 											 swapchain->getViewportImageView(currentFrame),
 											 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
-	renderFrame(imageIndex);
 }
 
 void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
@@ -415,3 +413,9 @@ void Renderer_Vulkan::updateBuffers()
 		meshQueue.pop();
 	}
 }
+
+void Renderer_Vulkan::endFrame()
+{
+	renderFrame(imageIndex);
+}
+

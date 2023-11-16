@@ -35,6 +35,7 @@ class Renderer_Vulkan : public Renderer
 
 	// Renderer interface
 	void beginFrame() final;
+	void endFrame() final;
 	void render() final;
 	void addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader) final;
 	void updateBuffers();
@@ -63,6 +64,7 @@ class Renderer_Vulkan : public Renderer
 	Sync* sync;
 
 	uint32_t currentFrame = 0;
+	uint32_t imageIndex = 0;
 	bool frameBufferResized = false;
 
 	VkDescriptorPool imguiPool;

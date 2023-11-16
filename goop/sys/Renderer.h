@@ -14,6 +14,7 @@ class Renderer : public Subsystem
   public:
 	Renderer() = default;
 	virtual void beginFrame() = 0;
+	virtual void endFrame() = 0;
 	virtual void render() = 0;
 	virtual void addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader);
 	bool isMeshQueueEmpty() const { return meshQueue.empty(); }

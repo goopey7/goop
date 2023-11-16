@@ -44,6 +44,7 @@ void Core::run()
 		sys::gRenderer->beginFrame();
 		ImGui::NewFrame();
 
+		sys::gRenderer->render();
 		app->gui();
 		ImGui::ShowDemoWindow();
 
@@ -53,7 +54,8 @@ void Core::run()
 		{
 			app->render();
 		}
-		sys::gRenderer->render();
+
+		sys::gRenderer->endFrame();
 
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
