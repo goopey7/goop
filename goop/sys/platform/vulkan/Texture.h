@@ -27,5 +27,7 @@ class Texture
 	VkDeviceMemory textureImageMemory;
 	VkImageView textureImageView;
 	VkSampler textureSampler;
+
+	VkSampler viewportSampler;
 };
 } // namespace goop::sys::platform::vulkan

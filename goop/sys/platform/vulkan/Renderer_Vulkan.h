@@ -50,6 +50,9 @@ class Renderer_Vulkan : public Renderer
 
 	void recreateSwapchain();
 
+	bool renderScene(uint32_t width, uint32_t height, uint32_t imageIndex);
+	void renderFrame(uint32_t imageIndex);
+
 	Context* ctx;
 	UniformBuffer* uniformBuffer;
 	Descriptor* descriptor;
@@ -66,5 +69,6 @@ class Renderer_Vulkan : public Renderer
 	VkDescriptorSet imgSet;
 
 	std::queue<goop::res::mesh> oldQueue;
+
 };
 } // namespace goop::sys::platform::vulkan

@@ -129,32 +129,90 @@ int Renderer_Vulkan::destroy()
 
 void Renderer_Vulkan::beginFrame() { ImGui_ImplVulkan_NewFrame(); }
 
-void Renderer_Vulkan::render()
+bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imageIndex)
 {
+	vkDeviceWaitIdle(*ctx);
 	buffers->swapBuffers(currentFrame);
 
-	// wait for the fence to signal that the frame is finished
-	sync->waitForFrame(currentFrame);
+	VkCommandBuffer cb = beginSingleTimeCommands(ctx);
+	VkViewport viewport{};
+	viewport.x = 0.f;
+	viewport.y = 0.f;
+	viewport.width = static_cast<float>(width);
+	viewport.height = static_cast<float>(height);
+	viewport.minDepth = 0.f;
+	viewport.maxDepth = 1.f;
+	vkCmdSetViewport(cb, 0, 1, &viewport);
 
-	// Acquire image from swapchain
-	uint32_t imageIndex;
-	VkResult result = vkAcquireNextImageKHR(*ctx, *swapchain, UINT64_MAX,
-											sync->getImageAvailableSemaphore(currentFrame),
-											VK_NULL_HANDLE, &imageIndex);
+	VkRect2D scissor{};
+	scissor.offset = {0, 0};
+	scissor.extent = swapchain->getViewportExtent();
+	vkCmdSetScissor(cb, 0, 1, &scissor);
 
-	if (result == VK_ERROR_OUT_OF_DATE_KHR)
+	std::array<VkClearValue, 2> clearValues{};
+	clearValues[0].color = {{0.f, 0.f, 0.f, 1.f}};
+	clearValues[1].depthStencil = {1.f, 0};
+
+	VkRenderPassBeginInfo beginRenderPassInfo{};
+	beginRenderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	beginRenderPassInfo.renderPass = swapchain->getViewportRenderPass();
+	beginRenderPassInfo.framebuffer = swapchain->getViewportFramebuffer(0);
+	beginRenderPassInfo.renderArea.offset = {0, 0};
+	beginRenderPassInfo.renderArea.extent = swapchain->getViewportExtent();
+	beginRenderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+	beginRenderPassInfo.pClearValues = clearValues.data();
+
+	vkCmdBeginRenderPass(cb, &beginRenderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline());
+
+	if (buffers->getVertexCount(currentFrame) && buffers->getIndexCount(currentFrame) != 0 &&
+		buffers->getVertexBuffer(currentFrame) != VK_NULL_HANDLE &&
+		buffers->getIndexBuffer(currentFrame) != VK_NULL_HANDLE)
 	{
-		recreateSwapchain();
-		return;
-	}
-	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-	{
-		throw std::runtime_error("failed to acquire swapchain image!");
+		VkDeviceSize offset = 0;
+		vkCmdBindVertexBuffers(cb, 0, 1, buffers->getVertexBuffer(currentFrame), &offset);
+		vkCmdBindIndexBuffer(cb, buffers->getIndexBuffer(currentFrame), 0, VK_INDEX_TYPE_UINT32);
 	}
 
-	// Only reset the fence if we're definitely submitting work to gpu
-	// which is at this point
-	sync->resetFrameFence(currentFrame);
+	vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 0,
+							1, descriptor->getSet(currentFrame), 0, nullptr);
+
+	if (buffers->getIndexCount(currentFrame) != 0)
+	{
+		vkCmdDrawIndexed(cb, buffers->getIndexCount(currentFrame), 1, 0, 0, 0);
+	}
+
+	vkCmdEndRenderPass(cb);
+
+	VkImageMemoryBarrier barrier{};
+	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.image = swapchain->getViewportImage(imageIndex);
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.subresourceRange.levelCount = 1;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.layerCount = 1;
+	barrier.srcAccessMask = 0;
+	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+	vkCmdPipelineBarrier(cb, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+						 VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1,
+						 &barrier);
+
+	endSingleTimeCommands(ctx, cb);
+
+	vkDeviceWaitIdle(*ctx);
+
+	return true;
+}
+
+void Renderer_Vulkan::renderFrame(uint32_t imageIndex)
+{
 
 	updateUniformBuffer(currentFrame);
 
@@ -189,7 +247,7 @@ void Renderer_Vulkan::render()
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = *swapchain;
 	presentInfo.pImageIndices = &imageIndex;
-	result = vkQueuePresentKHR(ctx->getPresentQueue(), &presentInfo);
+	VkResult result = vkQueuePresentKHR(ctx->getPresentQueue(), &presentInfo);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frameBufferResized)
 	{
@@ -204,6 +262,41 @@ void Renderer_Vulkan::render()
 	// advance frame (modulo will wrap around)
 	currentFrame = (currentFrame + 1) % ctx->getMaxFramesInFlight();
 	updateBuffers();
+}
+
+void Renderer_Vulkan::render()
+{
+	// wait for the fence to signal that the frame is finished
+	sync->waitForFrame(currentFrame);
+
+	// Acquire image from swapchain
+	uint32_t imageIndex;
+	VkResult result = vkAcquireNextImageKHR(*ctx, *swapchain, UINT64_MAX,
+											sync->getImageAvailableSemaphore(currentFrame),
+											VK_NULL_HANDLE, &imageIndex);
+
+	if (result == VK_ERROR_OUT_OF_DATE_KHR)
+	{
+		recreateSwapchain();
+		return;
+	}
+	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+	{
+		throw std::runtime_error("failed to acquire swapchain image!");
+	}
+
+	// Only reset the fence if we're definitely submitting work to gpu
+	// which is at this point
+	sync->resetFrameFence(currentFrame);
+
+	if (renderScene(1280, 720, imageIndex))
+	{
+		// ImGui_ImplVulkan_RemoveTexture(imgSet);
+		imgSet = ImGui_ImplVulkan_AddTexture(texture->getSampler(),
+											 swapchain->getViewportImageView(currentFrame),
+											 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	}
+	renderFrame(imageIndex);
 }
 
 void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
@@ -234,44 +327,7 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 	renderPassInfo.pClearValues = clearValues.data();
 
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline());
-
-	if (buffers->getVertexCount(currentFrame) && buffers->getIndexCount(currentFrame) != 0 &&
-		buffers->getVertexBuffer(currentFrame) != VK_NULL_HANDLE &&
-		buffers->getIndexBuffer(currentFrame) != VK_NULL_HANDLE)
-	{
-		VkDeviceSize offset = 0;
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers->getVertexBuffer(currentFrame),
-							   &offset);
-		vkCmdBindIndexBuffer(commandBuffer, buffers->getIndexBuffer(currentFrame), 0,
-							 VK_INDEX_TYPE_UINT32);
-	}
-
-	VkViewport viewport{};
-	viewport.x = 0.f;
-	viewport.y = 0.f;
-	viewport.width = static_cast<float>(swapchain->getExtent().width);
-	viewport.height = static_cast<float>(swapchain->getExtent().height);
-	viewport.minDepth = 0.f;
-	viewport.maxDepth = 1.f;
-	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-	VkRect2D scissor{};
-	scissor.offset = {0, 0};
-	scissor.extent = swapchain->getExtent();
-	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-							pipeline->getPipelineLayout(), 0, 1, descriptor->getSet(currentFrame),
-							0, nullptr);
-
-	if (buffers->getIndexCount(currentFrame) != 0)
-	{
-		vkCmdDrawIndexed(commandBuffer, buffers->getIndexCount(currentFrame), 1, 0, 0, 0);
-	}
-
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
-
 	vkCmdEndRenderPass(commandBuffer);
 
 	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)

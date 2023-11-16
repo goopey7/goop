@@ -19,13 +19,19 @@ Swapchain::Swapchain(Context* ctx, Swapchain* oldSwapchain) : ctx(ctx)
 	createRenderPass();
 	createDepthResources();
 	createFramebuffers();
+
+	createViewportImages();
+	createViewportRenderPass();
+	createViewportFramebuffers();
 }
 
 Swapchain::~Swapchain()
 {
 	destroySwapchainDependents();
+	destroyViewportDependents();
 	vkDestroySwapchainKHR(*ctx, swapchain, nullptr);
 	vkDestroyRenderPass(*ctx, renderPass, nullptr);
+	vkDestroyRenderPass(*ctx, viewportRenderPass, nullptr);
 }
 
 void Swapchain::createSwapchain(Swapchain* oldSwapchain)
@@ -282,3 +288,131 @@ void Swapchain::createDepthResources()
 
 	depthImageView = createImageView(ctx, depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 }
+
+void Swapchain::createViewportRenderPass()
+{
+	VkAttachmentDescription colorAttachment{};
+	colorAttachment.format = swapchainImageFormat;
+	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+	VkAttachmentReference colorAttachmentRef{};
+	colorAttachmentRef.attachment = 0; // layout(location = 0) out vec4 outColor; in frag shader
+	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkAttachmentDescription depthAttachment{};
+	depthAttachment.format = findDepthFormat(ctx);
+	depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // after drawing is finished we
+																// don't care about the depth data
+	depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	VkAttachmentReference depthAttachmentRef{};
+	depthAttachmentRef.attachment = 1; // layout(location = 1) out vec4 outColor; in frag shader
+	depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription subpass{};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &colorAttachmentRef;
+	subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+	std::array<VkAttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
+
+	VkSubpassDependency dependency{};
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+	dependency.srcStageMask =
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+	dependency.srcAccessMask = 0;
+	dependency.dstStageMask =
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+	dependency.dstAccessMask =
+		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+	VkRenderPassCreateInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+	renderPassInfo.pAttachments = attachments.data();
+	renderPassInfo.subpassCount = 1;
+	renderPassInfo.pSubpasses = &subpass;
+	renderPassInfo.dependencyCount = 1;
+	renderPassInfo.pDependencies = &dependency;
+
+	if (vkCreateRenderPass(*ctx, &renderPassInfo, nullptr, &viewportRenderPass) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to create offscreen render pass!");
+	}
+}
+
+void Swapchain::createViewportImages()
+{
+	viewportImages.resize(swapchainImages.size());
+	viewportImageMemories.resize(swapchainImages.size());
+	viewportImageViews.resize(swapchainImages.size());
+
+	for (size_t i = 0; i < swapchainImages.size(); i++)
+	{
+		createImage(ctx, swapchainExtent.width, swapchainExtent.height, swapchainImageFormat,
+					VK_IMAGE_TILING_OPTIMAL,
+					VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, viewportImages[i],
+					viewportImageMemories[i]);
+		viewportImageViews[i] = createImageView(ctx, viewportImages[i], swapchainImageFormat,
+												VK_IMAGE_ASPECT_COLOR_BIT);
+	}
+}
+
+void Swapchain::createViewportFramebuffers()
+{
+	viewportFramebuffers.resize(viewportImageViews.size());
+	for (size_t i = 0; i < viewportImageViews.size(); i++)
+	{
+		std::array<VkImageView, 2> attachments = {viewportImageViews[i], depthImageView};
+
+		VkFramebufferCreateInfo framebufferInfo{};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = renderPass;
+		framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+		framebufferInfo.pAttachments = attachments.data();
+		framebufferInfo.width = viewportExtent.width;
+		framebufferInfo.height = viewportExtent.height;
+		framebufferInfo.layers = 1;
+
+		if (vkCreateFramebuffer(*ctx, &framebufferInfo, nullptr, &viewportFramebuffers[i]) !=
+			VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create viewport framebuffer!");
+		}
+	}
+}
+
+void Swapchain::destroyViewportDependents()
+{
+	for (auto framebuffer : viewportFramebuffers)
+	{
+		vkDestroyFramebuffer(*ctx, framebuffer, nullptr);
+	}
+	for (auto imageView : viewportImageViews)
+	{
+		vkDestroyImageView(*ctx, imageView, nullptr);
+	}
+	for (auto image : viewportImages)
+	{
+		vkDestroyImage(*ctx, image, nullptr);
+	}
+	for (auto memory : viewportImageMemories)
+	{
+		vkFreeMemory(*ctx, memory, nullptr);
+	}
+}
+

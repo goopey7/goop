@@ -45,7 +45,7 @@ void EditorApp::gui()
 	auto r = (goop::sys::platform::vulkan::Renderer_Vulkan*)goop::sys::gRenderer.get();
 	ImGui::Begin("Viewport");
 	ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-	ImGui::Image(r->getImageDescriptorSet(), viewportSize);
+	ImGui::Image((ImTextureID)r->getImageDescriptorSet(), viewportSize);
 	ImGui::End();
 
 	ImGui::Begin("Inspector");
