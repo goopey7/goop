@@ -241,10 +241,6 @@ void Swapchain::createFramebuffers()
 
 void Swapchain::destroySwapchainDependents()
 {
-	vkDestroyImageView(*ctx, depthImageView, nullptr);
-	vkDestroyImage(*ctx, depthImage, nullptr);
-	vkFreeMemory(*ctx, depthImageMemory, nullptr);
-
 	for (auto framebuffer : swapchainFramebuffers)
 	{
 		vkDestroyFramebuffer(*ctx, framebuffer, nullptr);
@@ -259,7 +255,7 @@ void Swapchain::createDepthResources()
 {
 	VkFormat depthFormat = findDepthFormat(ctx);
 
-	createImage(ctx, swapchainExtent.width, swapchainExtent.height, depthFormat,
+	createImage(ctx, viewportExtent.width, viewportExtent.height, depthFormat,
 				VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
 
@@ -366,12 +362,16 @@ void Swapchain::destroyViewportDependents()
 	vkDestroyImage(*ctx, viewportImage, nullptr);
 	vkFreeMemory(*ctx, viewportImageMemory, nullptr);
 	vkDestroyFramebuffer(*ctx, viewportFramebuffer, nullptr);
+	vkDestroyImageView(*ctx, depthImageView, nullptr);
+	vkDestroyImage(*ctx, depthImage, nullptr);
+	vkFreeMemory(*ctx, depthImageMemory, nullptr);
 }
 
 void Swapchain::recreateViewport(float width, float height)
 {
 	destroyViewportDependents();
 	viewportExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+	createDepthResources();
 	createViewportImage();
 	createViewportFramebuffer();
 }
