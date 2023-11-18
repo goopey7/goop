@@ -44,8 +44,15 @@ void EditorApp::gui()
 {
 	auto r = (goop::sys::platform::vulkan::Renderer_Vulkan*)goop::sys::gRenderer.get();
 	ImGui::Begin("Viewport");
-	ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-	ImGui::Image((ImTextureID)r->getImageDescriptorSet(), viewportSize);
+	ImVec2 max = ImGui::GetWindowContentRegionMax();
+	ImVec2 min = ImGui::GetWindowContentRegionMin();
+	max.x += ImGui::GetWindowPos().x;
+	max.y += ImGui::GetWindowPos().y;
+	min.x += ImGui::GetWindowPos().x;
+	min.y += ImGui::GetWindowPos().y;
+	viewportSize = {max.x - min.x, max.y - min.y};
+	ImGui::Image(r->getImageDescriptorSet(), viewportSize);
+	ImGui::GetWindowDrawList()->AddRect(max, min, IM_COL32(255, 0, 0, 255));
 	ImGui::End();
 
 	ImGui::Begin("Inspector");
