@@ -21,8 +21,8 @@ void EditorApp::init()
 	goop::rm->loadMesh("res/viking_room.obj");
 	goop::rm->loadMesh("res/cow.obj");
 
-	//goop::sys::gRenderer->addToRenderQueue(goop::res::COW, goop::rm->getMeshLoader());
-	//goop::sys::gRenderer->addToRenderQueue(goop::res::VIKING_ROOM, goop::rm->getMeshLoader());
+	// goop::sys::gRenderer->addToRenderQueue(goop::res::COW, goop::rm->getMeshLoader());
+	// goop::sys::gRenderer->addToRenderQueue(goop::res::VIKING_ROOM, goop::rm->getMeshLoader());
 	goop::rm->loadSfx("res/blast.mp3");
 	goop::rm->playSfx(goop::res::LAZER);
 
@@ -42,6 +42,20 @@ void EditorApp::update(float dt)
 
 void EditorApp::gui()
 {
+	// build dockspace
+	const ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(viewport->WorkPos);
+	ImGui::SetNextWindowSize(viewport->WorkSize);
+	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+	ImGui::Begin("Dockspace", nullptr, windowFlags);
+	ImGui::PopStyleVar(2);
+	ImGuiID dockspaceID = ImGui::GetID("Dockspace");
+	ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), dockspaceFlags);
+	ImGui::End();
+
 	auto r = (goop::sys::platform::vulkan::Renderer_Vulkan*)goop::sys::gRenderer.get();
 	ImGui::Begin("Viewport");
 	ImVec2 max = ImGui::GetWindowContentRegionMax();
@@ -52,7 +66,6 @@ void EditorApp::gui()
 	min.y += ImGui::GetWindowPos().y;
 	viewportSize = {max.x - min.x, max.y - min.y};
 	ImGui::Image(r->getImageDescriptorSet(), viewportSize);
-	ImGui::GetWindowDrawList()->AddRect(max, min, IM_COL32(255, 0, 0, 255));
 	ImGui::End();
 
 	ImGui::Begin("Inspector");
@@ -78,4 +91,3 @@ void EditorApp::render()
 	if (shouldSpawnCow)
 		goop::sys::gRenderer->addToRenderQueue(goop::res::COW, goop::rm->getMeshLoader());
 }
-
