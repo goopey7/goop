@@ -156,7 +156,7 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 	VkRenderPassBeginInfo beginRenderPassInfo{};
 	beginRenderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	beginRenderPassInfo.renderPass = swapchain->getViewportRenderPass();
-	beginRenderPassInfo.framebuffer = swapchain->getViewportFramebuffer(0);
+	beginRenderPassInfo.framebuffer = swapchain->getViewportFramebuffer();
 	beginRenderPassInfo.renderArea.offset = {0, 0};
 	beginRenderPassInfo.renderArea.extent = swapchain->getViewportExtent();
 	beginRenderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -191,7 +191,7 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 	barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	barrier.image = swapchain->getViewportImage(imageIndex);
+	barrier.image = swapchain->getViewportImage();
 	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	barrier.subresourceRange.baseMipLevel = 0;
 	barrier.subresourceRange.levelCount = 1;
@@ -292,7 +292,7 @@ void Renderer_Vulkan::render()
 	{
 		ImGui_ImplVulkan_RemoveTexture(imgSet);
 		imgSet = ImGui_ImplVulkan_AddTexture(texture->getSampler(),
-											 swapchain->getViewportImageView(currentFrame),
+											 swapchain->getViewportImageView(),
 											 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 }

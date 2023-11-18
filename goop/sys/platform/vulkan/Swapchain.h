@@ -23,9 +23,9 @@ class Swapchain
 	VkFramebuffer getFramebuffer(int index) const { return swapchainFramebuffers[index]; }
 	VkRenderPass getViewportRenderPass() const { return viewportRenderPass; }
 	VkExtent2D getViewportExtent() const { return viewportExtent; }
-	VkFramebuffer getViewportFramebuffer(int index) const { return viewportFramebuffers[index]; }
-	VkImageView getViewportImageView(int index) const { return viewportImageViews[index]; }
-	VkImage getViewportImage(int index) const { return viewportImages[index]; }
+	VkFramebuffer getViewportFramebuffer() const { return viewportFramebuffer; }
+	VkImageView getViewportImageView() const { return viewportImageView; }
+	VkImage getViewportImage() const { return viewportImage; }
 
   private:
 	void createSwapchain(Swapchain* oldSwapchain);
@@ -38,8 +38,8 @@ class Swapchain
 	void createRenderPass();
 	void createFramebuffers();
 	void createViewportRenderPass();
-	void createViewportImages();
-	void createViewportFramebuffers();
+	void createViewportImage();
+	void createViewportFramebuffer();
 
 	void destroySwapchainDependents();
 	void destroyViewportDependents();
@@ -58,10 +58,10 @@ class Swapchain
 
 	VkExtent2D viewportExtent = { 1280, 720 };
 	VkRenderPass viewportRenderPass;
-	std::vector<VkImageView> viewportImageViews;
-	std::vector<VkImage> viewportImages;
-	std::vector<VkDeviceMemory> viewportImageMemories;
-	std::vector<VkFramebuffer> viewportFramebuffers;
+	VkImageView viewportImageView;
+	VkImage viewportImage;
+	VkDeviceMemory viewportImageMemory;
+	VkFramebuffer viewportFramebuffer;
 
 	Context* ctx;
 };

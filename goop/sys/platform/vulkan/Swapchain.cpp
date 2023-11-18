@@ -20,9 +20,9 @@ Swapchain::Swapchain(Context* ctx, Swapchain* oldSwapchain) : ctx(ctx)
 	createDepthResources();
 	createFramebuffers();
 
-	createViewportImages();
+	createViewportImage();
 	createViewportRenderPass();
-	createViewportFramebuffers();
+	createViewportFramebuffer();
 }
 
 Swapchain::~Swapchain()
@@ -354,65 +354,39 @@ void Swapchain::createViewportRenderPass()
 	}
 }
 
-void Swapchain::createViewportImages()
+void Swapchain::createViewportImage()
 {
-	viewportImages.resize(swapchainImages.size());
-	viewportImageMemories.resize(swapchainImages.size());
-	viewportImageViews.resize(swapchainImages.size());
-
-	for (size_t i = 0; i < swapchainImages.size(); i++)
-	{
-		createImage(ctx, swapchainExtent.width, swapchainExtent.height, swapchainImageFormat,
-					VK_IMAGE_TILING_OPTIMAL,
-					VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, viewportImages[i],
-					viewportImageMemories[i]);
-		viewportImageViews[i] = createImageView(ctx, viewportImages[i], swapchainImageFormat,
-												VK_IMAGE_ASPECT_COLOR_BIT);
-	}
+	createImage(ctx, swapchainExtent.width, swapchainExtent.height, swapchainImageFormat,
+				VK_IMAGE_TILING_OPTIMAL,
+				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, viewportImage, viewportImageMemory);
+	viewportImageView =
+		createImageView(ctx, viewportImage, swapchainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
-void Swapchain::createViewportFramebuffers()
+void Swapchain::createViewportFramebuffer()
 {
-	viewportFramebuffers.resize(viewportImageViews.size());
-	for (size_t i = 0; i < viewportImageViews.size(); i++)
+	std::array<VkImageView, 2> attachments = {viewportImageView, depthImageView};
+
+	VkFramebufferCreateInfo framebufferInfo{};
+	framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	framebufferInfo.renderPass = renderPass;
+	framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+	framebufferInfo.pAttachments = attachments.data();
+	framebufferInfo.width = viewportExtent.width;
+	framebufferInfo.height = viewportExtent.height;
+	framebufferInfo.layers = 1;
+
+	if (vkCreateFramebuffer(*ctx, &framebufferInfo, nullptr, &viewportFramebuffer) != VK_SUCCESS)
 	{
-		std::array<VkImageView, 2> attachments = {viewportImageViews[i], depthImageView};
-
-		VkFramebufferCreateInfo framebufferInfo{};
-		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = renderPass;
-		framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-		framebufferInfo.pAttachments = attachments.data();
-		framebufferInfo.width = viewportExtent.width;
-		framebufferInfo.height = viewportExtent.height;
-		framebufferInfo.layers = 1;
-
-		if (vkCreateFramebuffer(*ctx, &framebufferInfo, nullptr, &viewportFramebuffers[i]) !=
-			VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create viewport framebuffer!");
-		}
+		throw std::runtime_error("failed to create viewport framebuffer!");
 	}
 }
 
 void Swapchain::destroyViewportDependents()
 {
-	for (auto framebuffer : viewportFramebuffers)
-	{
-		vkDestroyFramebuffer(*ctx, framebuffer, nullptr);
-	}
-	for (auto imageView : viewportImageViews)
-	{
-		vkDestroyImageView(*ctx, imageView, nullptr);
-	}
-	for (auto image : viewportImages)
-	{
-		vkDestroyImage(*ctx, image, nullptr);
-	}
-	for (auto memory : viewportImageMemories)
-	{
-		vkFreeMemory(*ctx, memory, nullptr);
-	}
+	vkDestroyImageView(*ctx, viewportImageView, nullptr);
+	vkDestroyImage(*ctx, viewportImage, nullptr);
+	vkFreeMemory(*ctx, viewportImageMemory, nullptr);
+	vkDestroyFramebuffer(*ctx, viewportFramebuffer, nullptr);
 }
-
