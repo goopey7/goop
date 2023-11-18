@@ -93,14 +93,14 @@ void Pipeline::createGraphicsPipeline(Swapchain* swapchain)
 	VkViewport viewport{};
 	viewport.x = 0.f;
 	viewport.y = 0.f;
-	viewport.width = (float)swapchain->getExtent().width;
-	viewport.height = (float)swapchain->getExtent().height;
+	viewport.width = (float)swapchain->getViewportExtent().width;
+	viewport.height = (float)swapchain->getViewportExtent().height;
 	viewport.minDepth = 0.f;
 	viewport.maxDepth = 1.f;
 
 	VkRect2D scissor{};
 	scissor.offset = {0, 0};
-	scissor.extent = swapchain->getExtent();
+	scissor.extent = swapchain->getViewportExtent();
 
 	// dynamic states can be changed at draw time without recreating the pipeline
 	VkDynamicState dynamicStates[] = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
@@ -179,7 +179,7 @@ void Pipeline::createGraphicsPipeline(Swapchain* swapchain)
 	pipelineInfo.pDepthStencilState = &depthStencilInfo;
 	pipelineInfo.pColorBlendState = &colorBlendingInfo;
 	pipelineInfo.layout = pipelineLayout;
-	pipelineInfo.renderPass = swapchain->getRenderPass();
+	pipelineInfo.renderPass = swapchain->getViewportRenderPass();
 	pipelineInfo.subpass = 0;
 
 	if (vkCreateGraphicsPipelines(*ctx, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) !=
