@@ -213,9 +213,6 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 
 void Renderer_Vulkan::renderFrame(uint32_t imageIndex)
 {
-
-	updateUniformBuffer(currentFrame);
-
 	// Submit command buffer
 	vkResetCommandBuffer(*ctx->getCommandBuffer(currentFrame), 0);
 	recordCommandBuffer(*ctx->getCommandBuffer(currentFrame), imageIndex);
@@ -309,6 +306,8 @@ void Renderer_Vulkan::render(float width, float height)
 			ImGui_ImplVulkan_AddTexture(texture->getSampler(), swapchain->getViewportImageView(),
 										VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
+
+	updateUniformBuffer(currentFrame);
 }
 
 void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
@@ -364,7 +363,8 @@ void Renderer_Vulkan::updateUniformBuffer(uint32_t currentFrame)
 		glm::lookAt(glm::vec3(2.f, 2.f, 2.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
 
 	ubo.proj = glm::perspective(glm::radians(45.f),
-								swapchain->getExtent().width / (float)swapchain->getExtent().height,
+								swapchain->getViewportExtent().width /
+									(float)swapchain->getViewportExtent().height,
 								0.1f, 10.f);
 
 	// flip y coordinate, glm was designed for OpenGL which has an inverted y coordinate
