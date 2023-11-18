@@ -35,11 +35,17 @@ class Renderer_Vulkan : public Renderer
 
 	// Renderer interface
 	void beginFrame() final;
-	void endFrame() final;
+#ifdef GOOP_APPTYPE_EDITOR
 	void render(float width = -1.f, float height = -1.f) final;
+#else
+	void render() final;
+#endif
+	void endFrame() final;
 	void addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader) final;
 	void updateBuffers();
+#ifdef GOOP_APPTYPE_EDITOR
 	VkDescriptorSet getImageDescriptorSet() { return imgSet; }
+#endif
 
   private:
 	void initImGui();
@@ -51,8 +57,10 @@ class Renderer_Vulkan : public Renderer
 
 	void recreateSwapchain();
 
+#ifdef GOOP_APPTYPE_EDITOR
 	bool renderScene(uint32_t width, uint32_t height, uint32_t imageIndex);
 	void renderFrame(uint32_t imageIndex);
+#endif
 
 	Context* ctx;
 	UniformBuffer* uniformBuffer;
@@ -63,16 +71,18 @@ class Renderer_Vulkan : public Renderer
 	Buffers* buffers;
 	Sync* sync;
 
+	VkDescriptorPool imguiPool;
+
 	uint32_t currentFrame = 0;
 	uint32_t imageIndex = 0;
 	bool frameBufferResized = false;
 
-	VkDescriptorPool imguiPool;
-	VkDescriptorSet imgSet;
-
 	std::queue<goop::res::mesh> oldQueue;
 
+#ifdef GOOP_APPTYPE_EDITOR
 	float oldWidth = -1.f;
 	float oldHeight = -1.f;
+	VkDescriptorSet imgSet;
+#endif
 };
 } // namespace goop::sys::platform::vulkan

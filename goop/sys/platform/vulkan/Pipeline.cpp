@@ -52,7 +52,11 @@ void Pipeline::createGraphicsPipeline(Swapchain* swapchain)
 {
 	// ============ Programmable Pipeline Stages
 	std::vector<char> vertShaderBytecode = readFile("shaders/shader.vert.spv");
-	std::vector<char> fragShaderBytecode = readFile("shaders/shader.frag.spv");
+#ifdef GOOP_APPTYPE_EDITOR
+	std::vector<char> fragShaderBytecode = readFile("shaders/shader_editor.frag.spv");
+#else
+	std::vector<char> fragShaderBytecode = readFile("shaders/shader_game.frag.spv");
+#endif
 
 	VkShaderModule vertShaderModule = createShaderModule(vertShaderBytecode);
 	VkShaderModule fragShaderModule = createShaderModule(fragShaderBytecode);
@@ -93,14 +97,23 @@ void Pipeline::createGraphicsPipeline(Swapchain* swapchain)
 	VkViewport viewport{};
 	viewport.x = 0.f;
 	viewport.y = 0.f;
+#ifdef GOOP_APPTYPE_EDITOR
 	viewport.width = (float)swapchain->getViewportExtent().width;
 	viewport.height = (float)swapchain->getViewportExtent().height;
+#else
+	viewport.width = (float)swapchain->getExtent().width;
+	viewport.height = (float)swapchain->getExtent().height;
+#endif
 	viewport.minDepth = 0.f;
 	viewport.maxDepth = 1.f;
 
 	VkRect2D scissor{};
 	scissor.offset = {0, 0};
+#ifdef GOOP_APPTYPE_EDITOR
 	scissor.extent = swapchain->getViewportExtent();
+#else
+	scissor.extent = swapchain->getExtent();
+#endif
 
 	// dynamic states can be changed at draw time without recreating the pipeline
 	VkDynamicState dynamicStates[] = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
@@ -179,7 +192,11 @@ void Pipeline::createGraphicsPipeline(Swapchain* swapchain)
 	pipelineInfo.pDepthStencilState = &depthStencilInfo;
 	pipelineInfo.pColorBlendState = &colorBlendingInfo;
 	pipelineInfo.layout = pipelineLayout;
+#ifdef GOOP_APPTYPE_EDITOR
 	pipelineInfo.renderPass = swapchain->getViewportRenderPass();
+#else
+	pipelineInfo.renderPass = swapchain->getRenderPass();
+#endif
 	pipelineInfo.subpass = 0;
 
 	if (vkCreateGraphicsPipelines(*ctx, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) !=

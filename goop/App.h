@@ -1,7 +1,10 @@
 // Sam Collier 2023
 #pragma once
 
-#include "imgui.h"
+#ifdef GOOP_APPTYPE_EDITOR
+#include <imgui.h>
+#endif
+
 namespace goop
 {
 class App
@@ -11,11 +14,14 @@ class App
 	virtual void update(float dt) = 0;
 	virtual void gui() = 0;
 	virtual void render() = 0;
-
+#ifdef GOOP_APPTYPE_EDITOR
 	ImVec2 getViewportSize() const { return viewportSize; }
+#endif
 
   protected:
+#ifdef GOOP_APPTYPE_EDITOR
 	ImVec2 viewportSize;
+#endif
 };
 extern App* createApp(int argc, char** argv);
 } // namespace goop

@@ -1,4 +1,10 @@
+#define GOOP_APPTYPE_EDITOR
+
 #include <goop/App.h>
+
+#ifndef GOOP_APPTYPE_EDITOR
+#include <imgui.h>
+#endif
 
 class EditorApp : public goop::App
 {
@@ -10,7 +16,7 @@ class EditorApp : public goop::App
 
   private:
 	bool shouldSpawnHouse = true;
-	bool shouldSpawnCow = false;
+	bool shouldSpawnCow = true;
 	ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
 	ImGuiDockNodeFlags windowFlags =
 		ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |

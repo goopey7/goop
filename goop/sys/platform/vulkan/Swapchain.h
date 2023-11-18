@@ -21,12 +21,15 @@ class Swapchain
 	VkExtent2D getExtent() const { return swapchainExtent; }
 	VkRenderPass getRenderPass() const { return renderPass; }
 	VkFramebuffer getFramebuffer(int index) const { return swapchainFramebuffers[index]; }
+
+#ifdef GOOP_APPTYPE_EDITOR
 	VkRenderPass getViewportRenderPass() const { return viewportRenderPass; }
 	VkExtent2D getViewportExtent() const { return viewportExtent; }
 	VkFramebuffer getViewportFramebuffer() const { return viewportFramebuffer; }
 	VkImageView getViewportImageView() const { return viewportImageView; }
 	VkImage getViewportImage() const { return viewportImage; }
 	void recreateViewport(float width, float height);
+#endif
 
   private:
 	void createSwapchain(Swapchain* oldSwapchain);
@@ -38,12 +41,16 @@ class Swapchain
 	void createDepthResources();
 	void createRenderPass();
 	void createFramebuffers();
+
+	void destroySwapchainDependents();
+
+#ifdef GOOP_APPTYPE_EDITOR
 	void createViewportRenderPass();
 	void createViewportImage();
 	void createViewportFramebuffer();
 
-	void destroySwapchainDependents();
 	void destroyViewportDependents();
+#endif
 
 
 	VkSwapchainKHR swapchain;
@@ -58,12 +65,14 @@ class Swapchain
 	VkDeviceMemory depthImageMemory;
 	VkImageView depthImageView;
 
+#ifdef GOOP_APPTYPE_EDITOR
 	VkExtent2D viewportExtent = { 1280, 720 };
 	VkRenderPass viewportRenderPass;
 	VkImageView viewportImageView;
 	VkImage viewportImage;
 	VkDeviceMemory viewportImageMemory;
 	VkFramebuffer viewportFramebuffer;
+#endif
 
 	Context* ctx;
 };

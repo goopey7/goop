@@ -20,18 +20,24 @@ Swapchain::Swapchain(Context* ctx, Swapchain* oldSwapchain) : ctx(ctx)
 	createDepthResources();
 	createFramebuffers();
 
+#ifdef GOOP_APPTYPE_EDITOR
 	createViewportImage();
 	createViewportRenderPass();
 	createViewportFramebuffer();
+#endif
 }
 
 Swapchain::~Swapchain()
 {
 	destroySwapchainDependents();
+#ifdef GOOP_APPTYPE_EDITOR
 	destroyViewportDependents();
+#endif
 	vkDestroySwapchainKHR(*ctx, swapchain, nullptr);
 	vkDestroyRenderPass(*ctx, renderPass, nullptr);
+#ifdef GOOP_APPTYPE_EDITOR
 	vkDestroyRenderPass(*ctx, viewportRenderPass, nullptr);
+#endif
 }
 
 void Swapchain::createSwapchain(Swapchain* oldSwapchain)
@@ -188,24 +194,60 @@ void Swapchain::createRenderPass()
 	colorAttachmentRef.attachment = 0; // layout(location = 0) out vec4 outColor; in frag shader
 	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+#ifndef GOOP_APPTYPE_EDITOR
+	VkAttachmentDescription depthAttachment{};
+	depthAttachment.format = findDepthFormat(ctx);
+	depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // after drawing is finished we
+																// don't care about the depth data
+	depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	VkAttachmentReference depthAttachmentRef{};
+	depthAttachmentRef.attachment = 1; // layout(location = 1) out vec4 outColor; in frag shader
+	depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+#endif
+
 	VkSubpassDescription subpass{};
 	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	subpass.colorAttachmentCount = 1;
 	subpass.pColorAttachments = &colorAttachmentRef;
+#ifndef GOOP_APPTYPE_EDITOR
+	subpass.pDepthStencilAttachment = &depthAttachmentRef;
+#endif
 
 	// We must wait for the swapchain to finish reading from the image before we can access it
 	VkSubpassDependency dependency{};
 	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 	dependency.dstSubpass = 0;
+#ifndef GOOP_APPTYPE_EDITOR
+	dependency.srcStageMask =
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+	dependency.dstStageMask =
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+	dependency.srcAccessMask = 0;
+	dependency.dstAccessMask =
+		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+#else
 	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	dependency.srcAccessMask = 0;
 	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+#endif
 
 	VkRenderPassCreateInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+#ifdef GOOP_APPTYPE_EDITOR
 	renderPassInfo.attachmentCount = 1;
 	renderPassInfo.pAttachments = &colorAttachment;
+#else
+	std::array<VkAttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
+	renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+	renderPassInfo.pAttachments = attachments.data();
+#endif
 	renderPassInfo.subpassCount = 1;
 	renderPassInfo.pSubpasses = &subpass;
 	renderPassInfo.dependencyCount = 1;
@@ -222,11 +264,16 @@ void Swapchain::createFramebuffers()
 	swapchainFramebuffers.resize(swapchainImageViews.size());
 	for (size_t i = 0; i < swapchainImageViews.size(); i++)
 	{
+#ifndef GOOP_APPTYPE_EDITOR
+		std::array<VkImageView, 2> attachments = {swapchainImageViews[i], depthImageView};
+#else
+		std::array<VkImageView, 1> attachments = {swapchainImageViews[i]};
+#endif
 		VkFramebufferCreateInfo framebufferInfo{};
 		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		framebufferInfo.renderPass = renderPass;
-		framebufferInfo.attachmentCount = 1;
-		framebufferInfo.pAttachments = &swapchainImageViews[i];
+		framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+		framebufferInfo.pAttachments = attachments.data();
 		framebufferInfo.width = swapchainExtent.width;
 		framebufferInfo.height = swapchainExtent.height;
 		framebufferInfo.layers = 1;
@@ -241,6 +288,12 @@ void Swapchain::createFramebuffers()
 
 void Swapchain::destroySwapchainDependents()
 {
+#ifndef GOOP_APPTYPE_EDITOR
+	vkDestroyImageView(*ctx, depthImageView, nullptr);
+	vkDestroyImage(*ctx, depthImage, nullptr);
+	vkFreeMemory(*ctx, depthImageMemory, nullptr);
+#endif
+
 	for (auto framebuffer : swapchainFramebuffers)
 	{
 		vkDestroyFramebuffer(*ctx, framebuffer, nullptr);
@@ -255,13 +308,20 @@ void Swapchain::createDepthResources()
 {
 	VkFormat depthFormat = findDepthFormat(ctx);
 
+#ifdef GOOP_APPTYPE_EDITOR
 	createImage(ctx, viewportExtent.width, viewportExtent.height, depthFormat,
 				VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
+#else
+	createImage(ctx, swapchainExtent.width, swapchainExtent.height, depthFormat,
+				VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
+#endif
 
 	depthImageView = createImageView(ctx, depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 }
 
+#ifdef GOOP_APPTYPE_EDITOR
 void Swapchain::createViewportRenderPass()
 {
 	VkAttachmentDescription colorAttachment{};
@@ -375,3 +435,4 @@ void Swapchain::recreateViewport(float width, float height)
 	createViewportImage();
 	createViewportFramebuffer();
 }
+#endif
