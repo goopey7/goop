@@ -367,3 +367,11 @@ void Swapchain::destroyViewportDependents()
 	vkFreeMemory(*ctx, viewportImageMemory, nullptr);
 	vkDestroyFramebuffer(*ctx, viewportFramebuffer, nullptr);
 }
+
+void Swapchain::recreateViewport(float width, float height)
+{
+	destroyViewportDependents();
+	viewportExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+	createViewportImage();
+	createViewportFramebuffer();
+}

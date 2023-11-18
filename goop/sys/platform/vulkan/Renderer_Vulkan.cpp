@@ -264,7 +264,7 @@ void Renderer_Vulkan::renderFrame(uint32_t imageIndex)
 	updateBuffers();
 }
 
-void Renderer_Vulkan::render()
+void Renderer_Vulkan::render(float width, float height)
 {
 	// wait for the fence to signal that the frame is finished
 	sync->waitForFrame(currentFrame);
@@ -288,12 +288,26 @@ void Renderer_Vulkan::render()
 	// which is at this point
 	sync->resetFrameFence(currentFrame);
 
-	if (renderScene(1280, 720, imageIndex))
+	if (width <= 0.f || height <= 0.f)
+	{
+		width = swapchain->getExtent().width;
+		height = swapchain->getExtent().height;
+	}
+
+	if (width != oldWidth || height != oldHeight)
+	{
+		oldWidth = width;
+		oldHeight = height;
+		vkDeviceWaitIdle(*ctx);
+		swapchain->recreateViewport(width, height);
+	}
+
+	if (renderScene(width, height, imageIndex))
 	{
 		ImGui_ImplVulkan_RemoveTexture(imgSet);
-		imgSet = ImGui_ImplVulkan_AddTexture(texture->getSampler(),
-											 swapchain->getViewportImageView(),
-											 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		imgSet =
+			ImGui_ImplVulkan_AddTexture(texture->getSampler(), swapchain->getViewportImageView(),
+										VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 }
 
@@ -414,8 +428,4 @@ void Renderer_Vulkan::updateBuffers()
 	}
 }
 
-void Renderer_Vulkan::endFrame()
-{
-	renderFrame(imageIndex);
-}
-
+void Renderer_Vulkan::endFrame() { renderFrame(imageIndex); }

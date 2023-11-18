@@ -1,20 +1,20 @@
 // Sam Collier 2023
 #pragma once
 
-#include <goop/sys/Vertex.h>
 #include <array>
 #include <glm/glm.hpp>
 #include <goop/sys/Renderer.h>
+#include <goop/sys/Vertex.h>
+#include <goop/sys/platform/vulkan/Buffers.h>
 #include <goop/sys/platform/vulkan/Context.h>
 #include <goop/sys/platform/vulkan/Pipeline.h>
 #include <goop/sys/platform/vulkan/Swapchain.h>
-#include <goop/sys/platform/vulkan/Buffers.h>
 #include <goop/sys/platform/vulkan/Sync.h>
 #include <goop/sys/platform/vulkan/Texture.h>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <thread>
-#include <mutex>
 #include <vector>
 
 #include <volk.h>
@@ -36,7 +36,7 @@ class Renderer_Vulkan : public Renderer
 	// Renderer interface
 	void beginFrame() final;
 	void endFrame() final;
-	void render() final;
+	void render(float width = -1.f, float height = -1.f) final;
 	void addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader) final;
 	void updateBuffers();
 	VkDescriptorSet getImageDescriptorSet() { return imgSet; }
@@ -72,5 +72,7 @@ class Renderer_Vulkan : public Renderer
 
 	std::queue<goop::res::mesh> oldQueue;
 
+	float oldWidth = -1.f;
+	float oldHeight = -1.f;
 };
 } // namespace goop::sys::platform::vulkan

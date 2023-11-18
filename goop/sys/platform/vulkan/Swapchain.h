@@ -26,6 +26,7 @@ class Swapchain
 	VkFramebuffer getViewportFramebuffer() const { return viewportFramebuffer; }
 	VkImageView getViewportImageView() const { return viewportImageView; }
 	VkImage getViewportImage() const { return viewportImage; }
+	void recreateViewport(float width, float height);
 
   private:
 	void createSwapchain(Swapchain* oldSwapchain);
@@ -43,6 +44,7 @@ class Swapchain
 
 	void destroySwapchainDependents();
 	void destroyViewportDependents();
+
 
 	VkSwapchainKHR swapchain;
 	std::vector<VkImage> swapchainImages;

@@ -8,6 +8,6 @@ public:
 	void gui() final;
 	void render() final;
 private:
-	bool shouldSpawnHouse = false;
+	bool shouldSpawnHouse = true;
 	bool shouldSpawnCow = false;
 };

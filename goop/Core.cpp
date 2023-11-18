@@ -44,7 +44,8 @@ void Core::run()
 		sys::gRenderer->beginFrame();
 		ImGui::NewFrame();
 
-		sys::gRenderer->render();
+		ImVec2 viewportSize = app->getViewportSize();
+		sys::gRenderer->render(viewportSize.x, viewportSize.y);
 		app->gui();
 		ImGui::ShowDemoWindow();
 
