@@ -17,7 +17,7 @@ Core::Core(int argc, char** argv) : app(createApp(argc, argv))
 	auto& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 	sys::gWindow->initialize();
 	sys::gWindow->openWindow(1280, 720, "Goop", GOOP_WINDOW_DEFAULT);
 	sys::gRenderer->initialize();
