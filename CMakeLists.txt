@@ -52,7 +52,7 @@ file(GLOB STB_IMAGE_HEADER "libs/stb/stb_image.h")
 add_executable(${PROJECT_NAME} ${ENGINE_SRC_FILES} ${STB_VORBIS_SOURCE})
 
 #define app type
-target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_APPTYPE_EDITOR=1)
+#target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_APPTYPE_EDITOR=1)
 
 # define systems
 target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_RENDERER_VULKAN=1)
@@ -101,10 +101,11 @@ endif()
 
 # Link the C++ executable
 add_subdirectory(libs/volk)
-add_subdirectory(app)
+add_subdirectory(editor)
+add_subdirectory(game)
 add_subdirectory(libs/imgui)
 target_link_libraries(${PROJECT_NAME} PRIVATE volk ${SDL2_LIBRARY} ${RUST_LIB} ${GLFW3_LIBRARY}
-	${ASSIMP_LIBRARY} SoLoud imgui_lib app_lib)
+	${ASSIMP_LIBRARY} SoLoud imgui_lib app_lib game_lib)
 # ##############################################################################
 
 # ##################### Build shaders

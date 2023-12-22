@@ -8,34 +8,16 @@
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Sfx.h>
 
-goop::App* goop::createApp(int argc, char** argv) { return new EditorApp(); }
+goop::App* goop::createEditor(int argc, char** argv, App* game) { return new EditorApp(game); }
 
 void EditorApp::init()
 {
-	std::cout << "Hello from EditorApp!" << std::endl;
-
-	// TODO dynamically load and unload meshes and handle instances etc
-	// TODO user should never be using goop::sys
-	goop::rm->loadMesh("res/viking_room.obj");
-	goop::rm->loadMesh("res/cow.obj");
-
-	// goop::sys::gRenderer->addToRenderQueue(goop::res::COW, goop::rm->getMeshLoader());
-	// goop::sys::gRenderer->addToRenderQueue(goop::res::VIKING_ROOM, goop::rm->getMeshLoader());
-	goop::rm->loadSfx("res/blast.mp3");
-	goop::rm->playSfx(goop::res::LAZER);
-
-	/* TODO -------------
-	   - store EVERYTHING contiguously - decide on a data structure - (week 7)
-	   - dynamically generate a header file for resource enums
-
-	   - End user should not worry about loading / unloading resources
-			- should be abstracted once ECS is in -- but sfx??
-   */
+	game->init();
 }
 
 void EditorApp::update(float dt)
 {
-	// std::cout << "delta time: " << dt << std::endl;
+	game->update(dt);
 }
 
 void EditorApp::gui()
@@ -54,7 +36,7 @@ void EditorApp::gui()
 	ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), dockspaceFlags);
 	ImGui::End();
 
-	auto r = (goop::sys::platform::vulkan::Renderer_Vulkan*)goop::sys::gRenderer.get();
+	auto r = goop::sys::gRenderer.get();
 	ImGui::Begin("Viewport");
 	ImVec2 max = ImGui::GetWindowContentRegionMax();
 	ImVec2 min = ImGui::GetWindowContentRegionMin();
@@ -63,7 +45,7 @@ void EditorApp::gui()
 	min.x += ImGui::GetWindowPos().x;
 	min.y += ImGui::GetWindowPos().y;
 	viewportSize = {max.x - min.x, max.y - min.y};
-	ImGui::Image(r->getImageDescriptorSet(), viewportSize);
+	ImGui::Image(r->getViewTexture(), viewportSize);
 	ImGui::End();
 
 	ImGui::Begin("Inspector");
@@ -84,8 +66,5 @@ void EditorApp::gui()
 
 void EditorApp::render()
 {
-	if (shouldSpawnHouse)
-		goop::sys::gRenderer->addToRenderQueue(goop::res::VIKING_ROOM, goop::rm->getMeshLoader());
-	if (shouldSpawnCow)
-		goop::sys::gRenderer->addToRenderQueue(goop::res::COW, goop::rm->getMeshLoader());
+	game->render();
 }

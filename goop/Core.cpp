@@ -10,7 +10,11 @@ using namespace goop;
 const std::unique_ptr<goop::sys::ResourceManager> goop::rm =
 	std::make_unique<goop::sys::ResourceManager>();
 
-Core::Core(int argc, char** argv) : app(createApp(argc, argv))
+#ifdef GOOP_APPTYPE_EDITOR
+Core::Core(int argc, char** argv) : app(createEditor(argc, argv, createGame(argc, argv)))
+#else
+Core::Core(int argc, char** argv) : app(createGame(argc, argv))
+#endif
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();

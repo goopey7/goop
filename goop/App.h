@@ -23,5 +23,8 @@ class App
 	ImVec2 viewportSize;
 #endif
 };
-extern App* createApp(int argc, char** argv);
+#ifdef GOOP_APPTYPE_EDITOR
+extern App* createEditor(int argc, char** argv, App* game);
+#endif
+extern App* createGame(int argc, char** argv);
 } // namespace goop

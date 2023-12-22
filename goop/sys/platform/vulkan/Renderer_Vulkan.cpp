@@ -35,12 +35,6 @@ using namespace goop::sys::platform::vulkan;
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-#ifdef NDEBUG
-const bool enableValidationLayers = false;
-#else
-const bool enableValidationLayers = true;
-#endif
-
 void Renderer_Vulkan::initImGui()
 {
 	VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},

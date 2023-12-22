@@ -43,8 +43,11 @@ class Renderer_Vulkan : public Renderer
 	void endFrame() final;
 	void addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader) final;
 	void updateBuffers();
+
 #ifdef GOOP_APPTYPE_EDITOR
-	VkDescriptorSet getImageDescriptorSet() { return imgSet; }
+	ImTextureID getViewTexture() const final { return imgSet; }
+#else
+	ImTextureID getViewTexture() const final { return nullptr; }
 #endif
 
   private:

@@ -4,6 +4,7 @@
 #include "Subsystem.h"
 #include "Window.h"
 #include "goop/sys/ResourceManager.h"
+#include "imgui.h"
 #include <goop/sys/MeshLoader.h>
 #include <queue>
 
@@ -22,6 +23,8 @@ class Renderer : public Subsystem
 #endif
 	virtual void addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader);
 	bool isMeshQueueEmpty() const { return meshQueue.empty(); }
+
+	virtual ImTextureID getViewTexture() const = 0;
 
   protected:
 	std::queue<goop::res::mesh> meshQueue;

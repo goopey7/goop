@@ -9,6 +9,7 @@
 class EditorApp : public goop::App
 {
   public:
+	EditorApp(goop::App* game) : game(game) {}
 	void init() final;
 	void update(float dt) final;
 	void gui() final;
@@ -22,4 +23,6 @@ class EditorApp : public goop::App
 		ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
 		ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+	App* game;
 };
