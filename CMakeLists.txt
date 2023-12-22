@@ -41,6 +41,9 @@ include_directories("libs/vulkan/include")
 include_directories("libs/imgui/")
 include_directories("libs/imgui/backends")
 
+# include entt headers
+include_directories("libs/entt/")
+
 # Add engine source files
 file(GLOB_RECURSE ENGINE_SRC_FILES "goop/*.cpp" "goop/*.h")
 file(GLOB STB_IMAGE_HEADER "libs/stb/stb_image.h")
