@@ -42,6 +42,7 @@ void GameApp::gui()
 {
 	ImGui::Begin("hello");
 		ImGui::Text("Hello from GameApp!");
+		ImGui::Button("Button");
 	ImGui::End();
 }
 

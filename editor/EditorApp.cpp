@@ -48,20 +48,7 @@ void EditorApp::gui()
 	ImGui::Image(r->getViewTexture(), viewportSize);
 	ImGui::End();
 
-	ImGui::Begin("Inspector");
-	if (ImGui::Button("Toggle House"))
-	{
-		shouldSpawnHouse = !shouldSpawnHouse;
-	}
-	if (ImGui::Button("Toggle Cow"))
-	{
-		shouldSpawnCow = !shouldSpawnCow;
-	}
-	if (ImGui::Button("Play Sfx"))
-	{
-		goop::rm->playSfx(goop::res::LAZER);
-	}
-	ImGui::End();
+	game->gui();
 }
 
 void EditorApp::render()
