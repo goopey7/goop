@@ -36,9 +36,9 @@ class Renderer_Vulkan : public Renderer
 	// Renderer interface
 	void beginFrame() final;
 #ifdef GOOP_APPTYPE_EDITOR
-	void render(float width = -1.f, float height = -1.f) final;
+	void render(Scene* scene, float width = -1.f, float height = -1.f) final;
 #else
-	void render() final;
+	void render(Scene* scene) final;
 #endif
 	void endFrame() final;
 	void addToRenderQueue(uint32_t mesh, MeshLoader* meshLoader) final;
@@ -56,7 +56,7 @@ class Renderer_Vulkan : public Renderer
 	VkExtent2D selectExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-	void updateUniformBuffer(uint32_t currentFrame);
+	void updateUniformBuffer(Scene* scene, uint32_t currentFrame);
 
 	void recreateSwapchain();
 

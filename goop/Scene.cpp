@@ -17,3 +17,15 @@ Entity Scene::createEntity(const std::string& tag)
 	e.addComponent<TagComponent>(tag);
 	return e;
 }
+
+Entity Scene::getEntity(const std::string& tag)
+{
+	auto view = registry.view<TagComponent>();
+	for (auto entity : view)
+	{
+		if (view.get<TagComponent>(entity).tag == tag)
+			return Entity(entity, this);
+	}
+
+	return Entity(entt::null, this);
+}

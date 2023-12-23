@@ -18,6 +18,8 @@ class Scene
 	template <typename T>
 	auto view() { return registry.view<T>(); }
 
+	Entity getEntity(const std::string& tag);
+
   private:
 	entt::registry registry;
 	friend class Entity;

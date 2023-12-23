@@ -20,10 +20,9 @@ void GameApp::init()
 	// TODO user should never be using goop::sys
 
 	goop::rm->loadSfx("res/blast.mp3");
-	//goop::rm->playSfx(0);
+	// goop::rm->playSfx(0);
 
 	scene->createEntity("Viking Room").addComponent<goop::MeshComponent>("res/viking_room.obj");
-	scene->createEntity("Cow").addComponent<goop::MeshComponent>("res/cow.obj");
 
 	/* TODO -------------
 	   - store EVERYTHING contiguously - decide on a data structure - (week 7)
@@ -36,5 +35,9 @@ void GameApp::init()
 
 void GameApp::update(float dt)
 {
-}
+	time += dt;
+	goop::TransformComponent* transform =
+		&scene->getEntity("Viking Room").getComponent<goop::TransformComponent>();
 
+	transform->transform = glm::rotate(glm::mat4(1.f), time, glm::vec3(0.0f, 1.0f, 0.0f));
+}

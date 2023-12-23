@@ -2,6 +2,7 @@
 
 #include "Renderer_Vulkan.h"
 #include "Utils.h"
+#include "goop/Entity.h"
 #include "goop/sys/MeshLoader.h"
 #include "goop/sys/platform/vulkan/QueueFamilyIndices.h"
 #include "goop/sys/platform/vulkan/SwapchainSupportInfo.h"
@@ -125,11 +126,14 @@ int Renderer_Vulkan::destroy()
 
 void Renderer_Vulkan::beginFrame() { ImGui_ImplVulkan_NewFrame(); }
 
-void Renderer_Vulkan::updateUniformBuffer(uint32_t currentFrame)
+void Renderer_Vulkan::updateUniformBuffer(Scene* scene, uint32_t currentFrame)
 {
 	UniformBufferObject ubo{};
 
-	ubo.model = glm::mat4(1.f);
+	TransformComponent& transform =
+		scene->getEntity("Viking Room").getComponent<goop::TransformComponent>();
+
+	ubo.model = transform.transform;
 
 	ubo.view =
 		glm::lookAt(glm::vec3(2.f, 2.f, 2.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
@@ -207,7 +211,7 @@ void Renderer_Vulkan::recreateSwapchain()
 }
 
 #ifndef GOOP_APPTYPE_EDITOR
-void Renderer_Vulkan::render()
+void Renderer_Vulkan::render(Scene* scene)
 {
 	vkDeviceWaitIdle(*ctx);
 	buffers->swapBuffers(currentFrame);
@@ -235,7 +239,7 @@ void Renderer_Vulkan::render()
 	// which is at this point
 	sync->resetFrameFence(currentFrame);
 
-	updateUniformBuffer(currentFrame);
+	updateUniformBuffer(scene, currentFrame);
 
 	// Submit command buffer
 	vkResetCommandBuffer(*ctx->getCommandBuffer(currentFrame), 0);
@@ -496,7 +500,7 @@ void Renderer_Vulkan::renderFrame(uint32_t imageIndex)
 	updateBuffers();
 }
 
-void Renderer_Vulkan::render(float width, float height)
+void Renderer_Vulkan::render(Scene* scene, float width, float height)
 {
 	// wait for the fence to signal that the frame is finished
 	sync->waitForFrame(currentFrame);
@@ -542,7 +546,7 @@ void Renderer_Vulkan::render(float width, float height)
 										VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
-	updateUniformBuffer(currentFrame);
+	updateUniformBuffer(scene, currentFrame);
 }
 
 void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)

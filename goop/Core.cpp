@@ -60,7 +60,7 @@ void Core::run()
 
 #ifdef GOOP_APPTYPE_EDITOR
 		ImVec2 viewportSize = app->getViewportSize();
-		sys::gRenderer->render(viewportSize.x, viewportSize.y);
+		sys::gRenderer->render(&scene, viewportSize.x, viewportSize.y);
 #endif
 		app->gui();
 
@@ -81,7 +81,7 @@ void Core::run()
 		}
 
 #ifndef GOOP_APPTYPE_EDITOR
-		sys::gRenderer->render();
+		sys::gRenderer->render(&scene);
 #endif
 
 		sys::gRenderer->endFrame();
