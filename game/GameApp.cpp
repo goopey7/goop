@@ -16,13 +16,14 @@ void GameApp::init()
 {
 	std::cout << "Hello from GameApp!" << std::endl;
 
-	// TODO dynamically load and unload meshes and handle instances etc
-	// TODO user should never be using goop::sys
 
 	goop::rm->loadSfx("res/blast.mp3");
 	// goop::rm->playSfx(0);
 
+	// TODO dynamically load and unload meshes and handle instances etc
+	// TODO each separate mesh should have its own draw call
 	scene->createEntity("Viking Room").addComponent<goop::MeshComponent>("res/viking_room.obj");
+	scene->createEntity("Cow").addComponent<goop::MeshComponent>("res/cow.obj");
 
 	/* TODO -------------
 	   - store EVERYTHING contiguously - decide on a data structure - (week 7)
