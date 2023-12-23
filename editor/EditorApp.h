@@ -15,13 +15,12 @@ class EditorApp : public goop::App
 	void gui() final;
 
   private:
-	bool shouldSpawnHouse = true;
-	bool shouldSpawnCow = true;
 	ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
 	ImGuiDockNodeFlags windowFlags =
-		ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+		ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
 		ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
 	App* game;
+	bool shouldPlay = false;
 };

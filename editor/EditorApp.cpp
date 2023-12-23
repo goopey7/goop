@@ -10,14 +10,14 @@
 
 goop::App* goop::createEditor(int argc, char** argv, App* game) { return new EditorApp(game); }
 
-void EditorApp::init()
-{
-	game->init();
-}
+void EditorApp::init() { game->init(); }
 
 void EditorApp::update(float dt)
 {
-	game->update(dt);
+	if (shouldPlay)
+	{
+		game->update(dt);
+	}
 }
 
 void EditorApp::gui()
@@ -35,6 +35,13 @@ void EditorApp::gui()
 	ImGuiID dockspaceID = ImGui::GetID("Dockspace");
 	ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), dockspaceFlags);
 	ImGui::End();
+
+	ImGui::BeginMainMenuBar();
+	if (ImGui::Button(shouldPlay ? "Pause" : "Play"))
+	{
+		shouldPlay = !shouldPlay;
+	}
+	ImGui::EndMainMenuBar();
 
 	auto r = goop::sys::gRenderer.get();
 	ImGui::Begin("Viewport");
