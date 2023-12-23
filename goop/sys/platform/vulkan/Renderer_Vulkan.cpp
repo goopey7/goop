@@ -127,15 +127,9 @@ void Renderer_Vulkan::beginFrame() { ImGui_ImplVulkan_NewFrame(); }
 
 void Renderer_Vulkan::updateUniformBuffer(uint32_t currentFrame)
 {
-	static auto startTime = std::chrono::high_resolution_clock::now();
-	auto currentTime = std::chrono::high_resolution_clock::now();
-
-	float time =
-		std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
 	UniformBufferObject ubo{};
 
-	ubo.model = glm::rotate(glm::mat4(1.f), time + glm::radians(90.f), glm::vec3(0.f, 1.f, 0.f));
+	ubo.model = glm::mat4(1.f);
 
 	ubo.view =
 		glm::lookAt(glm::vec3(2.f, 2.f, 2.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
@@ -157,7 +151,7 @@ void Renderer_Vulkan::updateUniformBuffer(uint32_t currentFrame)
 	uniformBuffer->update(currentFrame, ubo);
 }
 
-void Renderer_Vulkan::addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader)
+void Renderer_Vulkan::addToRenderQueue(uint32_t mesh, MeshLoader* meshLoader)
 {
 	Renderer::addToRenderQueue(mesh, meshLoader);
 }
@@ -170,7 +164,7 @@ void Renderer_Vulkan::updateBuffers()
 		MeshImportData combinedMesh;
 		while (!meshQueue.empty())
 		{
-			goop::res::mesh id = meshQueue.front();
+			uint32_t id = meshQueue.front();
 			MeshImportData mesh = (*meshLoader->getData())[id];
 
 			for (uint32_t i = 0; i < mesh.indices.size(); i++)

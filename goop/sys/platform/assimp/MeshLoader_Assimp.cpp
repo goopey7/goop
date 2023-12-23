@@ -22,7 +22,7 @@ int MeshLoader_Assimp::destroy()
 	return 0;
 }
 
-bool MeshLoader_Assimp::load(const std::string& path)
+uint32_t MeshLoader_Assimp::load(const std::string& path)
 {
 	int index = data->size();
 
@@ -86,7 +86,7 @@ bool MeshLoader_Assimp::load(const std::string& path)
 		}
 	}
 
-	return true;
+	return index;
 }
 
 MeshLoader_Assimp::MeshLoader_Assimp() {}

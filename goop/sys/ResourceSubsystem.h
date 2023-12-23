@@ -3,6 +3,7 @@
 
 #include "goop/sys/Subsystem.h"
 #include <string>
+#include <cstdint>
 
 namespace goop::sys
 {
@@ -10,7 +11,7 @@ namespace goop::sys
 class ResourceSubsystem : public Subsystem
 {
   public:
-	virtual bool load(const std::string& path) = 0;
+	virtual uint32_t load(const std::string& path) = 0;
   protected:
 	bool bIsInitialized = false;
 };

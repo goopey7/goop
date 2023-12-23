@@ -1,4 +1,5 @@
 #include <goop/App.h>
+#include <goop/Scene.h>
 
 #ifndef GOOP_APPTYPE_EDITOR
 #include <imgui.h>
@@ -7,10 +8,10 @@
 class GameApp : public goop::App
 {
   public:
+	GameApp(goop::Scene* scene = nullptr) : App(scene) {}
 	void init() final;
 	void update(float dt) final;
-	void gui() final;
-	void render() final;
+	void gui() final {}
 
   private:
 	bool shouldSpawnHouse = true;

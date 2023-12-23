@@ -1,3 +1,5 @@
+#pragma once
+
 #include <glm/glm.hpp>
 #include <string>
 
@@ -16,4 +18,12 @@ struct TagComponent
 	TagComponent() : tag("Entity") {}
 	TagComponent(const std::string& tag) : tag(tag) {}
 };
+
+struct MeshComponent
+{
+	std::string path;
+	uint32_t id;
+	MeshComponent(const std::string& path) : path(path) {}
+};
+
 } // namespace goop

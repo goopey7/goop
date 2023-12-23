@@ -11,9 +11,9 @@ const std::unique_ptr<goop::sys::ResourceManager> goop::rm =
 	std::make_unique<goop::sys::ResourceManager>();
 
 #ifdef GOOP_APPTYPE_EDITOR
-Core::Core(int argc, char** argv) : app(createEditor(argc, argv, createGame(argc, argv)))
+Core::Core(int argc, char** argv) : app(createEditor(argc, argv, createGame(argc, argv, &scene)))
 #else
-Core::Core(int argc, char** argv) : app(createGame(argc, argv))
+Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 #endif
 {
 	IMGUI_CHECKVERSION();
@@ -29,6 +29,14 @@ Core::Core(int argc, char** argv) : app(createGame(argc, argv))
 	sys::gRenderer->initialize();
 	rm->initialize();
 	app->init();
+
+	// load meshes from components
+	auto view = scene.view<MeshComponent>();
+	for (auto entity : view)
+	{
+		MeshComponent& mesh = view.get<MeshComponent>(entity);
+		rm->loadMesh(mesh);
+	}
 }
 
 void Core::run()
@@ -64,7 +72,12 @@ void Core::run()
 
 		if (sys::gRenderer->isMeshQueueEmpty())
 		{
-			app->render();
+			auto view = scene.view<MeshComponent>();
+			for (auto entity : view)
+			{
+				MeshComponent mesh = view.get<MeshComponent>(entity);
+				sys::gRenderer->addToRenderQueue(mesh.id, rm->getMeshLoader());
+			}
 		}
 
 #ifndef GOOP_APPTYPE_EDITOR

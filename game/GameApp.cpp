@@ -1,4 +1,6 @@
 #include "GameApp.h"
+#include "goop/Components.h"
+#include "goop/Entity.h"
 #include <imgui.h>
 #include <iostream>
 
@@ -8,7 +10,7 @@
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Sfx.h>
 
-goop::App* goop::createGame(int argc, char** argv) { return new GameApp(); }
+goop::App* goop::createGame(int argc, char** argv, Scene* scene) { return new GameApp(scene); }
 
 void GameApp::init()
 {
@@ -16,13 +18,12 @@ void GameApp::init()
 
 	// TODO dynamically load and unload meshes and handle instances etc
 	// TODO user should never be using goop::sys
-	goop::rm->loadMesh("res/viking_room.obj");
-	goop::rm->loadMesh("res/cow.obj");
 
-	// goop::sys::gRenderer->addToRenderQueue(goop::res::COW, goop::rm->getMeshLoader());
-	// goop::sys::gRenderer->addToRenderQueue(goop::res::VIKING_ROOM, goop::rm->getMeshLoader());
 	goop::rm->loadSfx("res/blast.mp3");
-	goop::rm->playSfx(goop::res::LAZER);
+	//goop::rm->playSfx(0);
+
+	scene->createEntity("Viking Room").addComponent<goop::MeshComponent>("res/viking_room.obj");
+	scene->createEntity("Cow").addComponent<goop::MeshComponent>("res/cow.obj");
 
 	/* TODO -------------
 	   - store EVERYTHING contiguously - decide on a data structure - (week 7)
@@ -35,19 +36,5 @@ void GameApp::init()
 
 void GameApp::update(float dt)
 {
-	// std::cout << "delta time: " << dt << std::endl;
 }
 
-void GameApp::gui()
-{
-	ImGui::Begin("hello");
-		ImGui::Text("Hello from GameApp!");
-		ImGui::Button("Button");
-	ImGui::End();
-}
-
-void GameApp::render()
-{
-	goop::sys::gRenderer->addToRenderQueue(goop::res::VIKING_ROOM, goop::rm->getMeshLoader());
-	goop::sys::gRenderer->addToRenderQueue(goop::res::COW, goop::rm->getMeshLoader());
-}

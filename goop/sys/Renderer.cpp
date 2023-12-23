@@ -3,7 +3,7 @@
 
 using namespace goop::sys;
 
-void Renderer::addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader)
+void Renderer::addToRenderQueue(uint32_t mesh, MeshLoader* meshLoader)
 {
 	this->meshLoader = meshLoader;
 	meshQueue.push(mesh);

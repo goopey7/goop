@@ -20,11 +20,11 @@ int Sfx_SoLoud::destroy()
 	return 0;
 }
 
-bool Sfx_SoLoud::load(const std::string& path)
+uint32_t Sfx_SoLoud::load(const std::string& path)
 {
 	sfx.push_back(SoLoud::Wav());
 	sfx.back().load(path.c_str());
-	return true;
+	return sfx.size() - 1;
 }
 
 void Sfx_SoLoud::playSfx(uint32_t id) { engine.play(sfx[id]); }

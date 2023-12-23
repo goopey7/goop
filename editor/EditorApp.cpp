@@ -50,8 +50,3 @@ void EditorApp::gui()
 
 	game->gui();
 }
-
-void EditorApp::render()
-{
-	game->render();
-}

@@ -13,7 +13,6 @@ class EditorApp : public goop::App
 	void init() final;
 	void update(float dt) final;
 	void gui() final;
-	void render() final;
 
   private:
 	bool shouldSpawnHouse = true;

@@ -28,7 +28,11 @@ int ResourceManager::initialize()
 	return 0;
 }
 
-bool ResourceManager::loadMesh(const std::string& path) { return meshLoader->load(path); }
+bool ResourceManager::loadMesh(MeshComponent& mesh)
+{
+	mesh.id = meshLoader->load(mesh.path);
+	return true;
+}
 bool ResourceManager::loadSfx(const std::string& path) { return sfx->load(path); }
 
 int ResourceManager::destroy()
@@ -38,8 +42,4 @@ int ResourceManager::destroy()
 	return 0;
 }
 
-void ResourceManager::playSfx(uint32_t id) const
-{
-	sfx->playSfx(id);
-}
-
+void ResourceManager::playSfx(uint32_t id) const { sfx->playSfx(id); }

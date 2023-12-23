@@ -41,7 +41,7 @@ class Renderer_Vulkan : public Renderer
 	void render() final;
 #endif
 	void endFrame() final;
-	void addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader) final;
+	void addToRenderQueue(uint32_t mesh, MeshLoader* meshLoader) final;
 	void updateBuffers();
 
 #ifdef GOOP_APPTYPE_EDITOR
@@ -80,7 +80,7 @@ class Renderer_Vulkan : public Renderer
 	uint32_t imageIndex = 0;
 	bool frameBufferResized = false;
 
-	std::queue<goop::res::mesh> oldQueue;
+	std::queue<uint32_t> oldQueue;
 
 #ifdef GOOP_APPTYPE_EDITOR
 	float oldWidth = -1.f;

@@ -2,6 +2,7 @@
 #pragma once
 
 #include <entt.hpp>
+#include "Components.h"
 
 namespace goop
 {
@@ -13,6 +14,9 @@ class Scene
 	~Scene();
 
 	Entity createEntity(const std::string& tag = "Entity");
+
+	template <typename T>
+	auto view() { return registry.view<T>(); }
 
   private:
 	entt::registry registry;

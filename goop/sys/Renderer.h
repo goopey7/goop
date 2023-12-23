@@ -21,13 +21,13 @@ class Renderer : public Subsystem
 #else
 	virtual void render() = 0;
 #endif
-	virtual void addToRenderQueue(goop::res::mesh mesh, MeshLoader* meshLoader);
+	virtual void addToRenderQueue(uint32_t mesh, MeshLoader* meshLoader);
 	bool isMeshQueueEmpty() const { return meshQueue.empty(); }
 
 	virtual ImTextureID getViewTexture() const = 0;
 
   protected:
-	std::queue<goop::res::mesh> meshQueue;
+	std::queue<uint32_t> meshQueue;
 	MeshLoader* meshLoader;
 };
 

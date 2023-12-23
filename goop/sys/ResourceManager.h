@@ -4,21 +4,8 @@
 #include "goop/sys/Sfx.h"
 #include <goop/sys/MeshLoader.h>
 #include <goop/sys/Subsystem.h>
+#include <goop/Components.h>
 #include <string>
-
-namespace goop::res
-{
-	enum mesh
-	{
-		VIKING_ROOM,
-		COW,
-	};
-	enum sfx
-	{
-		LAZER,
-		BEEP,
-	};
-}
 
 namespace goop::sys
 {
@@ -28,7 +15,7 @@ class ResourceManager : public Subsystem
 	virtual int initialize() final;
 	virtual int destroy() final;
 
-	virtual bool loadMesh(const std::string& path);
+	virtual bool loadMesh(MeshComponent& mesh);
 	virtual bool loadSfx(const std::string& path);
 
 	void playSfx(uint32_t id) const;

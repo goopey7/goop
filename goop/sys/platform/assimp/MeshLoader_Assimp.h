@@ -19,7 +19,7 @@ class MeshLoader_Assimp : public MeshLoader
 	int destroy() final;
 
 	// ResourceSubsystem Interface
-	bool load(const std::string& path) final;
+	uint32_t load(const std::string& path) final;
 
   private:
 	Assimp::Importer importer;

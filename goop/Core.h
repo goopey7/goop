@@ -1,6 +1,7 @@
 // Sam Collier 2023
 #pragma once
 
+#include "goop/Scene.h"
 #include <goop/App.h>
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Window.h>
@@ -28,6 +29,7 @@ class Core
 	const float blastFreq = 5.0f;
 
 	App* app;
+	Scene scene;
 };
 extern const std::unique_ptr<sys::ResourceManager> rm;
 } // namespace goop
