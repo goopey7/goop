@@ -2,8 +2,6 @@
 #include <imgui.h>
 #include <iostream>
 
-#define GOOP_RENDERER_VULKAN
-#include "goop/sys/platform/vulkan/Renderer_Vulkan.h"
 #include <goop/Core.h>
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Sfx.h>

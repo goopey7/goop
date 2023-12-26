@@ -4,8 +4,6 @@
 #include <imgui.h>
 #include <iostream>
 
-#define GOOP_RENDERER_VULKAN
-#include "goop/sys/platform/vulkan/Renderer_Vulkan.h"
 #include <goop/Core.h>
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Sfx.h>
@@ -16,12 +14,10 @@ void GameApp::init()
 {
 	std::cout << "Hello from GameApp!" << std::endl;
 
-
 	goop::rm->loadSfx("res/blast.mp3");
 	// goop::rm->playSfx(0);
 
 	// TODO dynamically load and unload meshes and handle instances etc
-	// TODO each separate mesh should have its own draw call
 	scene->createEntity("Viking Room").addComponent<goop::MeshComponent>("res/viking_room.obj");
 	scene->createEntity("Cow").addComponent<goop::MeshComponent>("res/cow.obj");
 
