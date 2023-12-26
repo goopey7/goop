@@ -28,6 +28,8 @@ Buffers::Buffers(Context* ctx) : ctx(ctx)
 	oldVertexCounts.resize(ctx->getMaxFramesInFlight());
 	oldIndexCounts.resize(ctx->getMaxFramesInFlight());
 
+	indexOffsets.resize(ctx->getMaxFramesInFlight());
+
 	for (size_t i = 0; i < oldVertexCounts.size(); i++)
 	{
 		oldVertexCounts[i] = -1;
@@ -72,7 +74,9 @@ void Buffers::swapBuffers(uint32_t currentFrame)
 }
 
 void Buffers::updateBuffers(uint32_t currentFrame, const Vertex* vertices, uint32_t vertexCount,
-							const uint32_t* indices, uint32_t indexCount)
+							const uint32_t* indices, uint32_t indexCount,
+							const std::vector<uint32_t>* indexOffsets,
+							const std::vector<uint32_t>* indexCounts)
 {
 	if (vertexCount == oldVertexCounts[currentFrame] && indexCount == oldIndexCounts[currentFrame])
 	{
@@ -82,6 +86,7 @@ void Buffers::updateBuffers(uint32_t currentFrame, const Vertex* vertices, uint3
 	oldIndexCounts[currentFrame] = indexCount;
 	if (vertexCount == 0 || indexCount == 0)
 	{
+		// create one vertex and index to keep the renderer happy
 		Vertex v{};
 		v.pos = glm::vec3(0.0f);
 		v.color = glm::vec3(0.0f);
@@ -96,7 +101,8 @@ void Buffers::updateBuffers(uint32_t currentFrame, const Vertex* vertices, uint3
 		createIndexBuffer(currentFrame, indices, indexCount);
 	}
 	this->vertexCounts[currentFrame] = vertexCount;
-	this->indexCounts[currentFrame] = indexCount;
+	this->indexCounts[currentFrame] = *indexCounts;
+	this->indexOffsets[currentFrame] = *indexOffsets;
 	bReadyToSwap = true;
 }
 

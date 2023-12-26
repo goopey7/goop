@@ -165,26 +165,31 @@ void Renderer_Vulkan::updateBuffers()
 	if (meshLoader != nullptr)
 	{
 		oldQueue = meshQueue;
-		MeshImportData combinedMesh;
+		std::vector<Vertex> vertices;
+		std::vector<uint32_t> indices;
+		std::vector<uint32_t> indexOffsets;
+		std::vector<uint32_t> indexCounts;
+
 		while (!meshQueue.empty())
 		{
 			uint32_t id = meshQueue.front();
 			MeshImportData mesh = (*meshLoader->getData())[id];
 
+			indexOffsets.push_back(indices.size());
+
 			for (uint32_t i = 0; i < mesh.indices.size(); i++)
 			{
-				mesh.indices[i] += combinedMesh.vertices.size();
+				mesh.indices[i] += vertices.size();
 			}
 
-			combinedMesh.vertices.insert(combinedMesh.vertices.end(), mesh.vertices.begin(),
-										 mesh.vertices.end());
-			combinedMesh.indices.insert(combinedMesh.indices.end(), mesh.indices.begin(),
-										mesh.indices.end());
+			vertices.insert(vertices.end(), mesh.vertices.begin(), mesh.vertices.end());
+			indices.insert(indices.end(), mesh.indices.begin(), mesh.indices.end());
+			indexCounts.push_back(mesh.indices.size());
+
 			meshQueue.pop();
 		}
-		buffers->updateBuffers(currentFrame, combinedMesh.vertices.data(),
-							   combinedMesh.vertices.size(), combinedMesh.indices.data(),
-							   combinedMesh.indices.size());
+		buffers->updateBuffers(currentFrame, vertices.data(), vertices.size(), indices.data(),
+							   indices.size(), &indexOffsets, &indexCounts);
 	}
 	for (size_t i = 0; i < meshQueue.size(); i++)
 	{
@@ -318,7 +323,7 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline());
 
-	if (buffers->getVertexCount(currentFrame) && buffers->getIndexCount(currentFrame) != 0 &&
+	if (buffers->getVertexCount(currentFrame) && buffers->getIndexCount(currentFrame, 0) != 0 &&
 		buffers->getVertexBuffer(currentFrame) != VK_NULL_HANDLE &&
 		buffers->getIndexBuffer(currentFrame) != VK_NULL_HANDLE)
 	{
@@ -347,10 +352,14 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 							pipeline->getPipelineLayout(), 0, 1, descriptor->getSet(currentFrame),
 							0, nullptr);
 
-	if (buffers->getIndexCount(currentFrame) != 0 &&
+	if (buffers->getIndexCount(currentFrame, 0) != 0 &&
 		buffers->getIndexBuffer(currentFrame) != nullptr)
 	{
-		vkCmdDrawIndexed(commandBuffer, buffers->getIndexCount(currentFrame), 1, 0, 0, 0);
+		for (size_t i = 0; i < buffers->getIndexCountSize(currentFrame); i++)
+		{
+			vkCmdDrawIndexed(commandBuffer, buffers->getIndexCount(currentFrame, i), 1,
+							 buffers->getIndexOffset(currentFrame, i), 0, 0);
+		}
 	}
 
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);

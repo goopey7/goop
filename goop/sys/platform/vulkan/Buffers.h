@@ -24,11 +24,29 @@ class Buffers
 	}
 	VkBuffer getIndexBuffer(uint32_t currentFrame) const { return indexBuffers[currentFrame]; }
 	uint32_t getVertexCount(uint32_t currentFrame) const { return vertexCounts[currentFrame]; }
-	uint32_t getIndexCount(uint32_t currentFrame) const { return indexCounts[currentFrame]; }
+	uint32_t getIndexCount(uint32_t currentFrame, uint32_t index) const {
+		if (indexCounts.size() <= currentFrame)
+		{
+			return 0;
+		}
+		if (indexCounts[currentFrame].size() <= index)
+		{
+			return 0;
+		}
+
+		return indexCounts[currentFrame][index];
+	}
+	size_t getIndexCountSize(uint32_t currentFrame) const { return indexCounts[currentFrame].size(); }
+	uint32_t getIndexOffset(uint32_t currentFrame, uint32_t index) const
+	{
+		return indexOffsets[currentFrame][index];
+	}
 
 	void swapBuffers(uint32_t currentFrame);
 	void updateBuffers(uint32_t currentFrame, const Vertex* vertices, uint32_t vertexCount,
-					   const uint32_t* indices, uint32_t indexCount);
+					   const uint32_t* indices, uint32_t indexCount,
+					   const std::vector<uint32_t>* indexOffsets,
+					   const std::vector<uint32_t>* indexCounts);
 	bool isReadyToSwap() const { return bReadyToSwap; }
 
   private:
@@ -43,13 +61,15 @@ class Buffers
 	std::vector<VkBuffer> indexBuffers;
 	std::vector<VkDeviceMemory> indexBufferMemories;
 
+	std::vector<std::vector<uint32_t>> indexOffsets;
+
 	std::vector<VkBuffer> vertexBufferStaging;
 	std::vector<VkDeviceMemory> vertexBufferMemoryStaging;
 	std::vector<VkBuffer> indexBufferStaging;
 	std::vector<VkDeviceMemory> indexBufferMemoryStaging;
 
 	std::vector<uint32_t> vertexCounts;
-	std::vector<uint32_t> indexCounts;
+	std::vector<std::vector<uint32_t>> indexCounts;
 	std::vector<uint32_t> oldVertexCounts;
 	std::vector<uint32_t> oldIndexCounts;
 
