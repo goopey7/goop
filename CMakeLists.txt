@@ -52,7 +52,7 @@ file(GLOB STB_IMAGE_HEADER "libs/stb/stb_image.h")
 add_executable(${PROJECT_NAME} ${ENGINE_SRC_FILES} ${STB_VORBIS_SOURCE})
 
 #define app type
-#target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_APPTYPE_EDITOR=1)
+target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_APPTYPE_EDITOR=1)
 
 # define systems
 target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_RENDERER_VULKAN=1)

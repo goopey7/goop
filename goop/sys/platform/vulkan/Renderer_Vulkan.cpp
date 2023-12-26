@@ -414,7 +414,7 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 
 	vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline());
 
-	if (buffers->getVertexCount(currentFrame) && buffers->getIndexCount(currentFrame) != 0 &&
+	if (buffers->getVertexCount(currentFrame) && buffers->getIndexCount(currentFrame, 0) != 0 &&
 		buffers->getVertexBuffer(currentFrame) != VK_NULL_HANDLE &&
 		buffers->getIndexBuffer(currentFrame) != VK_NULL_HANDLE)
 	{
@@ -426,9 +426,14 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 	vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 0,
 							1, descriptor->getSet(currentFrame), 0, nullptr);
 
-	if (buffers->getIndexCount(currentFrame) != 0)
+	if (buffers->getIndexCount(currentFrame, 0) != 0 &&
+		buffers->getIndexBuffer(currentFrame) != nullptr)
 	{
-		vkCmdDrawIndexed(cb, buffers->getIndexCount(currentFrame), 1, 0, 0, 0);
+		for (size_t i = 0; i < buffers->getIndexCountSize(currentFrame); i++)
+		{
+			vkCmdDrawIndexed(cb, buffers->getIndexCount(currentFrame, i), 1,
+							 buffers->getIndexOffset(currentFrame, i), 0, 0);
+		}
 	}
 
 	vkCmdEndRenderPass(cb);
