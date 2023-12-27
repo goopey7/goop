@@ -27,6 +27,7 @@ Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 	sys::gWindow->initialize();
 	sys::gWindow->openWindow(1280, 720, "Goop", GOOP_WINDOW_DEFAULT);
 	sys::gRenderer->initialize();
+	sys::gRenderer->setScene(&scene);
 	rm->initialize();
 	app->init();
 
@@ -59,7 +60,7 @@ void Core::run()
 
 #ifdef GOOP_APPTYPE_EDITOR
 		ImVec2 viewportSize = app->getViewportSize();
-		sys::gRenderer->render(&scene, viewportSize.x, viewportSize.y);
+		sys::gRenderer->render(viewportSize.x, viewportSize.y);
 #endif
 		app->gui();
 
@@ -80,7 +81,7 @@ void Core::run()
 		}
 
 #ifndef GOOP_APPTYPE_EDITOR
-		sys::gRenderer->render(&scene);
+		sys::gRenderer->render();
 #endif
 
 		sys::gRenderer->endFrame();

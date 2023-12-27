@@ -32,7 +32,14 @@ int ResourceManager::initialize()
 
 bool ResourceManager::loadMesh(MeshComponent& mesh)
 {
+	if (loadedMeshes[mesh.path] != 0)
+	{
+		std::cout << "Mesh " << mesh.path << " already loaded" << std::endl;
+		mesh.id = loadedMeshes[mesh.path];
+		return true;
+	}
 	mesh.id = meshLoader->load(mesh.path);
+	loadedMeshes[mesh.path] = mesh.id;
 	std::cout << "Loaded mesh " << mesh.path << " with id " << mesh.id << std::endl;
 	return true;
 }

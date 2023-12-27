@@ -121,11 +121,12 @@ void Buffers::updateBuffers(uint32_t currentFrame, const Vertex* vertices, uint3
 	{
 		createVertexBuffer(currentFrame, vertices, vertexCount);
 		std::vector<Instance> instancesToRender;
-		for (auto& [index, instances] : *instances)
+		for (int i = 0; i < instances->size(); i++)
 		{
 			instanceOffsets[currentFrame].push_back(instancesToRender.size());
-			instancesToRender.insert(instancesToRender.end(), instances.begin(), instances.end());
-			instanceCounts[currentFrame].push_back(instances.size());
+			instancesToRender.insert(instancesToRender.end(), instances->at(i).begin(),
+									 instances->at(i).end());
+			instanceCounts[currentFrame].push_back(instances->at(i).size());
 		}
 		createInstanceBuffer(currentFrame, instancesToRender.data(), instancesToRender.size());
 		createIndexBuffer(currentFrame, indices, indexCount);

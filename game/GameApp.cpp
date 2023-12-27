@@ -19,6 +19,10 @@ void GameApp::init()
 
 	// TODO dynamically load and unload meshes and handle instances etc
 	scene->createEntity("Viking Room").addComponent<goop::MeshComponent>("res/viking_room.obj");
+	scene->createEntity("Viking Room1").addComponent<goop::MeshComponent>("res/viking_room.obj");
+	glm::mat4& transform =
+		scene->getEntity("Viking Room1").getComponent<goop::TransformComponent>().transform;
+	transform = glm::translate(transform, glm::vec3(0.0f, -2.0f, -2.0f));
 	scene->createEntity("Cow").addComponent<goop::MeshComponent>("res/cow.obj");
 
 	/* TODO -------------
@@ -32,8 +36,8 @@ void GameApp::init()
 
 void GameApp::update(float dt)
 {
-	glm::mat4& transform =
-		scene->getEntity("Viking Room").getComponent<goop::TransformComponent>().transform;
+	//glm::mat4& transform =
+	//	scene->getEntity("Viking Room").getComponent<goop::TransformComponent>().transform;
 
-	transform = glm::rotate(transform, dt, glm::vec3(0.0f, 1.0f, 0.0f));
+	//transform = glm::rotate(transform, dt, glm::vec3(0.0f, 1.0f, 0.0f));
 }

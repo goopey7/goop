@@ -5,6 +5,7 @@
 #include <goop/sys/MeshLoader.h>
 #include <goop/sys/Subsystem.h>
 #include <goop/Components.h>
+#include <map>
 #include <string>
 
 namespace goop::sys
@@ -26,5 +27,6 @@ class ResourceManager : public Subsystem
   private:
 	std::unique_ptr<MeshLoader> meshLoader;
 	std::unique_ptr<Sfx> sfx;
+	std::map<std::string, uint32_t> loadedMeshes;
 };
 } // namespace goop::sys

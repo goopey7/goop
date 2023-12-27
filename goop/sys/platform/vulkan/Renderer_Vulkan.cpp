@@ -130,10 +130,7 @@ void Renderer_Vulkan::updateUniformBuffer(Scene* scene, uint32_t currentFrame)
 {
 	UniformBufferObject ubo{};
 
-	TransformComponent& transform =
-		scene->getEntity("Viking Room").getComponent<goop::TransformComponent>();
-
-	ubo.model = transform.transform;
+	ubo.model = glm::mat4(1.f);
 
 	ubo.view =
 		glm::lookAt(glm::vec3(2.f, 2.f, 2.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
@@ -162,7 +159,7 @@ void Renderer_Vulkan::addToRenderQueue(uint32_t mesh, MeshLoader* meshLoader)
 
 void Renderer_Vulkan::updateBuffers()
 {
-	if (meshLoader != nullptr)
+	if (meshLoader != nullptr && scene != nullptr)
 	{
 		oldQueue = meshQueue;
 		std::vector<Vertex> vertices;
@@ -172,6 +169,14 @@ void Renderer_Vulkan::updateBuffers()
 		std::vector<uint32_t> indexCounts;
 
 		std::map<uint32_t, uint32_t> instanceCounts;
+
+		std::vector<Entity> entitiesToRender;
+		auto view = scene->view<MeshComponent>();
+
+		for (auto entity : view)
+		{
+			entitiesToRender.push_back(goop::Entity(entity, scene));
+		}
 
 		while (!meshQueue.empty())
 		{
@@ -193,7 +198,12 @@ void Renderer_Vulkan::updateBuffers()
 				indexCounts.push_back(mesh.indices.size());
 			}
 
-			instances[id].push_back({glm::mat4(1.f)});
+			// find an entity to render who has the corresponding mesh ID
+			auto entity =
+				std::find_if(entitiesToRender.begin(), entitiesToRender.end(),
+							 [id](Entity& e) { return e.getComponent<MeshComponent>().id == id; });
+			instances[id].push_back({entity->getComponent<TransformComponent>().transform});
+			entitiesToRender.erase(entity);
 
 			meshQueue.pop();
 		}
@@ -225,7 +235,7 @@ void Renderer_Vulkan::recreateSwapchain()
 }
 
 #ifndef GOOP_APPTYPE_EDITOR
-void Renderer_Vulkan::render(Scene* scene)
+void Renderer_Vulkan::render()
 {
 	vkDeviceWaitIdle(*ctx);
 	buffers->swapBuffers(currentFrame);
@@ -367,12 +377,15 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 		buffers->getIndexBuffer(currentFrame) != nullptr)
 	{
 		// for each different instance, render all instances of that mesh
+		size_t uniqueInstances = buffers->getNumUniqueInstances(currentFrame);
 		for (size_t i = 0; i < buffers->getNumUniqueInstances(currentFrame); i++)
 		{
-			vkCmdDrawIndexed(commandBuffer, buffers->getIndexCount(currentFrame, i),
-							 buffers->getInstanceCount(currentFrame, i),
-							 buffers->getIndexOffset(currentFrame, i), 0,
-							 buffers->getInstanceOffsets(currentFrame, i));
+			int instanceCount = buffers->getInstanceCount(currentFrame, i);
+			int instanceOffset = buffers->getInstanceOffsets(currentFrame, i);
+			int indexCount = buffers->getIndexCount(currentFrame, i);
+			int indexOffset = buffers->getIndexOffset(currentFrame, i);
+			vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, indexOffset, 0,
+							 instanceOffset);
 		}
 	}
 
@@ -528,7 +541,7 @@ void Renderer_Vulkan::renderFrame(uint32_t imageIndex)
 	updateBuffers();
 }
 
-void Renderer_Vulkan::render(Scene* scene, float width, float height)
+void Renderer_Vulkan::render(float width, float height)
 {
 	// wait for the fence to signal that the frame is finished
 	sync->waitForFrame(currentFrame);

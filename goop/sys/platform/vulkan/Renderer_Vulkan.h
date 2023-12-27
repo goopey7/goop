@@ -36,9 +36,9 @@ class Renderer_Vulkan : public Renderer
 	// Renderer interface
 	void beginFrame() final;
 #ifdef GOOP_APPTYPE_EDITOR
-	void render(Scene* scene, float width = -1.f, float height = -1.f) final;
+	void render(float width = -1.f, float height = -1.f) final;
 #else
-	void render(Scene* scene) final;
+	void render() final;
 #endif
 	void endFrame() final;
 	void addToRenderQueue(uint32_t mesh, MeshLoader* meshLoader) final;
