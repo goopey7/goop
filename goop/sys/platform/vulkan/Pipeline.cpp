@@ -1,8 +1,8 @@
 // Sam Collier 2023
 
 #include "Pipeline.h"
-#include <goop/sys/Vertex.h>
 #include <fstream>
+#include <goop/sys/Vertex.h>
 
 using namespace goop::sys::platform::vulkan;
 
@@ -78,13 +78,25 @@ void Pipeline::createGraphicsPipeline(Swapchain* swapchain)
 
 	// ============ Fixed Function Pipeline Stages
 
-	auto bindingDescription = Vertex::getBindingDescription();
-	auto attributeDescriptions = Vertex::getAttributeDescriptions();
+	std::array<VkVertexInputBindingDescription, 2> bindingDescriptions{
+		Vertex::getBindingDescription(), Instance::getBindingDescription()};
+	auto vAttributeDescriptions = Vertex::getAttributeDescriptions();
+	auto iAttributeDescriptions = Instance::getAttributeDescriptions();
+
+	std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+	for (auto& desc : vAttributeDescriptions)
+	{
+		attributeDescriptions.push_back(desc);
+	}
+	for (auto& desc : iAttributeDescriptions)
+	{
+		attributeDescriptions.push_back(desc);
+	}
 
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = 1;
-	vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+	vertexInputInfo.vertexBindingDescriptionCount = bindingDescriptions.size();
+	vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
 	vertexInputInfo.vertexAttributeDescriptionCount =
 		static_cast<uint32_t>(attributeDescriptions.size());
 	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();

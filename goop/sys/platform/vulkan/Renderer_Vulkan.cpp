@@ -166,30 +166,39 @@ void Renderer_Vulkan::updateBuffers()
 	{
 		oldQueue = meshQueue;
 		std::vector<Vertex> vertices;
+		std::map<uint32_t, std::vector<Instance>> instances;
 		std::vector<uint32_t> indices;
 		std::vector<uint32_t> indexOffsets;
 		std::vector<uint32_t> indexCounts;
 
+		std::map<uint32_t, uint32_t> instanceCounts;
+
 		while (!meshQueue.empty())
 		{
 			uint32_t id = meshQueue.front();
-			MeshImportData mesh = (*meshLoader->getData())[id];
-
-			indexOffsets.push_back(indices.size());
-
-			for (uint32_t i = 0; i < mesh.indices.size(); i++)
+			instanceCounts[id]++;
+			if (instanceCounts[id] == 1)
 			{
-				mesh.indices[i] += vertices.size();
+				MeshImportData mesh = (*meshLoader->getData())[id];
+
+				indexOffsets.push_back(indices.size());
+
+				for (uint32_t i = 0; i < mesh.indices.size(); i++)
+				{
+					mesh.indices[i] += vertices.size();
+				}
+
+				vertices.insert(vertices.end(), mesh.vertices.begin(), mesh.vertices.end());
+				indices.insert(indices.end(), mesh.indices.begin(), mesh.indices.end());
+				indexCounts.push_back(mesh.indices.size());
 			}
 
-			vertices.insert(vertices.end(), mesh.vertices.begin(), mesh.vertices.end());
-			indices.insert(indices.end(), mesh.indices.begin(), mesh.indices.end());
-			indexCounts.push_back(mesh.indices.size());
+			instances[id].push_back({glm::mat4(1.f)});
 
 			meshQueue.pop();
 		}
 		buffers->updateBuffers(currentFrame, vertices.data(), vertices.size(), indices.data(),
-							   indices.size(), &indexOffsets, &indexCounts);
+							   indices.size(), &indexOffsets, &indexCounts, &instances);
 	}
 	for (size_t i = 0; i < meshQueue.size(); i++)
 	{
@@ -330,6 +339,8 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 		VkDeviceSize offset = 0;
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers->getVertexBuffer(currentFrame),
 							   &offset);
+		vkCmdBindVertexBuffers(commandBuffer, 1, 1, buffers->getInstanceBuffer(currentFrame),
+							   &offset);
 		vkCmdBindIndexBuffer(commandBuffer, buffers->getIndexBuffer(currentFrame), 0,
 							 VK_INDEX_TYPE_UINT32);
 	}
@@ -355,10 +366,13 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 	if (buffers->getIndexCount(currentFrame, 0) != 0 &&
 		buffers->getIndexBuffer(currentFrame) != nullptr)
 	{
-		for (size_t i = 0; i < buffers->getIndexCountSize(currentFrame); i++)
+		// for each different instance, render all instances of that mesh
+		for (size_t i = 0; i < buffers->getNumUniqueInstances(currentFrame); i++)
 		{
-			vkCmdDrawIndexed(commandBuffer, buffers->getIndexCount(currentFrame, i), 1,
-							 buffers->getIndexOffset(currentFrame, i), 0, 0);
+			vkCmdDrawIndexed(commandBuffer, buffers->getIndexCount(currentFrame, i),
+							 buffers->getInstanceCount(currentFrame, i),
+							 buffers->getIndexOffset(currentFrame, i), 0,
+							 buffers->getInstanceOffsets(currentFrame, i));
 		}
 	}
 

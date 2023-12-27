@@ -44,7 +44,6 @@ void Core::run()
 	say_hello("Sam");
 
 	auto last = std::chrono::high_resolution_clock::now();
-	float blastTime = 0.f;
 
 	while (!sys::gWindow->shouldClose())
 	{

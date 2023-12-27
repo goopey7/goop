@@ -9,6 +9,8 @@
 #include "goop/sys/platform/soloud/Sfx_SoLoud.h"
 #endif
 
+#include <iostream>
+
 using namespace goop::sys;
 
 int ResourceManager::initialize()
@@ -31,6 +33,7 @@ int ResourceManager::initialize()
 bool ResourceManager::loadMesh(MeshComponent& mesh)
 {
 	mesh.id = meshLoader->load(mesh.path);
+	std::cout << "Loaded mesh " << mesh.path << " with id " << mesh.id << std::endl;
 	return true;
 }
 bool ResourceManager::loadSfx(const std::string& path) { return sfx->load(path); }
