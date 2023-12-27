@@ -447,6 +447,7 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 	{
 		VkDeviceSize offset = 0;
 		vkCmdBindVertexBuffers(cb, 0, 1, buffers->getVertexBuffer(currentFrame), &offset);
+		vkCmdBindVertexBuffers(cb, 1, 1, buffers->getInstanceBuffer(currentFrame), &offset);
 		vkCmdBindIndexBuffer(cb, buffers->getIndexBuffer(currentFrame), 0, VK_INDEX_TYPE_UINT32);
 	}
 
@@ -456,10 +457,16 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 	if (buffers->getIndexCount(currentFrame, 0) != 0 &&
 		buffers->getIndexBuffer(currentFrame) != nullptr)
 	{
-		for (size_t i = 0; i < buffers->getIndexCountSize(currentFrame); i++)
+		// for each different instance, render all instances of that mesh
+		size_t uniqueInstances = buffers->getNumUniqueInstances(currentFrame);
+		for (size_t i = 0; i < buffers->getNumUniqueInstances(currentFrame); i++)
 		{
-			vkCmdDrawIndexed(cb, buffers->getIndexCount(currentFrame, i), 1,
-							 buffers->getIndexOffset(currentFrame, i), 0, 0);
+			int instanceCount = buffers->getInstanceCount(currentFrame, i);
+			int instanceOffset = buffers->getInstanceOffsets(currentFrame, i);
+			int indexCount = buffers->getIndexCount(currentFrame, i);
+			int indexOffset = buffers->getIndexOffset(currentFrame, i);
+			vkCmdDrawIndexed(cb, indexCount, instanceCount, indexOffset, 0,
+							 instanceOffset);
 		}
 	}
 

@@ -16,4 +16,5 @@ class GameApp : public goop::App
   private:
 	bool shouldSpawnHouse = true;
 	bool shouldSpawnCow = true;
+	float timeElapsed = 0.f;
 };

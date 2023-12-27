@@ -36,8 +36,9 @@ void GameApp::init()
 
 void GameApp::update(float dt)
 {
-	//glm::mat4& transform =
-	//	scene->getEntity("Viking Room").getComponent<goop::TransformComponent>().transform;
+	timeElapsed += dt;
+	glm::mat4& transform =
+		scene->getEntity("Viking Room").getComponent<goop::TransformComponent>().transform;
 
-	//transform = glm::rotate(transform, dt, glm::vec3(0.0f, 1.0f, 0.0f));
+	transform = glm::rotate(glm::mat4(1.f), timeElapsed, glm::vec3(0.0f, 1.0f, 0.0f));
 }
