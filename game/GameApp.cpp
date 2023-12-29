@@ -22,7 +22,6 @@ void GameApp::init()
 	scene->createEntity("Viking Room1").addComponent<goop::MeshComponent>("res/viking_room.obj");
 	glm::mat4& transform =
 		scene->getEntity("Viking Room1").getComponent<goop::TransformComponent>().transform;
-	transform = glm::translate(transform, glm::vec3(0.0f, -2.0f, -2.0f));
 	scene->createEntity("Cow").addComponent<goop::MeshComponent>("res/cow.obj");
 
 	/* TODO -------------
@@ -41,4 +40,17 @@ void GameApp::update(float dt)
 		scene->getEntity("Viking Room").getComponent<goop::TransformComponent>().transform;
 
 	transform = glm::rotate(glm::mat4(1.f), timeElapsed, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	glm::mat4& transform1 =
+		scene->getEntity("Cow").getComponent<goop::TransformComponent>().transform;
+
+	transform1 = glm::scale(glm::mat4(1.f), glm::vec3(0.15f, 0.15f, 0.15f));
+	transform1 = glm::translate(transform1, glm::vec3(-3.0f, 2.0f, 9.0f));
+	transform1 = glm::rotate(transform1, -timeElapsed, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	glm::mat4& transform2 =
+		scene->getEntity("Viking Room1").getComponent<goop::TransformComponent>().transform;
+	transform2 = glm::translate(glm::mat4(1.f), glm::vec3(0.0f, -2.0f, -2.0f));
+	transform2 = glm::translate(transform2, glm::vec3(0.0f, sinf(timeElapsed), 0.0f));
+	transform2 = glm::rotate(transform2, timeElapsed * 2.f, glm::vec3(0.0f, 1.0f, 0.0f));
 }

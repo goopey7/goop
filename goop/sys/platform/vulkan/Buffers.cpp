@@ -34,6 +34,7 @@ Buffers::Buffers(Context* ctx) : ctx(ctx)
 	oldIndexCounts.resize(ctx->getMaxFramesInFlight());
 
 	instanceOffsets.resize(ctx->getMaxFramesInFlight());
+	meshIDs.resize(ctx->getMaxFramesInFlight());
 	indexOffsets.resize(ctx->getMaxFramesInFlight());
 
 	for (size_t i = 0; i < oldVertexCounts.size(); i++)
@@ -112,7 +113,6 @@ void Buffers::updateBuffers(uint32_t currentFrame, const Vertex* vertices, uint3
 		v.texCoord = glm::vec2(0.0f);
 		uint32_t i = 0;
 		Instance instance{};
-		instance.transform = glm::mat4(1.0f);
 		createVertexBuffer(currentFrame, &v, 1);
 		createInstanceBuffer(currentFrame, &instance, 1);
 		createIndexBuffer(currentFrame, &i, 1);
@@ -126,6 +126,7 @@ void Buffers::updateBuffers(uint32_t currentFrame, const Vertex* vertices, uint3
 			instanceOffsets[currentFrame].push_back(instancesToRender.size());
 			instancesToRender.insert(instancesToRender.end(), instances->at(i).begin(),
 									 instances->at(i).end());
+			meshIDs[currentFrame].push_back(instances->at(i).begin()->meshID);
 			instanceCounts[currentFrame].push_back(instances->at(i).size());
 		}
 		createInstanceBuffer(currentFrame, instancesToRender.data(), instancesToRender.size());

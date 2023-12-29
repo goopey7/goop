@@ -56,7 +56,8 @@ struct Vertex
 };
 struct Instance
 {
-	glm::mat4 transform;
+	uint32_t uid;
+	uint32_t meshID;
 
 	static VkVertexInputBindingDescription getBindingDescription()
 	{
@@ -67,32 +68,20 @@ struct Instance
 		return bindingDescription;
 	}
 
-	static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions()
+	static std::array<VkVertexInputAttributeDescription, 1> getAttributeDescriptions()
 	{
-		std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
+		std::array<VkVertexInputAttributeDescription, 1> attributeDescriptions{};
 
 		attributeDescriptions[0].binding = 1;
 		attributeDescriptions[0].location = 3;
-		attributeDescriptions[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		attributeDescriptions[0].format = VK_FORMAT_R32_UINT;
 		attributeDescriptions[0].offset = 0;
-		attributeDescriptions[1].binding = 1;
-		attributeDescriptions[1].location = 4;
-		attributeDescriptions[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-		attributeDescriptions[1].offset = sizeof(glm::vec4);
-		attributeDescriptions[2].binding = 1;
-		attributeDescriptions[2].location = 5;
-		attributeDescriptions[2].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-		attributeDescriptions[2].offset = sizeof(glm::vec4) * 2;
-		attributeDescriptions[3].binding = 1;
-		attributeDescriptions[3].location = 6;
-		attributeDescriptions[3].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-		attributeDescriptions[3].offset = sizeof(glm::vec4) * 3;
 
 		return attributeDescriptions;
 	}
 
 	// for use in std::unordered_map
-	bool operator==(const Instance& other) const { return transform == other.transform; }
+	bool operator==(const Instance& other) const { return uid == other.uid && meshID == other.meshID; }
 };
 } // namespace goop::sys
 
@@ -111,7 +100,7 @@ template <> struct hash<Instance>
 {
 	size_t operator()(Instance const& instance) const
 	{
-		return hash<glm::mat4>()(instance.transform);
+		return ((hash<uint32_t>()(instance.uid) ^ (hash<uint32_t>()(instance.meshID) << 1)) >> 1);
 	}
 };
 } // namespace std

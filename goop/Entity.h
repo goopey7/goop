@@ -22,6 +22,8 @@ class Entity
 
 	template <typename T> void removeComponent() { scene->registry.remove<T>(entity); }
 
+	uint32_t getUID() { return (uint32_t)entity; }
+
   private:
 	entt::entity entity;
 

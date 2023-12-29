@@ -96,8 +96,8 @@ int Renderer_Vulkan::initialize()
 {
 	ctx = new Context();
 	swapchain = new Swapchain(ctx);
-	uniformBuffer = new UniformBuffer(ctx);
 	texture = new Texture(ctx, "res/viking_room.png");
+	uniformBuffer = new UniformBuffer(ctx);
 	descriptor = new Descriptor(ctx, uniformBuffer, texture);
 	pipeline = new Pipeline(ctx, swapchain, descriptor);
 	buffers = new Buffers(ctx);
@@ -129,8 +129,6 @@ void Renderer_Vulkan::beginFrame() { ImGui_ImplVulkan_NewFrame(); }
 void Renderer_Vulkan::updateUniformBuffer(Scene* scene, uint32_t currentFrame)
 {
 	UniformBufferObject ubo{};
-
-	ubo.model = glm::mat4(1.f);
 
 	ubo.view =
 		glm::lookAt(glm::vec3(2.f, 2.f, 2.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
@@ -202,7 +200,7 @@ void Renderer_Vulkan::updateBuffers()
 			auto entity =
 				std::find_if(entitiesToRender.begin(), entitiesToRender.end(),
 							 [id](Entity& e) { return e.getComponent<MeshComponent>().id == id; });
-			instances[id].push_back({entity->getComponent<TransformComponent>().transform});
+			instances[id].push_back({entity->getUID(), entity->getComponent<MeshComponent>().id});
 			entitiesToRender.erase(entity);
 
 			meshQueue.pop();
@@ -384,8 +382,29 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 			int instanceOffset = buffers->getInstanceOffsets(currentFrame, i);
 			int indexCount = buffers->getIndexCount(currentFrame, i);
 			int indexOffset = buffers->getIndexOffset(currentFrame, i);
-			vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, indexOffset, 0,
-							 instanceOffset);
+			int meshID = buffers->getMeshID(currentFrame, i);
+			// get entities who have the mesh ID we're rendering
+			std::queue<Entity> entitiesToRender;
+			auto view = scene->view<MeshComponent>();
+			for (auto entity : view)
+			{
+				Entity e = goop::Entity(entity, scene);
+				if (e.getComponent<MeshComponent>().id == meshID)
+				{
+					entitiesToRender.push(goop::Entity(entity, scene));
+				}
+			}
+
+			for (int instanceIndex = instanceOffset; instanceIndex < instanceOffset + instanceCount;
+				 instanceIndex++)
+			{
+				auto transform =
+					entitiesToRender.front().getComponent<TransformComponent>().transform;
+				vkCmdPushConstants(commandBuffer, pipeline->getPipelineLayout(),
+								   VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &transform);
+				vkCmdDrawIndexed(commandBuffer, indexCount, 1, indexOffset, 0, instanceIndex);
+				entitiesToRender.pop();
+			}
 		}
 	}
 
@@ -465,8 +484,7 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 			int instanceOffset = buffers->getInstanceOffsets(currentFrame, i);
 			int indexCount = buffers->getIndexCount(currentFrame, i);
 			int indexOffset = buffers->getIndexOffset(currentFrame, i);
-			vkCmdDrawIndexed(cb, indexCount, instanceCount, indexOffset, 0,
-							 instanceOffset);
+			vkCmdDrawIndexed(cb, indexCount, instanceCount, indexOffset, 0, instanceOffset);
 		}
 	}
 

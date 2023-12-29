@@ -54,6 +54,10 @@ class Buffers
 	{
 		return instanceOffsets[currentFrame][index];
 	}
+	uint32_t getMeshID(uint32_t currentFrame, uint32_t index) const
+	{
+		return meshIDs[currentFrame][index];
+	}
 	uint32_t getInstanceCount(uint32_t currentFrame, uint32_t index) const
 	{
 		return instanceCounts[currentFrame][index];
@@ -89,6 +93,7 @@ class Buffers
 
 	std::vector<std::vector<uint32_t>> indexOffsets;
 	std::vector<std::vector<uint32_t>> instanceOffsets;
+	std::vector<std::vector<uint32_t>> meshIDs;
 
 	std::vector<VkBuffer> vertexBufferStaging;
 	std::vector<VkDeviceMemory> vertexBufferMemoryStaging;
