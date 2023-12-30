@@ -64,10 +64,6 @@ void Core::run()
 #endif
 		app->gui();
 
-#ifdef GOOP_APPTYPE_EDITOR
-		ImGui::ShowDemoWindow();
-#endif
-
 		ImGui::Render();
 
 		if (sys::gRenderer->isMeshQueueEmpty())

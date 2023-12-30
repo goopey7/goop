@@ -3,7 +3,8 @@
 #include "Scene.h"
 #include "goop/Components.h"
 #include "goop/Entity.h"
-#include <glm/ext/matrix_transform.hpp>
+#include <glm/common.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 using namespace goop;
 
@@ -32,6 +33,7 @@ Entity Scene::getEntity(const std::string& tag)
 
 void Scene::loadScene(nlohmann::json& startScene)
 {
+	sceneJson = startScene;
 	if (startScene["entities"].is_null())
 	{
 		return;
@@ -65,4 +67,55 @@ void Scene::loadScene(nlohmann::json& startScene)
 			}
 		}
 	}
+}
+
+nlohmann::json Scene::getScene() const { return sceneJson; }
+
+nlohmann::json Scene::saveScene()
+{
+	sceneJson["entities"] = json::array();
+	auto view = registry.view<TagComponent>();
+	for (auto& entity : view)
+	{
+		auto e = goop::Entity(entity, this);
+		json eJson;
+		eJson["name"] = e.getComponent<TagComponent>().tag;
+		eJson["components"] = json::array();
+		if (e.hasComponent<TransformComponent>())
+		{
+			json transformJson;
+			transformJson["type"] = "transform";
+			glm::mat4 transform = e.getComponent<TransformComponent>().transform;
+			glm::vec3 scale, skew, translation;
+			glm::quat orientation;
+			glm::vec4 perspective;
+			glm::decompose(transform, scale, orientation, translation, skew, perspective);
+
+			transformJson["position"]["x"] = translation.x;
+			transformJson["position"]["y"] = translation.y;
+			transformJson["position"]["z"] = translation.z;
+
+			glm::vec3 euler = glm::eulerAngles(orientation);
+			transformJson["rotation"]["x"] = glm::degrees(euler.x);
+			transformJson["rotation"]["y"] = glm::degrees(euler.y);
+			transformJson["rotation"]["z"] = glm::degrees(euler.z);
+
+			transformJson["scale"]["x"] = scale.x;
+			transformJson["scale"]["y"] = scale.y;
+			transformJson["scale"]["z"] = scale.z;
+
+			eJson["components"].push_back(transformJson);
+		}
+		if (e.hasComponent<MeshComponent>())
+		{
+			json meshJson;
+			meshJson["type"] = "mesh";
+			meshJson["path"] = e.getComponent<MeshComponent>().path;
+			eJson["components"].push_back(meshJson);
+		}
+
+		sceneJson["entities"].push_back(eJson);
+	}
+
+	return sceneJson;
 }

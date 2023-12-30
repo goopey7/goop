@@ -18,6 +18,8 @@ class Scene
 
 	Entity createEntity(const std::string& tag = "Entity");
 	void loadScene(nlohmann::json& scene);
+	nlohmann::json getScene() const;
+	nlohmann::json saveScene();
 
 	template <typename T>
 	auto view() { return registry.view<T>(); }
@@ -27,5 +29,7 @@ class Scene
   private:
 	entt::registry registry;
 	friend class Entity;
+
+	nlohmann::json sceneJson;
 };
 } // namespace goop
