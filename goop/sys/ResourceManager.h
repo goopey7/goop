@@ -28,5 +28,6 @@ class ResourceManager : public Subsystem
 	std::unique_ptr<MeshLoader> meshLoader;
 	std::unique_ptr<Sfx> sfx;
 	std::map<std::string, uint32_t> loadedMeshes;
+	std::map<std::string, uint32_t> numLoadedMeshes;
 };
 } // namespace goop::sys
