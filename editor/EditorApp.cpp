@@ -9,11 +9,66 @@
 #include <json.hpp>
 using json = nlohmann::json;
 
-goop::App* goop::createEditor(int argc, char** argv, App* game) { return new EditorApp(game); }
+goop::App* goop::createEditor(int argc, char** argv, App* game, goop::Scene* scene)
+{
+	return new EditorApp(game, scene);
+}
 
-void EditorApp::init()
-{ 
-	game->init(); 
+void EditorApp::init() 
+{
+	auto cfgOpt = loadJson("cfg.json");
+	if (!cfgOpt.has_value())
+	{
+		std::cout << "Failed to load cfg.json" << std::endl;
+
+		// create a default cfg.json
+		json cfg = {
+			{"game_file", "lvl.json"},
+			{"start_scene", "lvl_1"},
+		};
+
+		std::ofstream file("cfg.json");
+		file << cfg;
+		file.close();
+
+		cfgOpt = loadJson("cfg.json");
+	}
+
+	json cfg = cfgOpt.value();
+
+	auto lvlOpt = loadJson(cfg["game_file"]);
+	if (!lvlOpt.has_value())
+	{
+		std::cout << "Failed to load " << cfg["game_file"] << std::endl;
+
+		// create a default game file
+		json lvl;
+		json sceneObj = {{"name", "lvl_1"}};
+		json scenesArr = {sceneObj};
+
+		lvl["scenes"] = scenesArr;
+
+		std::ofstream file(cfg["game_file"]);
+		file << lvl;
+		file.close();
+
+		lvlOpt = loadJson(cfg["game_file"]);
+	}
+	json lvl = lvlOpt.value();
+
+	json startScene;
+
+	// find starting scene
+	for (json& scene : lvl["scenes"])
+	{
+		if (scene["name"] == cfg["start_scene"])
+		{
+			startScene = scene;
+			break;
+		}
+	}
+
+	scene->loadScene(startScene);
 }
 
 void EditorApp::update(float dt)

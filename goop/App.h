@@ -14,7 +14,7 @@ namespace goop
 class App
 {
   public:
-	App(Scene* scene = nullptr) : scene(scene) {}
+	App(Scene* scene) : scene(scene) {}
 	virtual void init() = 0;
 	virtual void update(float dt) = 0;
 	virtual void gui() = 0;
@@ -50,7 +50,7 @@ class App
 #endif
 };
 #ifdef GOOP_APPTYPE_EDITOR
-extern App* createEditor(int argc, char** argv, App* game);
+extern App* createEditor(int argc, char** argv, App* game, Scene* scene);
 #endif
 extern App* createGame(int argc, char** argv, Scene* scene);
 } // namespace goop

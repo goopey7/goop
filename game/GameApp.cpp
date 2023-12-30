@@ -23,40 +23,15 @@ void GameApp::init()
 	if (!cfgOpt.has_value())
 	{
 		std::cout << "Failed to load cfg.json" << std::endl;
-
-		// create a default cfg.json
-		json cfg = {
-			{"game_file", "lvl.json"},
-			{"start_scene", "lvl_1"},
-		};
-
-		std::ofstream file("cfg.json");
-		file << cfg;
-		file.close();
-
-		cfgOpt = loadJson("cfg.json");
+		throw std::runtime_error("Failed to load cfg.json");
 	}
-
 	json cfg = cfgOpt.value();
 
 	auto lvlOpt = loadJson(cfg["game_file"]);
 	if (!lvlOpt.has_value())
 	{
 		std::cout << "Failed to load " << cfg["game_file"] << std::endl;
-
-		// create a default game file
-		json lvl = {{
-			"scenes",
-			{
-				{"name", "lvl_1"},
-			},
-		}};
-
-		std::ofstream file(cfg["game_file"]);
-		file << lvl;
-		file.close();
-
-		lvlOpt = loadJson(cfg["game_file"]);
+		throw std::runtime_error("Failed to load " + cfg["game_file"].get<std::string>());
 	}
 	json lvl = lvlOpt.value();
 

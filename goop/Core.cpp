@@ -11,7 +11,7 @@ const std::unique_ptr<goop::sys::ResourceManager> goop::rm =
 	std::make_unique<goop::sys::ResourceManager>();
 
 #ifdef GOOP_APPTYPE_EDITOR
-Core::Core(int argc, char** argv) : app(createEditor(argc, argv, createGame(argc, argv, &scene)))
+Core::Core(int argc, char** argv) : app(createEditor(argc, argv, createGame(argc, argv, &scene), &scene))
 #else
 Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 #endif

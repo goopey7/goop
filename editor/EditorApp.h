@@ -9,7 +9,7 @@
 class EditorApp : public goop::App
 {
   public:
-	EditorApp(goop::App* game) : game(game) {}
+	EditorApp(goop::App* game, goop::Scene* scene) : game(game), App(scene) {}
 	void init() final;
 	void update(float dt) final;
 	void gui() final;

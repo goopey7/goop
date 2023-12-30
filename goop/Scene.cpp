@@ -32,6 +32,11 @@ Entity Scene::getEntity(const std::string& tag)
 
 void Scene::loadScene(nlohmann::json& startScene)
 {
+	if (startScene["entities"].is_null())
+	{
+		return;
+	}
+
 	for (json& entity : startScene["entities"])
 	{
 		goop::Entity e = createEntity(entity["name"]);
