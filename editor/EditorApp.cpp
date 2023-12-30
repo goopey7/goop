@@ -48,7 +48,8 @@ void EditorApp::init()
 
 		lvl["scenes"] = scenesArr;
 
-		std::ofstream file(cfg["game_file"]);
+		std::string gameFile = cfg["game_file"];
+		std::ofstream file(gameFile.c_str());
 		file << lvl;
 		file.close();
 
