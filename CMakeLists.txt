@@ -44,6 +44,9 @@ include_directories("libs/imgui/backends")
 # include entt headers
 include_directories("libs/entt/")
 
+# include json headers
+include_directories("libs/json/")
+
 # Add engine source files
 file(GLOB_RECURSE ENGINE_SRC_FILES "goop/*.cpp" "goop/*.h")
 file(GLOB STB_IMAGE_HEADER "libs/stb/stb_image.h")

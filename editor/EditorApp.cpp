@@ -6,9 +6,15 @@
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Sfx.h>
 
+#include <json.hpp>
+using json = nlohmann::json;
+
 goop::App* goop::createEditor(int argc, char** argv, App* game) { return new EditorApp(game); }
 
-void EditorApp::init() { game->init(); }
+void EditorApp::init()
+{ 
+	game->init(); 
+}
 
 void EditorApp::update(float dt)
 {

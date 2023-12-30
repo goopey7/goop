@@ -4,6 +4,9 @@
 #include <entt.hpp>
 #include "Components.h"
 
+#include <json.hpp>
+using json = nlohmann::json;
+
 namespace goop
 {
 class Entity;
@@ -14,6 +17,7 @@ class Scene
 	~Scene();
 
 	Entity createEntity(const std::string& tag = "Entity");
+	void loadScene(nlohmann::json& scene);
 
 	template <typename T>
 	auto view() { return registry.view<T>(); }
