@@ -375,7 +375,6 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 		buffers->getIndexBuffer(currentFrame) != nullptr)
 	{
 		// for each different instance, render all instances of that mesh
-		size_t uniqueInstances = buffers->getNumUniqueInstances(currentFrame);
 		for (size_t i = 0; i < buffers->getNumUniqueInstances(currentFrame); i++)
 		{
 			int instanceCount = buffers->getInstanceCount(currentFrame, i);
@@ -477,14 +476,35 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 		buffers->getIndexBuffer(currentFrame) != nullptr)
 	{
 		// for each different instance, render all instances of that mesh
-		size_t uniqueInstances = buffers->getNumUniqueInstances(currentFrame);
 		for (size_t i = 0; i < buffers->getNumUniqueInstances(currentFrame); i++)
 		{
 			int instanceCount = buffers->getInstanceCount(currentFrame, i);
 			int instanceOffset = buffers->getInstanceOffsets(currentFrame, i);
 			int indexCount = buffers->getIndexCount(currentFrame, i);
 			int indexOffset = buffers->getIndexOffset(currentFrame, i);
-			vkCmdDrawIndexed(cb, indexCount, instanceCount, indexOffset, 0, instanceOffset);
+			int meshID = buffers->getMeshID(currentFrame, i);
+			// get entities who have the mesh ID we're rendering
+			std::queue<Entity> entitiesToRender;
+			auto view = scene->view<MeshComponent>();
+			for (auto entity : view)
+			{
+				Entity e = goop::Entity(entity, scene);
+				if (e.getComponent<MeshComponent>().id == meshID)
+				{
+					entitiesToRender.push(goop::Entity(entity, scene));
+				}
+			}
+
+			for (int instanceIndex = instanceOffset; instanceIndex < instanceOffset + instanceCount;
+				 instanceIndex++)
+			{
+				auto transform =
+					entitiesToRender.front().getComponent<TransformComponent>().transform;
+				vkCmdPushConstants(cb, pipeline->getPipelineLayout(),
+								   VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &transform);
+				vkCmdDrawIndexed(cb, indexCount, 1, indexOffset, 0, instanceIndex);
+				entitiesToRender.pop();
+			}
 		}
 	}
 
