@@ -16,7 +16,6 @@ struct MeshImportData
 {
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
-	const char* path;
 };
 
 class MeshLoader : public ResourceSubsystem

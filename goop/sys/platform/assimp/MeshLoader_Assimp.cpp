@@ -42,7 +42,6 @@ uint32_t MeshLoader_Assimp::load(const std::string& path)
 	std::unordered_map<uint32_t, uint32_t> dupIndexToUniqueIndex{};
 
 	MeshImportData* mid = &data->emplace(index, MeshImportData{}).first->second;
-	mid->path = path.c_str();
 
 	mid->vertices.reserve(mesh->mNumVertices);
 

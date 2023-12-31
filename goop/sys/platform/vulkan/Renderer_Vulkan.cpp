@@ -404,10 +404,26 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 			for (int instanceIndex = instanceOffset; instanceIndex < instanceOffset + instanceCount;
 				 instanceIndex++)
 			{
-				auto transform =
-					entitiesToRender.front().getComponent<TransformComponent>().transform;
-				vkCmdPushConstants(commandBuffer, pipeline->getPipelineLayout(),
-								   VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &transform);
+				auto e = entitiesToRender.front();
+				if (!scene->hasEntity(e.getEntity()))
+				{
+					entitiesToRender.pop();
+					continue;
+				}
+				auto& tc = e.getComponent<TransformComponent>();
+				glm::mat4 transform = glm::mat4(1.0f);
+
+				transform = glm::translate(transform, tc.position);
+				transform =
+					glm::rotate(transform, glm::radians(tc.rotation.x), glm::vec3(1.f, 0.f, 0.f));
+				transform =
+					glm::rotate(transform, glm::radians(tc.rotation.y), glm::vec3(0.f, 1.f, 0.f));
+				transform =
+					glm::rotate(transform, glm::radians(tc.rotation.z), glm::vec3(0.f, 0.f, 1.f));
+				transform = glm::scale(transform, tc.scale);
+
+				vkCmdPushConstants(commandBuffer, pipeline->getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0,
+								   sizeof(glm::mat4), &transform);
 				vkCmdDrawIndexed(commandBuffer, indexCount, 1, indexOffset, 0, instanceIndex);
 				entitiesToRender.pop();
 			}
