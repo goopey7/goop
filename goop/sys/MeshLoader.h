@@ -7,6 +7,7 @@
 #include <goop/sys/Vertex.h>
 #include <memory>
 #include <vector>
+#include <map>
 
 namespace goop::sys
 {
@@ -15,16 +16,17 @@ struct MeshImportData
 {
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
+	const char* path;
 };
 
 class MeshLoader : public ResourceSubsystem
 {
   public:
 	virtual int initialize() override;
-	const std::vector<MeshImportData>* getData() const { return data.get(); }
+	const std::map<uint32_t, MeshImportData>* getData() const { return data.get(); }
 
   protected:
-	std::unique_ptr<std::vector<MeshImportData>> data;
+	std::unique_ptr<std::map<uint32_t, MeshImportData>> data;
 
 };
 } // namespace goop::sys

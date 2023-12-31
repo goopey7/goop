@@ -7,9 +7,14 @@ namespace goop
 {
 struct TransformComponent
 {
-	glm::mat4 transform;
-	TransformComponent() : transform(glm::mat4(1.0f)) {}
-	TransformComponent(const glm::mat4& transform) : transform(transform) {}
+	glm::vec3 position;
+	glm::vec3 rotation;
+	glm::vec3 scale;
+	TransformComponent() : position(0.0f), rotation(0.0f), scale(1.0f) {}
+	TransformComponent(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
+		: position(position), rotation(rotation), scale(scale)
+	{
+	}
 };
 
 struct TagComponent

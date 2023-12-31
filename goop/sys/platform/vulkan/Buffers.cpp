@@ -99,11 +99,11 @@ void Buffers::updateBuffers(uint32_t currentFrame, const Vertex* vertices, uint3
 							const std::vector<uint32_t>* indexOffsets,
 							const std::vector<uint32_t>* indexCounts,
 							const std::map<uint32_t, std::vector<Instance>>* instances,
-							uint32_t instanceCount)
+							uint32_t instanceCount, bool forceUpdate)
 {
-	if (vertexCount == oldVertexCounts[currentFrame] &&
+	if (!forceUpdate && (vertexCount == oldVertexCounts[currentFrame] &&
 		indexCount == oldIndexCounts[currentFrame] &&
-		instanceCount == oldInstanceCounts[currentFrame])
+		instanceCount == oldInstanceCounts[currentFrame]))
 	{
 		return;
 	}
@@ -115,11 +115,11 @@ void Buffers::updateBuffers(uint32_t currentFrame, const Vertex* vertices, uint3
 	this->indexOffsets[currentFrame].clear();
 	this->indexCounts[currentFrame].clear();
 	this->vertexCounts[currentFrame] = 0;
-	this->indexCounts[currentFrame].clear();
 
 	oldVertexCounts[currentFrame] = vertexCount;
 	oldIndexCounts[currentFrame] = indexCount;
 	oldInstanceCounts[currentFrame] = instanceCount;
+
 	if (vertexCount == 0 || indexCount == 0 || instances->empty())
 	{
 		// create one vertex and index to keep the renderer happy
@@ -137,13 +137,14 @@ void Buffers::updateBuffers(uint32_t currentFrame, const Vertex* vertices, uint3
 	{
 		createVertexBuffer(currentFrame, vertices, vertexCount);
 		std::vector<Instance> instancesToRender;
-		for (int i = 0; i < instances->size(); i++)
+		size_t instanceCount = instances->size();
+		for (auto& [key, value] : *instances)
 		{
 			instanceOffsets[currentFrame].push_back(instancesToRender.size());
-			instancesToRender.insert(instancesToRender.end(), instances->at(i).begin(),
-									 instances->at(i).end());
-			meshIDs[currentFrame].push_back(instances->at(i).begin()->meshID);
-			instanceCounts[currentFrame].push_back(instances->at(i).size());
+			instancesToRender.insert(instancesToRender.end(), value.begin(),
+									 value.end());
+			meshIDs[currentFrame].push_back(value.begin()->meshID);
+			instanceCounts[currentFrame].push_back(value.size());
 		}
 		createInstanceBuffer(currentFrame, instancesToRender.data(), instancesToRender.size());
 		createIndexBuffer(currentFrame, indices, indexCount);

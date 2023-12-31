@@ -28,5 +28,7 @@ class EditorApp : public goop::App
 	bool addComponentPopupOpen = false;
 	bool changeMeshPopupOpen = false;
 	char entityName[256] = "";
+	std::string oldMeshPath = "";
+	char meshPath[256] = "";
 	std::optional<goop::Entity> selectedEntity = std::nullopt;
 };

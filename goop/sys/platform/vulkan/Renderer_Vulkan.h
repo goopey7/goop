@@ -81,6 +81,7 @@ class Renderer_Vulkan : public Renderer
 	bool frameBufferResized = false;
 
 	std::queue<uint32_t> oldQueue;
+	std::vector<std::map<uint32_t, uint32_t>> oldInstanceCounts;
 
 #ifdef GOOP_APPTYPE_EDITOR
 	float oldWidth = -1.f;

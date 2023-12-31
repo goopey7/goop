@@ -41,11 +41,12 @@ bool ResourceManager::loadMesh(MeshComponent& mesh, const char* oldPath)
 		else
 		{
 			numLoadedMeshes[oldPath]--;
-			if (numLoadedMeshes[oldPath] == 0)
+			if (numLoadedMeshes[oldPath] <= 0)
 			{
 				std::cout << "Unloading mesh " << oldPath << std::endl;
 				meshLoader->unload(oldPath);
 				loadedMeshes.erase(oldPath);
+				numLoadedMeshes.erase(oldPath);
 			}
 		}
 	}
@@ -55,6 +56,7 @@ bool ResourceManager::loadMesh(MeshComponent& mesh, const char* oldPath)
 		std::cout << "Mesh " << mesh.path << " already loaded" << std::endl;
 		mesh.id = loadedMeshes[mesh.path];
 		numLoadedMeshes[mesh.path]++;
+		std::cout << "Loaded meshid: " << mesh.id << std::endl;
 		return true;
 	}
 	mesh.id = meshLoader->load(mesh.path);
@@ -67,7 +69,7 @@ bool ResourceManager::loadMesh(MeshComponent& mesh, const char* oldPath)
 bool ResourceManager::unloadMesh(MeshComponent& mesh)
 {
 	numLoadedMeshes[mesh.path]--;
-	if (numLoadedMeshes[mesh.path] == 0)
+	if (numLoadedMeshes[mesh.path] <= 0)
 	{
 		std::cout << "Unloading mesh " << mesh.path << std::endl;
 		meshLoader->unload(mesh.path);
@@ -86,4 +88,3 @@ int ResourceManager::destroy()
 }
 
 void ResourceManager::playSfx(uint32_t id) const { sfx->playSfx(id); }
-

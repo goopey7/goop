@@ -26,6 +26,12 @@ uint32_t MeshLoader_Assimp::load(const std::string& path)
 {
 	int index = data->size();
 
+	if (unloadedSlots.size() > 0)
+	{
+		index = unloadedSlots.back();
+		unloadedSlots.pop_back();
+	}
+
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs |
 													   aiProcess_JoinIdenticalVertices);
 	const auto mesh = scene->mMeshes[0];
@@ -35,7 +41,8 @@ uint32_t MeshLoader_Assimp::load(const std::string& path)
 	std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 	std::unordered_map<uint32_t, uint32_t> dupIndexToUniqueIndex{};
 
-	MeshImportData* mid = &data->emplace_back();
+	MeshImportData* mid = &data->emplace(index, MeshImportData{}).first->second;
+	mid->path = path.c_str();
 
 	mid->vertices.reserve(mesh->mNumVertices);
 
@@ -96,7 +103,9 @@ MeshLoader_Assimp::~MeshLoader_Assimp() {}
 
 uint32_t MeshLoader_Assimp::unload(const std::string& path)
 {
-	data->erase(data->begin() + loadedMeshes[path]);
+	unloadedSlots.push_back(loadedMeshes[path]);
+	data->erase(loadedMeshes[path]);
+	loadedMeshes.erase(path);
 	return 0;
 }
 

@@ -2,10 +2,10 @@
 
 #include "Scene.h"
 #include "goop/Components.h"
-#include <goop/Core.h>
 #include "goop/Entity.h"
 #include <glm/common.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <goop/Core.h>
 
 using namespace goop;
 
@@ -47,20 +47,23 @@ void Scene::loadScene(nlohmann::json& startScene)
 		{
 			if (component["type"] == "transform")
 			{
-				glm::mat4 transform = glm::mat4(1.0f);
-				transform = glm::translate(transform, glm::vec3(component["position"]["x"],
-																component["position"]["y"],
-																component["position"]["z"]));
-				transform = glm::rotate(transform, glm::vec1(component["rotation"]["x"]).x,
-										glm::vec3(1.f, 0.f, 0.f));
-				transform = glm::rotate(transform, glm::vec1(component["rotation"]["y"]).x,
-										glm::vec3(0.f, 1.f, 0.f));
-				transform = glm::rotate(transform, glm::vec1(component["rotation"]["z"]).x,
-										glm::vec3(0.f, 0.f, 1.f));
-				transform = glm::scale(transform,
-									   glm::vec3(component["scale"]["x"], component["scale"]["y"],
-												 component["scale"]["z"]));
-				e.addComponent<goop::TransformComponent>(transform);
+				glm::vec3 position;
+				glm::vec3 rotation;
+				glm::vec3 scale;
+
+				position.x = component["position"]["x"];
+				position.y = component["position"]["y"];
+				position.z = component["position"]["z"];
+
+				rotation.x = component["rotation"]["x"];
+				rotation.y = component["rotation"]["y"];
+				rotation.z = component["rotation"]["z"];
+
+				scale.x = component["scale"]["x"];
+				scale.y = component["scale"]["y"];
+				scale.z = component["scale"]["z"];
+
+				e.addComponent<goop::TransformComponent>(position, rotation, scale);
 			}
 			else if (component["type"] == "mesh")
 			{
@@ -86,24 +89,19 @@ nlohmann::json Scene::saveScene()
 		{
 			json transformJson;
 			transformJson["type"] = "transform";
-			glm::mat4 transform = e.getComponent<TransformComponent>().transform;
-			glm::vec3 scale, skew, translation;
-			glm::quat orientation;
-			glm::vec4 perspective;
-			glm::decompose(transform, scale, orientation, translation, skew, perspective);
+			auto tc = e.getComponent<TransformComponent>();
 
-			transformJson["position"]["x"] = translation.x;
-			transformJson["position"]["y"] = translation.y;
-			transformJson["position"]["z"] = translation.z;
+			transformJson["position"]["x"] = tc.position.x;
+			transformJson["position"]["y"] = tc.position.y;
+			transformJson["position"]["z"] = tc.position.z;
 
-			glm::vec3 euler = glm::eulerAngles(orientation);
-			transformJson["rotation"]["x"] = glm::degrees(euler.x);
-			transformJson["rotation"]["y"] = glm::degrees(euler.y);
-			transformJson["rotation"]["z"] = glm::degrees(euler.z);
+			transformJson["rotation"]["x"] = tc.rotation.x;
+			transformJson["rotation"]["y"] = tc.rotation.y;
+			transformJson["rotation"]["z"] = tc.rotation.z;
 
-			transformJson["scale"]["x"] = scale.x;
-			transformJson["scale"]["y"] = scale.y;
-			transformJson["scale"]["z"] = scale.z;
+			transformJson["scale"]["x"] = tc.scale.x;
+			transformJson["scale"]["y"] = tc.scale.y;
+			transformJson["scale"]["z"] = tc.scale.z;
 
 			eJson["components"].push_back(transformJson);
 		}
@@ -129,4 +127,3 @@ void Scene::destroyEntity(Entity entity)
 	}
 	registry.destroy((entt::entity)entity.getUID());
 }
-

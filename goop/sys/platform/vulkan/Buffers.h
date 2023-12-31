@@ -73,7 +73,7 @@ class Buffers
 					   const std::vector<uint32_t>* indexOffsets,
 					   const std::vector<uint32_t>* indexCounts,
 					   const std::map<uint32_t, std::vector<Instance>>* instances,
-					   uint32_t instanceCount);
+					   uint32_t instanceCount, bool forceUpdate);
 	bool isReadyToSwap() const { return bReadyToSwap; }
 
   private:

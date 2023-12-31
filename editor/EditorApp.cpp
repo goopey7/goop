@@ -1,4 +1,5 @@
 #include "EditorApp.h"
+#include <glm/gtx/matrix_decompose.hpp>
 #include <imgui.h>
 #include <iostream>
 
@@ -213,8 +214,11 @@ void EditorApp::gui()
 		if (e.hasComponent<goop::TransformComponent>())
 		{
 			ImGui::Text("Transform");
-			auto& transform = e.getComponent<goop::TransformComponent>().transform;
-			ImGui::DragFloat3("Position", &transform[3][0], 0.1f);
+			auto& tc = e.getComponent<goop::TransformComponent>();
+
+			ImGui::DragFloat3("Position", &tc.position[0], 0.1f);
+			ImGui::DragFloat3("Rotation", &tc.rotation[0], 0.1f);
+			ImGui::DragFloat3("Scale", &tc.scale[0], 0.1f);
 		}
 		if (e.hasComponent<goop::MeshComponent>())
 		{
@@ -244,10 +248,17 @@ void EditorApp::gui()
 			if (ImGui::BeginPopup("ChangeMesh"))
 			{
 				ImGui::Text("Change Mesh");
-				ImGui::InputText("Path", mesh.path.data(), 256);
+				if (oldMeshPath.empty())
+				{
+					oldMeshPath = mesh.path;
+				}
+				ImGui::InputText("Path", meshPath, 256);
 				if (ImGui::Button("Change"))
 				{
-					goop::rm->loadMesh(mesh);
+					mesh.path = std::string(meshPath);
+					goop::rm->loadMesh(mesh, oldMeshPath.c_str());
+					oldMeshPath = "";
+					std::memset(meshPath, 0, 256);
 					ImGui::CloseCurrentPopup();
 					changeMeshPopupOpen = false;
 				}

@@ -102,8 +102,9 @@ int Renderer_Vulkan::initialize()
 	pipeline = new Pipeline(ctx, swapchain, descriptor);
 	buffers = new Buffers(ctx);
 	sync = new Sync(ctx);
-	bIsInitialized = true;
+	oldInstanceCounts.resize(ctx->getMaxFramesInFlight());
 	initImGui();
+	bIsInitialized = true;
 	return 0;
 }
 
@@ -177,14 +178,22 @@ void Renderer_Vulkan::updateBuffers()
 			entitiesToRender.push_back(goop::Entity(entity, scene));
 		}
 
+		std::vector<uint32_t> meshIDs;
 		while (!meshQueue.empty())
 		{
-			uint32_t id = meshQueue.front();
+			meshIDs.push_back(meshQueue.front());
+			meshQueue.pop();
+		}
+
+		std::sort(meshIDs.begin(), meshIDs.end());
+
+		for (uint32_t id : meshIDs)
+		{
 			instanceCounts[id]++;
 			totalInstances++;
 			if (instanceCounts[id] == 1)
 			{
-				MeshImportData mesh = (*meshLoader->getData())[id];
+				MeshImportData mesh = (*meshLoader->getData()).at(id);
 
 				indexOffsets.push_back(indices.size());
 
@@ -204,16 +213,11 @@ void Renderer_Vulkan::updateBuffers()
 							 [id](Entity& e) { return e.getComponent<MeshComponent>().id == id; });
 			instances[id].push_back({entity->getUID(), entity->getComponent<MeshComponent>().id});
 			entitiesToRender.erase(entity);
-
-			meshQueue.pop();
 		}
 		buffers->updateBuffers(currentFrame, vertices.data(), vertices.size(), indices.data(),
 							   indices.size(), &indexOffsets, &indexCounts, &instances,
-							   totalInstances);
-	}
-	for (size_t i = 0; i < meshQueue.size(); i++)
-	{
-		meshQueue.pop();
+							   totalInstances, instanceCounts != oldInstanceCounts[currentFrame]);
+		oldInstanceCounts[currentFrame] = instanceCounts;
 	}
 }
 
@@ -508,8 +512,19 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 					continue;
 				}
 				auto& tc = e.getComponent<TransformComponent>();
+				glm::mat4 transform = glm::mat4(1.0f);
+
+				transform = glm::translate(transform, tc.position);
+				transform =
+					glm::rotate(transform, glm::radians(tc.rotation.x), glm::vec3(1.f, 0.f, 0.f));
+				transform =
+					glm::rotate(transform, glm::radians(tc.rotation.y), glm::vec3(0.f, 1.f, 0.f));
+				transform =
+					glm::rotate(transform, glm::radians(tc.rotation.z), glm::vec3(0.f, 0.f, 1.f));
+				transform = glm::scale(transform, tc.scale);
+
 				vkCmdPushConstants(cb, pipeline->getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0,
-								   sizeof(glm::mat4), &tc.transform);
+								   sizeof(glm::mat4), &transform);
 				vkCmdDrawIndexed(cb, indexCount, 1, indexOffset, 0, instanceIndex);
 				entitiesToRender.pop();
 			}
