@@ -72,7 +72,8 @@ class Buffers
 					   const uint32_t* indices, uint32_t indexCount,
 					   const std::vector<uint32_t>* indexOffsets,
 					   const std::vector<uint32_t>* indexCounts,
-					   const std::map<uint32_t, std::vector<Instance>>* instances);
+					   const std::map<uint32_t, std::vector<Instance>>* instances,
+					   uint32_t instanceCount);
 	bool isReadyToSwap() const { return bReadyToSwap; }
 
   private:
@@ -107,6 +108,7 @@ class Buffers
 	std::vector<std::vector<uint32_t>> indexCounts;
 	std::vector<uint32_t> oldVertexCounts;
 	std::vector<uint32_t> oldIndexCounts;
+	std::vector<uint32_t> oldInstanceCounts;
 
 	VkDeviceSize vertexBufferSize = 0;
 	VkDeviceSize instanceBufferSize = 0;

@@ -12,6 +12,7 @@ class ResourceSubsystem : public Subsystem
 {
   public:
 	virtual uint32_t load(const std::string& path) = 0;
+	virtual uint32_t unload(const std::string& path) = 0;
   protected:
 	bool bIsInitialized = false;
 };

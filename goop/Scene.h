@@ -17,6 +17,7 @@ class Scene
 	~Scene();
 
 	Entity createEntity(const std::string& tag = "Entity");
+	void destroyEntity(Entity entity);
 	void loadScene(nlohmann::json& scene);
 	nlohmann::json getScene() const;
 	nlohmann::json saveScene();
@@ -25,6 +26,11 @@ class Scene
 	auto view() { return registry.view<T>(); }
 
 	Entity getEntity(const std::string& tag);
+
+	bool hasEntity(entt::entity id) const
+	{
+		return registry.valid(id);
+	}
 
   private:
 	entt::registry registry;

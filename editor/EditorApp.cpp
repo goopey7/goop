@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <goop/Core.h>
+#include <goop/Entity.h>
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Sfx.h>
 
@@ -139,14 +140,13 @@ void EditorApp::gui()
 	ImGui::Text("Scene View");
 	if (ImGui::Button("Add Entity"))
 	{
-		popupOpen = true;
+		addEntityPopupOpen = true;
 		ImVec2 centerPos = ImVec2(viewport->WorkPos.x + viewport->WorkSize.x * 0.5f,
 								  viewport->WorkPos.y + viewport->WorkSize.y * 0.5f);
 		ImGui::SetNextWindowPos(centerPos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 	}
-	ImGui::End();
 
-	if (popupOpen)
+	if (addEntityPopupOpen)
 	{
 		ImGui::OpenPopup("AddEntity");
 
@@ -160,21 +160,149 @@ void EditorApp::gui()
 		ImGui::SetNextWindowSize(popupSize, ImGuiCond_Always);
 	}
 
-	// Popup
+	// AddEntity Popup
 	if (ImGui::BeginPopup("AddEntity"))
 	{
-		ImGui::Text("This is a Popup!");
-		if (ImGui::Button("Close"))
+		ImGui::Text("Add Entity");
+		ImGui::InputText("Name", entityName, 256);
+		if (ImGui::Button("Add"))
+		{
+			auto e = scene->createEntity(entityName);
+			e.addComponent<goop::TransformComponent>();
+			ImGui::CloseCurrentPopup();
+			addEntityPopupOpen = false;
+		}
+		if (ImGui::Button("Cancel"))
 		{
 			ImGui::CloseCurrentPopup();
-			popupOpen = false;
+			addEntityPopupOpen = false;
 		}
 		ImGui::EndPopup();
 	}
 
+	auto view = scene->view<goop::TagComponent>();
+	for (auto entity : view)
+	{
+		auto e = goop::Entity(entity, scene);
+		auto& tag = view.get<goop::TagComponent>(entity).tag;
+		if (ImGui::Selectable(tag.c_str(), selectedEntity.has_value() &&
+											   selectedEntity.value().getUID() == (uint32_t)entity))
+		{
+			selectedEntity = e;
+		}
+	}
+	ImGui::End();
+
 	// Inspector
 	ImGui::Begin("Inspector");
-	ImGui::Text("Inspector");
+	ImGui::Text("%s", !selectedEntity.has_value()
+						  ? "No Entity Selected"
+						  : selectedEntity.value().getComponent<goop::TagComponent>().tag.c_str());
+	if (selectedEntity.has_value())
+	{
+		auto e = selectedEntity.value();
+		if (ImGui::Button("Delete Entity"))
+		{
+			scene->destroyEntity(e);
+			addEntityPopupOpen = false;
+			addComponentPopupOpen = false;
+			selectedEntity = std::nullopt;
+			ImGui::End();
+			return;
+		}
+		if (e.hasComponent<goop::TransformComponent>())
+		{
+			ImGui::Text("Transform");
+			auto& transform = e.getComponent<goop::TransformComponent>().transform;
+			ImGui::DragFloat3("Position", &transform[3][0], 0.1f);
+		}
+		if (e.hasComponent<goop::MeshComponent>())
+		{
+			ImGui::Text("Mesh");
+			auto& mesh = e.getComponent<goop::MeshComponent>();
+			ImGui::Text("%s", mesh.path.c_str());
+			if (ImGui::Button("Change Mesh"))
+			{
+				changeMeshPopupOpen = true;
+				ImVec2 centerPos = ImVec2(viewport->WorkPos.x + viewport->WorkSize.x * 0.5f,
+										  viewport->WorkPos.y + viewport->WorkSize.y * 0.5f);
+				ImGui::SetNextWindowPos(centerPos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+			}
+			if (changeMeshPopupOpen)
+			{
+				ImGui::OpenPopup("ChangeMesh");
+
+				ImVec2 centerPos = ImVec2(viewport->WorkPos.x + viewport->WorkSize.x * 0.5f,
+										  viewport->WorkPos.y + viewport->WorkSize.y * 0.5f);
+
+				ImVec2 popupSize = ImVec2(200, 100); // Adjust the size if needed
+				ImVec2 popupPos =
+					ImVec2(centerPos.x - popupSize.x * 0.5f, centerPos.y - popupSize.y * 0.5f);
+				ImGui::SetNextWindowPos(popupPos, ImGuiCond_Always);
+				ImGui::SetNextWindowSize(popupSize, ImGuiCond_Always);
+			}
+			if (ImGui::BeginPopup("ChangeMesh"))
+			{
+				ImGui::Text("Change Mesh");
+				ImGui::InputText("Path", mesh.path.data(), 256);
+				if (ImGui::Button("Change"))
+				{
+					goop::rm->loadMesh(mesh);
+					ImGui::CloseCurrentPopup();
+					changeMeshPopupOpen = false;
+				}
+				if (ImGui::Button("Cancel"))
+				{
+					ImGui::CloseCurrentPopup();
+					changeMeshPopupOpen = false;
+				}
+				ImGui::EndPopup();
+			}
+		}
+		if (!e.hasComponent<goop::TransformComponent>() ||
+			!e.hasComponent<goop::MeshComponent>() && ImGui::Button("Add Component"))
+		{
+			addComponentPopupOpen = true;
+		}
+		if (addComponentPopupOpen)
+		{
+			ImGui::OpenPopup("AddComponent");
+
+			ImVec2 centerPos = ImVec2(viewport->WorkPos.x + viewport->WorkSize.x * 0.5f,
+									  viewport->WorkPos.y + viewport->WorkSize.y * 0.5f);
+
+			ImVec2 popupSize = ImVec2(200, 100); // Adjust the size if needed
+			ImVec2 popupPos =
+				ImVec2(centerPos.x - popupSize.x * 0.5f, centerPos.y - popupSize.y * 0.5f);
+			ImGui::SetNextWindowPos(popupPos, ImGuiCond_Always);
+			ImGui::SetNextWindowSize(popupSize, ImGuiCond_Always);
+		}
+
+		// AddComponent Popup
+		if (ImGui::BeginPopup("AddComponent"))
+		{
+			ImGui::Text("Add Component");
+			if (!e.hasComponent<goop::TransformComponent>() && ImGui::Button("Transform"))
+			{
+				e.addComponent<goop::TransformComponent>();
+				ImGui::CloseCurrentPopup();
+				addComponentPopupOpen = false;
+			}
+			if (!e.hasComponent<goop::MeshComponent>() && ImGui::Button("Mesh"))
+			{
+				e.addComponent<goop::MeshComponent>("res/viking_room.obj");
+				goop::rm->loadMesh(e.getComponent<goop::MeshComponent>());
+				ImGui::CloseCurrentPopup();
+				addComponentPopupOpen = false;
+			}
+			if (ImGui::Button("Cancel"))
+			{
+				ImGui::CloseCurrentPopup();
+				addComponentPopupOpen = false;
+			}
+			ImGui::EndPopup();
+		}
+	}
 	ImGui::End();
 
 	game->gui();

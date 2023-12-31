@@ -28,3 +28,9 @@ uint32_t Sfx_SoLoud::load(const std::string& path)
 }
 
 void Sfx_SoLoud::playSfx(uint32_t id) { engine.play(sfx[id]); }
+
+uint32_t Sfx_SoLoud::unload(const std::string& path)
+{
+	return 0;
+}
+

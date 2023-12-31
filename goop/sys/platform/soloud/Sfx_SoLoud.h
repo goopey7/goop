@@ -18,6 +18,7 @@ class Sfx_SoLoud : public Sfx
 
 	  // Resource Subsystem interface
 	  virtual uint32_t load(const std::string& path) final;
+	  virtual uint32_t unload(const std::string& path) final;
 
 	  // Sfx interface
 	  virtual void playSfx(uint32_t id) final;

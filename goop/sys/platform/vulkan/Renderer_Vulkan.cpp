@@ -167,6 +167,7 @@ void Renderer_Vulkan::updateBuffers()
 		std::vector<uint32_t> indexCounts;
 
 		std::map<uint32_t, uint32_t> instanceCounts;
+		uint32_t totalInstances = 0;
 
 		std::vector<Entity> entitiesToRender;
 		auto view = scene->view<MeshComponent>();
@@ -180,6 +181,7 @@ void Renderer_Vulkan::updateBuffers()
 		{
 			uint32_t id = meshQueue.front();
 			instanceCounts[id]++;
+			totalInstances++;
 			if (instanceCounts[id] == 1)
 			{
 				MeshImportData mesh = (*meshLoader->getData())[id];
@@ -206,7 +208,8 @@ void Renderer_Vulkan::updateBuffers()
 			meshQueue.pop();
 		}
 		buffers->updateBuffers(currentFrame, vertices.data(), vertices.size(), indices.data(),
-							   indices.size(), &indexOffsets, &indexCounts, &instances);
+							   indices.size(), &indexOffsets, &indexCounts, &instances,
+							   totalInstances);
 	}
 	for (size_t i = 0; i < meshQueue.size(); i++)
 	{
@@ -489,7 +492,7 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 			for (auto entity : view)
 			{
 				Entity e = goop::Entity(entity, scene);
-				if (e.getComponent<MeshComponent>().id == meshID)
+				if (e.getComponent<MeshComponent>().id == meshID && scene->hasEntity(e.getEntity()))
 				{
 					entitiesToRender.push(goop::Entity(entity, scene));
 				}
@@ -498,10 +501,15 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 			for (int instanceIndex = instanceOffset; instanceIndex < instanceOffset + instanceCount;
 				 instanceIndex++)
 			{
-				auto transform =
-					entitiesToRender.front().getComponent<TransformComponent>().transform;
-				vkCmdPushConstants(cb, pipeline->getPipelineLayout(),
-								   VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &transform);
+				auto e = entitiesToRender.front();
+				if (!scene->hasEntity(e.getEntity()))
+				{
+					entitiesToRender.pop();
+					continue;
+				}
+				auto& tc = e.getComponent<TransformComponent>();
+				vkCmdPushConstants(cb, pipeline->getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0,
+								   sizeof(glm::mat4), &tc.transform);
 				vkCmdDrawIndexed(cb, indexCount, 1, indexOffset, 0, instanceIndex);
 				entitiesToRender.pop();
 			}

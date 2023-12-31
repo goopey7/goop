@@ -1,6 +1,7 @@
 #define GOOP_APPTYPE_EDITOR
 
 #include <goop/App.h>
+#include <goop/Entity.h>
 
 #ifndef GOOP_APPTYPE_EDITOR
 #include <imgui.h>
@@ -23,5 +24,9 @@ class EditorApp : public goop::App
 
 	App* game;
 	bool shouldPlay = false;
-	bool popupOpen = false;
+	bool addEntityPopupOpen = false;
+	bool addComponentPopupOpen = false;
+	bool changeMeshPopupOpen = false;
+	char entityName[256] = "";
+	std::optional<goop::Entity> selectedEntity = std::nullopt;
 };

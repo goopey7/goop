@@ -2,6 +2,7 @@
 
 #include "Scene.h"
 #include "goop/Components.h"
+#include <goop/Core.h>
 #include "goop/Entity.h"
 #include <glm/common.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
@@ -119,3 +120,13 @@ nlohmann::json Scene::saveScene()
 
 	return sceneJson;
 }
+
+void Scene::destroyEntity(Entity entity)
+{
+	if (entity.hasComponent<MeshComponent>())
+	{
+		goop::rm->unloadMesh(entity.getComponent<MeshComponent>());
+	}
+	registry.destroy((entt::entity)entity.getUID());
+}
+

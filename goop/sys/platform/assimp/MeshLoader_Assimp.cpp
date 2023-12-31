@@ -86,9 +86,17 @@ uint32_t MeshLoader_Assimp::load(const std::string& path)
 		}
 	}
 
+	loadedMeshes[path] = index;
 	return index;
 }
 
 MeshLoader_Assimp::MeshLoader_Assimp() {}
 
 MeshLoader_Assimp::~MeshLoader_Assimp() {}
+
+uint32_t MeshLoader_Assimp::unload(const std::string& path)
+{
+	data->erase(data->begin() + loadedMeshes[path]);
+	return 0;
+}
+

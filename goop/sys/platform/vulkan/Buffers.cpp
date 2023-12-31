@@ -32,6 +32,7 @@ Buffers::Buffers(Context* ctx) : ctx(ctx)
 	indexCounts.resize(ctx->getMaxFramesInFlight());
 	oldVertexCounts.resize(ctx->getMaxFramesInFlight());
 	oldIndexCounts.resize(ctx->getMaxFramesInFlight());
+	oldInstanceCounts.resize(ctx->getMaxFramesInFlight());
 
 	instanceOffsets.resize(ctx->getMaxFramesInFlight());
 	meshIDs.resize(ctx->getMaxFramesInFlight());
@@ -41,6 +42,7 @@ Buffers::Buffers(Context* ctx) : ctx(ctx)
 	{
 		oldVertexCounts[i] = -1;
 		oldIndexCounts[i] = -1;
+		oldInstanceCounts[i] = -1;
 	}
 }
 
@@ -96,14 +98,28 @@ void Buffers::updateBuffers(uint32_t currentFrame, const Vertex* vertices, uint3
 							const uint32_t* indices, uint32_t indexCount,
 							const std::vector<uint32_t>* indexOffsets,
 							const std::vector<uint32_t>* indexCounts,
-							const std::map<uint32_t, std::vector<Instance>>* instances)
+							const std::map<uint32_t, std::vector<Instance>>* instances,
+							uint32_t instanceCount)
 {
-	if (vertexCount == oldVertexCounts[currentFrame] && indexCount == oldIndexCounts[currentFrame])
+	if (vertexCount == oldVertexCounts[currentFrame] &&
+		indexCount == oldIndexCounts[currentFrame] &&
+		instanceCount == oldInstanceCounts[currentFrame])
 	{
 		return;
 	}
+
+	// clear vectors
+	this->instanceOffsets[currentFrame].clear();
+	this->meshIDs[currentFrame].clear();
+	this->instanceCounts[currentFrame].clear();
+	this->indexOffsets[currentFrame].clear();
+	this->indexCounts[currentFrame].clear();
+	this->vertexCounts[currentFrame] = 0;
+	this->indexCounts[currentFrame].clear();
+
 	oldVertexCounts[currentFrame] = vertexCount;
 	oldIndexCounts[currentFrame] = indexCount;
+	oldInstanceCounts[currentFrame] = instanceCount;
 	if (vertexCount == 0 || indexCount == 0 || instances->empty())
 	{
 		// create one vertex and index to keep the renderer happy
@@ -174,6 +190,13 @@ void Buffers::clearBuffers()
 void Buffers::createVertexBuffer(uint32_t currentFrame, const Vertex* vertices,
 								 uint32_t vertexCount)
 {
+	if (vertexBuffers[currentFrame] != VK_NULL_HANDLE)
+	{
+		vkDestroyBuffer(*ctx, vertexBuffers[currentFrame], nullptr);
+		vkFreeMemory(*ctx, vertexBufferMemories[currentFrame], nullptr);
+		vertexBuffers[currentFrame] = VK_NULL_HANDLE;
+		vertexBufferMemories[currentFrame] = VK_NULL_HANDLE;
+	}
 	std::cout << "VERTEX COUNT: " << vertexCount << std::endl;
 
 	vertexBufferSize = sizeof(vertices[0]) * vertexCount;
@@ -204,6 +227,13 @@ void Buffers::createVertexBuffer(uint32_t currentFrame, const Vertex* vertices,
 void Buffers::createInstanceBuffer(uint32_t currentFrame, const Instance* instances,
 								   uint32_t instanceCount)
 {
+	if (instanceBuffers[currentFrame] != VK_NULL_HANDLE)
+	{
+		vkDestroyBuffer(*ctx, instanceBuffers[currentFrame], nullptr);
+		vkFreeMemory(*ctx, instanceBufferMemories[currentFrame], nullptr);
+		instanceBuffers[currentFrame] = VK_NULL_HANDLE;
+		instanceBufferMemories[currentFrame] = VK_NULL_HANDLE;
+	}
 	std::cout << "INSTANCE COUNT: " << instanceCount << std::endl;
 
 	instanceBufferSize = sizeof(instances[0]) * instanceCount;
@@ -233,6 +263,13 @@ void Buffers::createInstanceBuffer(uint32_t currentFrame, const Instance* instan
 
 void Buffers::createIndexBuffer(uint32_t currentFrame, const uint32_t* indices, uint32_t indexCount)
 {
+	if (indexBuffers[currentFrame] != VK_NULL_HANDLE)
+	{
+		vkDestroyBuffer(*ctx, indexBuffers[currentFrame], nullptr);
+		vkFreeMemory(*ctx, indexBufferMemories[currentFrame], nullptr);
+		indexBuffers[currentFrame] = VK_NULL_HANDLE;
+		indexBufferMemories[currentFrame] = VK_NULL_HANDLE;
+	}
 	indexBufferSize = sizeof(indices[0]) * indexCount;
 
 	VkBuffer stagingBuffer;

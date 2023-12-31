@@ -16,7 +16,8 @@ class ResourceManager : public Subsystem
 	virtual int initialize() final;
 	virtual int destroy() final;
 
-	virtual bool loadMesh(MeshComponent& mesh);
+	virtual bool loadMesh(MeshComponent& mesh, const char* oldPath = nullptr);
+	virtual bool unloadMesh(MeshComponent& mesh);
 	virtual bool loadSfx(const std::string& path);
 
 	void playSfx(uint32_t id) const;
