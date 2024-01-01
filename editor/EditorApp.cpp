@@ -224,7 +224,8 @@ void EditorApp::gui()
 		{
 			ImGui::Text("Mesh");
 			auto& mesh = e.getComponent<goop::MeshComponent>();
-			ImGui::Text("%s", mesh.path.c_str());
+			ImGui::Text("Mesh: %s", mesh.path.c_str());
+			ImGui::Text("Texture: %s", mesh.texturePath.c_str());
 			if (ImGui::Button("Change Mesh"))
 			{
 				changeMeshPopupOpen = true;
@@ -301,8 +302,9 @@ void EditorApp::gui()
 			}
 			if (!e.hasComponent<goop::MeshComponent>() && ImGui::Button("Mesh"))
 			{
-				e.addComponent<goop::MeshComponent>("res/viking_room.obj");
+				e.addComponent<goop::MeshComponent>("res/viking_room.obj", "res/viking_room.png");
 				goop::rm->loadMesh(e.getComponent<goop::MeshComponent>());
+				goop::rm->loadTexture(e.getComponent<goop::MeshComponent>());
 				ImGui::CloseCurrentPopup();
 				addComponentPopupOpen = false;
 			}

@@ -1,13 +1,13 @@
 // Sam Collier 2023
 #pragma once
 
-#include <goop/sys/ResourceSubsystem.h>
 #include <cstdint>
 #include <functional>
+#include <goop/sys/ResourceSubsystem.h>
 #include <goop/sys/Vertex.h>
+#include <map>
 #include <memory>
 #include <vector>
-#include <map>
 
 namespace goop::sys
 {
@@ -26,6 +26,5 @@ class MeshLoader : public ResourceSubsystem
 
   protected:
 	std::unique_ptr<std::map<uint32_t, MeshImportData>> data;
-
 };
 } // namespace goop::sys

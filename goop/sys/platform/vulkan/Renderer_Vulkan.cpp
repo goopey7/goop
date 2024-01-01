@@ -87,8 +87,9 @@ void Renderer_Vulkan::initImGui()
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 
 #ifdef GOOP_APPTYPE_EDITOR
-	imgSet = ImGui_ImplVulkan_AddTexture(texture->getSampler(), texture->getImageView(),
-										 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	imgSet = VK_NULL_HANDLE;
+	//imgSet = ImGui_ImplVulkan_AddTexture(*sampler, viewTexture->getImageView(),
+	//									 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 #endif
 }
 
@@ -96,9 +97,9 @@ int Renderer_Vulkan::initialize()
 {
 	ctx = new Context();
 	swapchain = new Swapchain(ctx);
-	texture = new Texture(ctx, "res/viking_room.png");
+	sampler = new Sampler(ctx);
 	uniformBuffer = new UniformBuffer(ctx);
-	descriptor = new Descriptor(ctx, uniformBuffer, texture);
+	descriptor = new Descriptor(ctx, uniformBuffer, sampler);
 	pipeline = new Pipeline(ctx, swapchain, descriptor);
 	buffers = new Buffers(ctx);
 	sync = new Sync(ctx);
@@ -111,9 +112,12 @@ int Renderer_Vulkan::initialize()
 int Renderer_Vulkan::destroy()
 {
 	vkDeviceWaitIdle(*ctx);
+#ifdef GOOP_APPTYPE_EDITOR
+	delete viewTexture;
+#endif
 	ImGui_ImplVulkan_Shutdown();
 	vkDestroyDescriptorPool(*ctx, imguiPool, nullptr);
-	delete texture;
+	delete sampler;
 	delete buffers;
 	delete swapchain;
 	delete descriptor;
@@ -374,10 +378,6 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 	scissor.extent = swapchain->getExtent();
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-							pipeline->getPipelineLayout(), 0, 1, descriptor->getSet(currentFrame),
-							0, nullptr);
-
 	if (buffers->getIndexCount(currentFrame, 0) != 0 &&
 		buffers->getIndexBuffer(currentFrame) != nullptr)
 	{
@@ -422,8 +422,14 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 					glm::rotate(transform, glm::radians(tc.rotation.z), glm::vec3(0.f, 0.f, 1.f));
 				transform = glm::scale(transform, tc.scale);
 
-				vkCmdPushConstants(commandBuffer, pipeline->getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0,
-								   sizeof(glm::mat4), &transform);
+				auto mc = e.getComponent<MeshComponent>();
+
+				vkCmdBindDescriptorSets(
+					commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(),
+					0, 1, descriptor->getSet(currentFrame, textures[mc.texturePath]), 0, nullptr);
+
+				vkCmdPushConstants(commandBuffer, pipeline->getPipelineLayout(),
+								   VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &transform);
 				vkCmdDrawIndexed(commandBuffer, indexCount, 1, indexOffset, 0, instanceIndex);
 				entitiesToRender.pop();
 			}
@@ -492,9 +498,6 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 		vkCmdBindIndexBuffer(cb, buffers->getIndexBuffer(currentFrame), 0, VK_INDEX_TYPE_UINT32);
 	}
 
-	vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 0,
-							1, descriptor->getSet(currentFrame), 0, nullptr);
-
 	if (buffers->getIndexCount(currentFrame, 0) != 0 &&
 		buffers->getIndexBuffer(currentFrame) != nullptr)
 	{
@@ -539,6 +542,10 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 					glm::rotate(transform, glm::radians(tc.rotation.z), glm::vec3(0.f, 0.f, 1.f));
 				transform = glm::scale(transform, tc.scale);
 
+				auto mc = entitiesToRender.front().getComponent<MeshComponent>();
+				vkCmdBindDescriptorSets(
+					cb, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 0, 1,
+					descriptor->getSet(currentFrame, textures[mc.texturePath]), 0, nullptr);
 				vkCmdPushConstants(cb, pipeline->getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0,
 								   sizeof(glm::mat4), &transform);
 				vkCmdDrawIndexed(cb, indexCount, 1, indexOffset, 0, instanceIndex);
@@ -665,10 +672,12 @@ void Renderer_Vulkan::render(float width, float height)
 
 	if (renderScene(width, height, imageIndex))
 	{
-		ImGui_ImplVulkan_RemoveTexture(imgSet);
-		imgSet =
-			ImGui_ImplVulkan_AddTexture(texture->getSampler(), swapchain->getViewportImageView(),
-										VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		if (imgSet != VK_NULL_HANDLE)
+		{
+			ImGui_ImplVulkan_RemoveTexture(imgSet);
+		}
+		imgSet = ImGui_ImplVulkan_AddTexture(*sampler, swapchain->getViewportImageView(),
+											 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
 	updateUniformBuffer(scene, currentFrame);
@@ -713,3 +722,16 @@ void Renderer_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_
 
 void Renderer_Vulkan::endFrame() { renderFrame(imageIndex); }
 #endif
+
+void Renderer_Vulkan::addTexture(unsigned char* pixels, int width, int height, const char* path)
+{
+	Texture* texture = new Texture(ctx, pixels, width, height, path);
+	descriptor->createDescriptorSet(uniformBuffer, texture);
+	textures[path] = texture;
+}
+
+void Renderer_Vulkan::removeTexture(const char* path)
+{
+	delete textures[path];
+	textures.erase(path);
+}

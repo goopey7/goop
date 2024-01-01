@@ -37,6 +37,7 @@ Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 	{
 		MeshComponent& mesh = view.get<MeshComponent>(entity);
 		rm->loadMesh(mesh);
+		rm->loadTexture(mesh);
 	}
 }
 

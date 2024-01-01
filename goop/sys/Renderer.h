@@ -29,6 +29,9 @@ class Renderer : public Subsystem
 
 	void setScene(Scene* scene) { this->scene = scene; }
 
+	virtual void addTexture(unsigned char* pixels, int width, int height, const char* path) = 0;
+	virtual void removeTexture(const char* path) = 0;
+
   protected:
 	std::queue<uint32_t> meshQueue;
 	MeshLoader* meshLoader;

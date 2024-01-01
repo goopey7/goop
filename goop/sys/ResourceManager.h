@@ -1,6 +1,7 @@
 // Sam Collier 2023
 #pragma once
 
+#include "goop/sys/ImageLoader.h"
 #include "goop/sys/Sfx.h"
 #include <goop/sys/MeshLoader.h>
 #include <goop/sys/Subsystem.h>
@@ -16,9 +17,13 @@ class ResourceManager : public Subsystem
 	virtual int initialize() final;
 	virtual int destroy() final;
 
-	virtual bool loadMesh(MeshComponent& mesh, const char* oldPath = nullptr);
-	virtual bool unloadMesh(MeshComponent& mesh);
-	virtual bool loadSfx(const std::string& path);
+	bool loadMesh(MeshComponent& mesh, const char* oldPath = nullptr);
+	bool unloadMesh(MeshComponent& mesh);
+
+	bool loadTexture(MeshComponent& mesh, const char* oldPath = nullptr);
+	bool unloadTexture(MeshComponent& mesh);
+
+	bool loadSfx(const std::string& path);
 
 	void playSfx(uint32_t id) const;
 
@@ -27,8 +32,10 @@ class ResourceManager : public Subsystem
 
   private:
 	std::unique_ptr<MeshLoader> meshLoader;
+	std::unique_ptr<ImageLoader> imgLoader;
 	std::unique_ptr<Sfx> sfx;
 	std::map<std::string, uint32_t> loadedMeshes;
 	std::map<std::string, uint32_t> numLoadedMeshes;
+	std::map<std::string, uint32_t> numLoadedTextures;
 };
 } // namespace goop::sys

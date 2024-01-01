@@ -6,7 +6,11 @@
 #endif
 
 #ifdef GOOP_AUDIO_SOLOUD
-#include "goop/sys/platform/soloud/Sfx_SoLoud.h"
+#include <goop/sys/platform/soloud/Sfx_SoLoud.h>
+#endif
+
+#ifdef GOOP_IMGLOADER_STB
+#include <goop/sys/platform/stb/ImageLoader_STB.h>
 #endif
 
 #include <iostream>
@@ -23,7 +27,12 @@ int ResourceManager::initialize()
 	sfx = std::make_unique<platform::soloud::Sfx_SoLoud>();
 #endif
 
+#ifdef GOOP_IMGLOADER_STB
+	imgLoader = std::make_unique<platform::stb::ImageLoader_STB>();
+#endif
+
 	meshLoader->initialize();
+	imgLoader->initialize();
 	sfx->initialize();
 
 	bIsInitialized = true;
@@ -88,3 +97,46 @@ int ResourceManager::destroy()
 }
 
 void ResourceManager::playSfx(uint32_t id) const { sfx->playSfx(id); }
+
+bool ResourceManager::loadTexture(MeshComponent& mesh, const char* oldPath)
+{
+	if (oldPath != nullptr)
+	{
+		if (numLoadedTextures[oldPath] == 0)
+		{
+			std::cout << "Texture " << oldPath << " not loaded" << std::endl;
+		}
+		else
+		{
+			numLoadedTextures[oldPath]--;
+			if (numLoadedTextures[oldPath] <= 0)
+			{
+				std::cout << "Unloading texture " << oldPath << std::endl;
+				imgLoader->unload(oldPath);
+				numLoadedTextures.erase(oldPath);
+			}
+		}
+	}
+
+	if (numLoadedTextures[mesh.texturePath] > 0)
+	{
+		std::cout << "Texture " << mesh.texturePath << " already loaded" << std::endl;
+		numLoadedTextures[mesh.texturePath]++;
+		return true;
+	}
+	imgLoader->load(mesh.texturePath);
+	numLoadedTextures[mesh.texturePath]++;
+	std::cout << "Loaded texture " << mesh.texturePath << std::endl;
+	return true;
+}
+
+bool ResourceManager::unloadTexture(MeshComponent& mesh)
+{
+	numLoadedTextures[mesh.texturePath]--;
+	if (numLoadedTextures[mesh.texturePath] <= 0)
+	{
+		std::cout << "Unloading texture " << mesh.texturePath << std::endl;
+		imgLoader->unload(mesh.texturePath);
+	}
+	return true;
+}

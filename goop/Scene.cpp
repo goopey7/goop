@@ -67,7 +67,7 @@ void Scene::loadScene(nlohmann::json& startScene)
 			}
 			else if (component["type"] == "mesh")
 			{
-				e.addComponent<goop::MeshComponent>(component["path"]);
+				e.addComponent<goop::MeshComponent>(component["path"], component["texturePath"]);
 			}
 		}
 	}
@@ -109,7 +109,9 @@ nlohmann::json Scene::saveScene()
 		{
 			json meshJson;
 			meshJson["type"] = "mesh";
-			meshJson["path"] = e.getComponent<MeshComponent>().path;
+			auto mc = e.getComponent<MeshComponent>();
+			meshJson["path"] = mc.path;
+			meshJson["texturePath"] = mc.texturePath;
 			eJson["components"].push_back(meshJson);
 		}
 
@@ -124,6 +126,7 @@ void Scene::destroyEntity(Entity entity)
 	if (entity.hasComponent<MeshComponent>())
 	{
 		goop::rm->unloadMesh(entity.getComponent<MeshComponent>());
+		goop::rm->unloadTexture(entity.getComponent<MeshComponent>());
 	}
 	registry.destroy((entt::entity)entity.getUID());
 }

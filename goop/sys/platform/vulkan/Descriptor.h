@@ -1,8 +1,10 @@
 // Sam Collier 2023
 #pragma once
 
+#include "Sampler.h"
 #include "Texture.h"
 #include "UniformBuffer.h"
+#include <map>
 #include <vector>
 #include <volk.h>
 
@@ -13,23 +15,28 @@ class Descriptor
   public:
 	Descriptor(const Descriptor&) = delete;
 	Descriptor& operator=(const Descriptor&) = delete;
-	Descriptor(Context* ctx, UniformBuffer* ub, Texture* texture);
+	Descriptor(Context* ctx, UniformBuffer* ub, Sampler* sampler);
 	~Descriptor();
 
 	VkDescriptorSetLayout getLayout() const { return descriptorSetLayout; }
 	VkDescriptorPool getPool() const { return descriptorPool; }
-	VkDescriptorSet* getSet(uint8_t index) { return &descriptorSets[index]; }
+	VkDescriptorSet* getSet(uint8_t index, Texture* texture)
+	{
+		return &descriptorSets[texture][index];
+	}
+
+	void createDescriptorSet(UniformBuffer* ub, Texture* texture);
 
   private:
 	void createDescriptorSetLayout();
 	void createDescriptorPool();
-	void createDescriptorSets(UniformBuffer* ub);
 
 	VkDevice device;
 	uint8_t maxFramesInFlight;
 	VkDescriptorSetLayout descriptorSetLayout;
 	VkDescriptorPool descriptorPool;
-	std::vector<VkDescriptorSet> descriptorSets;
-	Texture* texture;
+	std::map<Texture*, std::vector<VkDescriptorSet>> descriptorSets;
+	Sampler* sampler;
+	UniformBuffer* ub;
 };
 } // namespace goop::sys::platform::vulkan

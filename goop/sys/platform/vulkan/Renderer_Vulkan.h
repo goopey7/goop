@@ -1,6 +1,8 @@
 // Sam Collier 2023
 #pragma once
 
+#include "goop/sys/platform/vulkan/Sampler.h"
+#include "goop/sys/platform/vulkan/Utils.h"
 #include <array>
 #include <glm/glm.hpp>
 #include <goop/sys/Renderer.h>
@@ -44,6 +46,9 @@ class Renderer_Vulkan : public Renderer
 	void addToRenderQueue(uint32_t mesh, MeshLoader* meshLoader) final;
 	void updateBuffers();
 
+	void addTexture(unsigned char* pixels, int width, int height, const char* path) final;
+	void removeTexture(const char* path) final;
+
 #ifdef GOOP_APPTYPE_EDITOR
 	ImTextureID getViewTexture() const final { return imgSet; }
 #else
@@ -70,7 +75,7 @@ class Renderer_Vulkan : public Renderer
 	Descriptor* descriptor;
 	Pipeline* pipeline;
 	Swapchain* swapchain;
-	Texture* texture;
+	Sampler* sampler;
 	Buffers* buffers;
 	Sync* sync;
 
@@ -83,10 +88,14 @@ class Renderer_Vulkan : public Renderer
 	std::queue<uint32_t> oldQueue;
 	std::vector<std::map<uint32_t, uint32_t>> oldInstanceCounts;
 
+	std::map<std::string, Texture*> textures;
+
 #ifdef GOOP_APPTYPE_EDITOR
 	float oldWidth = -1.f;
 	float oldHeight = -1.f;
 	VkDescriptorSet imgSet;
+	Texture* viewTexture;
 #endif
 };
 } // namespace goop::sys::platform::vulkan
+

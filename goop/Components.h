@@ -28,7 +28,12 @@ struct MeshComponent
 {
 	std::string path;
 	uint32_t id;
-	MeshComponent(const std::string& path) : path(path) {}
+	std::string texturePath;
+	uint32_t textureId;
+	MeshComponent(const std::string& path, const std::string& texturePath)
+		: path(path), texturePath(texturePath)
+	{
+	}
 };
 
 } // namespace goop

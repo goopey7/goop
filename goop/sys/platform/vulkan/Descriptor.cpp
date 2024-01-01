@@ -6,12 +6,12 @@
 
 using namespace goop::sys::platform::vulkan;
 
-Descriptor::Descriptor(Context* ctx, UniformBuffer* ub, Texture* texture)
-	: device(ctx->getDevice()), maxFramesInFlight(ctx->getMaxFramesInFlight()), texture(texture)
+Descriptor::Descriptor(Context* ctx, UniformBuffer* ub, Sampler* sampler)
+	: device(ctx->getDevice()), maxFramesInFlight(ctx->getMaxFramesInFlight()), sampler(sampler),
+	  ub(ub)
 {
 	createDescriptorSetLayout();
 	createDescriptorPool();
-	createDescriptorSets(ub);
 }
 
 void Descriptor::createDescriptorSetLayout()
@@ -49,13 +49,13 @@ void Descriptor::createDescriptorPool()
 	poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	poolSizes[0].descriptorCount = static_cast<uint32_t>(maxFramesInFlight);
 	poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	poolSizes[1].descriptorCount = static_cast<uint32_t>(maxFramesInFlight);
+	poolSizes[1].descriptorCount = 10 * static_cast<uint32_t>(maxFramesInFlight);
 
 	VkDescriptorPoolCreateInfo poolInfo{};
 	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 	poolInfo.pPoolSizes = poolSizes.data();
-	poolInfo.maxSets = static_cast<uint32_t>(maxFramesInFlight);
+	poolInfo.maxSets = 10 * static_cast<uint32_t>(maxFramesInFlight);
 
 	if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
 	{
@@ -63,7 +63,7 @@ void Descriptor::createDescriptorPool()
 	}
 }
 
-void Descriptor::createDescriptorSets(UniformBuffer* ub)
+void Descriptor::createDescriptorSet(UniformBuffer* ub, Texture* texture)
 {
 	std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, descriptorSetLayout);
 	VkDescriptorSetAllocateInfo allocInfo{};
@@ -72,8 +72,8 @@ void Descriptor::createDescriptorSets(UniformBuffer* ub)
 	allocInfo.descriptorSetCount = static_cast<uint32_t>(maxFramesInFlight);
 	allocInfo.pSetLayouts = layouts.data();
 
-	descriptorSets.resize(maxFramesInFlight);
-	if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+	descriptorSets[texture].resize(maxFramesInFlight);
+	if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets[texture].data()) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to allocate descriptor sets!");
 	}
@@ -88,12 +88,12 @@ void Descriptor::createDescriptorSets(UniformBuffer* ub)
 		VkDescriptorImageInfo imageInfo{};
 		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		imageInfo.imageView = texture->getImageView();
-		imageInfo.sampler = texture->getSampler();
+		imageInfo.sampler = *sampler;
 
 		std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
 		descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[0].dstSet = descriptorSets[i];
+		descriptorWrites[0].dstSet = descriptorSets[texture][i];
 		descriptorWrites[0].dstBinding = 0;
 		descriptorWrites[0].dstArrayElement = 0;
 		descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -101,7 +101,7 @@ void Descriptor::createDescriptorSets(UniformBuffer* ub)
 		descriptorWrites[0].pBufferInfo = &bufferInfo;
 
 		descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[1].dstSet = descriptorSets[i];
+		descriptorWrites[1].dstSet = descriptorSets[texture][i];
 		descriptorWrites[1].dstBinding = 1;
 		descriptorWrites[1].dstArrayElement = 0;
 		descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
