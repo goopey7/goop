@@ -115,6 +115,10 @@ int Renderer_Vulkan::destroy()
 #ifdef GOOP_APPTYPE_EDITOR
 	delete viewTexture;
 #endif
+	for (auto& [key, value] : textures)
+	{
+		delete value;
+	}
 	ImGui_ImplVulkan_Shutdown();
 	vkDestroyDescriptorPool(*ctx, imguiPool, nullptr);
 	delete sampler;
@@ -726,7 +730,7 @@ void Renderer_Vulkan::endFrame() { renderFrame(imageIndex); }
 void Renderer_Vulkan::addTexture(unsigned char* pixels, int width, int height, const char* path)
 {
 	Texture* texture = new Texture(ctx, pixels, width, height, path);
-	descriptor->createDescriptorSet(uniformBuffer, texture);
+	descriptor->createDescriptorSet(texture);
 	textures[path] = texture;
 }
 

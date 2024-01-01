@@ -47,7 +47,7 @@ void Descriptor::createDescriptorPool()
 {
 	std::array<VkDescriptorPoolSize, 2> poolSizes{};
 	poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	poolSizes[0].descriptorCount = static_cast<uint32_t>(maxFramesInFlight);
+	poolSizes[0].descriptorCount = 10 * static_cast<uint32_t>(maxFramesInFlight);
 	poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	poolSizes[1].descriptorCount = 10 * static_cast<uint32_t>(maxFramesInFlight);
 
@@ -63,7 +63,7 @@ void Descriptor::createDescriptorPool()
 	}
 }
 
-void Descriptor::createDescriptorSet(UniformBuffer* ub, Texture* texture)
+void Descriptor::createDescriptorSet(Texture* texture)
 {
 	std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, descriptorSetLayout);
 	VkDescriptorSetAllocateInfo allocInfo{};
@@ -118,3 +118,4 @@ Descriptor::~Descriptor()
 	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 }
+

@@ -25,7 +25,7 @@ class Descriptor
 		return &descriptorSets[texture][index];
 	}
 
-	void createDescriptorSet(UniformBuffer* ub, Texture* texture);
+	void createDescriptorSet(Texture* texture);
 
   private:
 	void createDescriptorSetLayout();
