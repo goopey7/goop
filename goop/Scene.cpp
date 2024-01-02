@@ -116,6 +116,17 @@ nlohmann::json Scene::saveScene()
 			meshJson["texturePath"] = mc.texturePath;
 			eJson["components"].push_back(meshJson);
 		}
+		if (e.hasComponent<RigidbodyComponent>())
+		{
+			json rbJson;
+			rbJson["type"] = "rigidBody";
+			auto rbc = e.getComponent<RigidbodyComponent>();
+			rbJson["mass"] = rbc.mass;
+			rbJson["box"]["x"] = rbc.box[0];
+			rbJson["box"]["y"] = rbc.box[1];
+			rbJson["box"]["z"] = rbc.box[2];
+			eJson["components"].push_back(rbJson);
+		}
 
 		sceneJson["entities"].push_back(eJson);
 	}

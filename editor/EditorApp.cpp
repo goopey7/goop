@@ -56,7 +56,7 @@ void EditorApp::gui()
 			scene->resetScene();
 		}
 	}
-	if (ImGui::Button("Save"))
+	if (!shouldPlay && ImGui::Button("Save"))
 	{
 		json sceneJson = scene->saveScene();
 		json cfg = loadJson("cfg.json").value();
