@@ -226,6 +226,50 @@ void EditorApp::gui()
 			auto& mesh = e.getComponent<goop::MeshComponent>();
 			ImGui::Text("Mesh: %s", mesh.path.c_str());
 			ImGui::Text("Texture: %s", mesh.texturePath.c_str());
+			if (ImGui::Button("Change Texture"))
+			{
+				changeTexturePopupOpen = true;
+				ImVec2 centerPos = ImVec2(viewport->WorkPos.x + viewport->WorkSize.x * 0.5f,
+										  viewport->WorkPos.y + viewport->WorkSize.y * 0.5f);
+				ImGui::SetNextWindowPos(centerPos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+			}
+			if (changeTexturePopupOpen)
+			{
+				ImGui::OpenPopup("ChangeTexture");
+
+				ImVec2 centerPos = ImVec2(viewport->WorkPos.x + viewport->WorkSize.x * 0.5f,
+										  viewport->WorkPos.y + viewport->WorkSize.y * 0.5f);
+
+				ImVec2 popupSize = ImVec2(200, 100); // Adjust the size if needed
+				ImVec2 popupPos =
+					ImVec2(centerPos.x - popupSize.x * 0.5f, centerPos.y - popupSize.y * 0.5f);
+				ImGui::SetNextWindowPos(popupPos, ImGuiCond_Always);
+				ImGui::SetNextWindowSize(popupSize, ImGuiCond_Always);
+			}
+			if (ImGui::BeginPopup("ChangeTexture"))
+			{
+				ImGui::Text("Change Texture");
+				if (oldTexturePath.empty())
+				{
+					oldTexturePath = mesh.texturePath;
+				}
+				ImGui::InputText("Path", texturePath, 256);
+				if (ImGui::Button("Change"))
+				{
+					mesh.texturePath = std::string(texturePath);
+					goop::rm->loadTexture(mesh, oldTexturePath.c_str());
+					oldTexturePath = "";
+					std::memset(texturePath, 0, 256);
+					ImGui::CloseCurrentPopup();
+					changeTexturePopupOpen = false;
+				}
+				if (ImGui::Button("Cancel"))
+				{
+					ImGui::CloseCurrentPopup();
+					changeTexturePopupOpen = false;
+				}
+				ImGui::EndPopup();
+			}
 			if (ImGui::Button("Change Mesh"))
 			{
 				changeMeshPopupOpen = true;
