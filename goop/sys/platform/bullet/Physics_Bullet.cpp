@@ -1,4 +1,5 @@
 #include "Physics_Bullet.h"
+#include <glm/gtc/quaternion.hpp>
 
 #ifdef GOOP_PHYSICS_BULLET
 const std::unique_ptr<goop::sys::Physics> goop::sys::gPhysics =
@@ -17,22 +18,30 @@ int Physics_Bullet::initialize()
 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver,
 												collisionConfiguration);
 
-	dynamicsWorld->setGravity(btVector3(0, -9.81f, 0));
+	dynamicsWorld->setGravity(btVector3(0, -0.81f, 0));
 
 	return 0;
 }
 
 int Physics_Bullet::destroy()
 {
+	for (auto& [rbc, rb] : rigidBodies)
+	{
+		dynamicsWorld->removeRigidBody(rb);
+		delete rb->getMotionState();
+		delete rb;
+		delete collisionShapes[rbc];
+	}
 	delete dynamicsWorld;
 	delete solver;
 	delete overlappingPairCache;
 	delete dispatcher;
 	delete collisionConfiguration;
+	rigidBodies.clear();
+	collisionShapes.clear();
+	transforms.clear();
 	return 0;
 }
-
-Physics_Bullet::~Physics_Bullet() { destroy(); }
 
 void Physics_Bullet::simulate(float dt)
 {
@@ -42,12 +51,11 @@ void Physics_Bullet::simulate(float dt)
 		btTransform transform;
 		rb->getMotionState()->getWorldTransform(transform);
 		btVector3 pos = transform.getOrigin();
-		btQuaternion rot = transform.getRotation();
 		transforms[rbc]->position = glm::vec3(pos.x(), pos.y(), pos.z());
-		// convert to euler angles
-		float yaw, pitch, roll;
-		btMatrix3x3(rot).getEulerYPR(yaw, pitch, roll);
-		transforms[rbc]->rotation = glm::vec3(pitch, yaw, roll);
+		auto rot = transform.getRotation();
+		glm::vec3 euler =
+			glm::degrees(glm::eulerAngles(glm::quat(rot.w(), rot.x(), rot.y(), rot.z())));
+		transforms[rbc]->rotation = euler;
 	}
 }
 
@@ -59,6 +67,8 @@ void Physics_Bullet::addRigidBody(RigidbodyComponent* rbc, TransformComponent* t
 	btTransform transform;
 	transform.setIdentity();
 	transform.setOrigin(btVector3(tc->position.x, tc->position.y, tc->position.z));
+	auto rot = glm::quat(glm::radians(tc->rotation));
+	transform.setRotation(btQuaternion(rot.x, rot.y, rot.z, rot.w));
 	transforms[rbc] = tc;
 
 	btScalar mass(rbc->mass);
@@ -71,11 +81,21 @@ void Physics_Bullet::addRigidBody(RigidbodyComponent* rbc, TransformComponent* t
 	}
 
 	btDefaultMotionState* motionState = new btDefaultMotionState(transform);
-	motionStates[rbc] = motionState;
 
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motionState, shape, localInertia);
 	rigidBodies[rbc] = new btRigidBody(rbInfo);
 	dynamicsWorld->addRigidBody(rigidBodies[rbc]);
 }
 
-void Physics_Bullet::removeRigidBody(RigidbodyComponent* rbc) {}
+void Physics_Bullet::removeRigidBody(RigidbodyComponent* rbc)
+{
+	dynamicsWorld->removeRigidBody(rigidBodies[rbc]);
+	delete rigidBodies[rbc]->getMotionState();
+	delete rigidBodies[rbc];
+	delete collisionShapes[rbc];
+	rigidBodies.erase(rbc);
+	collisionShapes.erase(rbc);
+	transforms.erase(rbc);
+}
+
+Physics_Bullet::~Physics_Bullet() { destroy(); }

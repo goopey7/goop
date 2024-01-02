@@ -13,11 +13,9 @@ class Entity;
 class Scene
 {
   public:
-	Scene();
-	~Scene();
-
 	Entity createEntity(const std::string& tag = "Entity");
 	void destroyEntity(Entity entity);
+	void resetScene();
 	void loadScene(nlohmann::json& scene);
 	nlohmann::json getScene() const;
 	nlohmann::json saveScene();

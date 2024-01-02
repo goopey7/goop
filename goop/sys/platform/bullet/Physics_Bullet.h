@@ -31,7 +31,6 @@ class Physics_Bullet : public Physics
 
 	std::map<RigidbodyComponent*, btRigidBody*> rigidBodies;
 	std::map<RigidbodyComponent*, btCollisionShape*> collisionShapes;
-	std::map<RigidbodyComponent*, btDefaultMotionState*> motionStates;
 	std::map<RigidbodyComponent*, TransformComponent*> transforms;
 };
 } // namespace goop::sys::platform::bullet

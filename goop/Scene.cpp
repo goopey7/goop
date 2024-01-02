@@ -9,10 +9,6 @@
 
 using namespace goop;
 
-Scene::Scene() {}
-
-Scene::~Scene() {}
-
 Entity Scene::createEntity(const std::string& tag)
 {
 	Entity e = Entity(registry.create(), this);
@@ -139,4 +135,50 @@ void Scene::destroyEntity(Entity entity)
 		sys::gPhysics->removeRigidBody(&entity.getComponent<RigidbodyComponent>());
 	}
 	registry.destroy((entt::entity)entity.getUID());
+}
+
+void Scene::resetScene()
+{
+	if (sceneJson["entities"].is_null())
+	{
+		return;
+	}
+
+	goop::sys::gPhysics->destroy();
+	goop::sys::gPhysics->initialize();
+
+	for (json& entity : sceneJson["entities"])
+	{
+		std::string name = entity["name"];
+		goop::Entity e = getEntity(name);
+
+		for (json& component : entity["components"])
+		{
+			std::string type = component["type"];
+			if (type == "transform")
+			{
+				auto& tc = e.getComponent<goop::TransformComponent>();
+				tc.position.x = component["position"]["x"];
+				tc.position.y = component["position"]["y"];
+				tc.position.z = component["position"]["z"];
+
+				tc.rotation.x = component["rotation"]["x"];
+				tc.rotation.y = component["rotation"]["y"];
+				tc.rotation.z = component["rotation"]["z"];
+
+				tc.scale.x = component["scale"]["x"];
+				tc.scale.y = component["scale"]["y"];
+				tc.scale.z = component["scale"]["z"];
+			}
+		}
+	}
+
+	auto rbView = view<RigidbodyComponent>();
+	auto tcView = view<TransformComponent>();
+	for (auto entity : rbView)
+	{
+		RigidbodyComponent* rbc = &rbView.get<RigidbodyComponent>(entity);
+		TransformComponent* tc = &tcView.get<TransformComponent>(entity);
+		sys::gPhysics->addRigidBody(rbc, tc);
+	}
 }

@@ -7,7 +7,15 @@ int main(int argc, char** argv)
 {
 	goop::Core core(argc, argv);
 
-	core.run();
+	try
+	{
+		core.run();
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return EXIT_FAILURE;
+	}
 
 	return EXIT_SUCCESS;
 }
