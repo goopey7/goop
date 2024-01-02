@@ -31,12 +31,12 @@ include_directories("libs/soloud/include")
 # Include STB headers
 include_directories("libs/stb/")
 
+# include vulkan headers
+include_directories("libs/vulkan/include")
+
 # include volk
 include_directories("libs/volk/")
 add_subdirectory(libs/volk)
-
-# include vulkan headers
-include_directories("libs/vulkan/include")
 
 # include imgui
 include_directories("libs/imgui/")
