@@ -16,9 +16,6 @@ void GameApp::init()
 {
 	std::cout << "Hello from GameApp!" << std::endl;
 
-	// goop::rm->loadSfx("res/blast.mp3");
-	//  goop::rm->playSfx(0);
-
 	auto cfgOpt = loadJson("cfg.json");
 	if (!cfgOpt.has_value())
 	{

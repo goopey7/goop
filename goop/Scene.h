@@ -15,7 +15,6 @@ class Scene
   public:
 	Entity createEntity(const std::string& tag = "Entity");
 	void destroyEntity(Entity entity);
-	void resetScene();
 	void loadScene(nlohmann::json& scene);
 	nlohmann::json getScene() const;
 	nlohmann::json saveScene();
@@ -29,6 +28,10 @@ class Scene
 	{
 		return registry.valid(id);
 	}
+
+#ifdef GOOP_APPTYPE_EDITOR
+	void resetScene();
+#endif
 
   private:
 	entt::registry registry;

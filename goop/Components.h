@@ -41,6 +41,12 @@ struct RigidbodyComponent
 {
 	float mass;
 	float box[3];
+	RigidbodyComponent() : mass(1.0f)
+	{
+		box[0] = 1.0f;
+		box[1] = 1.0f;
+		box[2] = 1.0f;
+	}
 	RigidbodyComponent(float mass, float box[3]) : mass(mass)
 	{
 		memcpy(this->box, box, sizeof(float) * 3);

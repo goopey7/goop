@@ -20,6 +20,7 @@ int Physics_Bullet::initialize()
 
 	dynamicsWorld->setGravity(btVector3(0, -0.81f, 0));
 
+	bIsInitialized = true;
 	return 0;
 }
 
@@ -40,6 +41,7 @@ int Physics_Bullet::destroy()
 	rigidBodies.clear();
 	collisionShapes.clear();
 	transforms.clear();
+	bIsInitialized = false;
 	return 0;
 }
 

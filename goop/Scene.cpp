@@ -148,15 +148,13 @@ void Scene::destroyEntity(Entity entity)
 	registry.destroy((entt::entity)entity.getUID());
 }
 
+#ifdef GOOP_APPTYPE_EDITOR
 void Scene::resetScene()
 {
 	if (sceneJson["entities"].is_null())
 	{
 		return;
 	}
-
-	goop::sys::gPhysics->destroy();
-	goop::sys::gPhysics->initialize();
 
 	for (json& entity : sceneJson["entities"])
 	{
@@ -183,13 +181,5 @@ void Scene::resetScene()
 			}
 		}
 	}
-
-	auto rbView = view<RigidbodyComponent>();
-	auto tcView = view<TransformComponent>();
-	for (auto entity : rbView)
-	{
-		RigidbodyComponent* rbc = &rbView.get<RigidbodyComponent>(entity);
-		TransformComponent* tc = &tcView.get<TransformComponent>(entity);
-		sys::gPhysics->addRigidBody(rbc, tc);
-	}
 }
+#endif

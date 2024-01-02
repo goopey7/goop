@@ -24,23 +24,14 @@ Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 #ifdef GOOP_APPTYPE_EDITOR
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 #endif
-	sys::gPhysics->initialize();
 	sys::gWindow->initialize();
 	sys::gWindow->openWindow(1280, 720, "Goop", GOOP_WINDOW_DEFAULT);
 	sys::gRenderer->initialize();
 	sys::gRenderer->setScene(&scene);
 	rm->initialize();
 	app->init();
-
-	// load meshes from components
-	auto mcView = scene.view<MeshComponent>();
-	for (auto entity : mcView)
-	{
-		MeshComponent& mesh = mcView.get<MeshComponent>(entity);
-		rm->loadMesh(mesh);
-		rm->loadTexture(mesh);
-	}
-
+#ifndef GOOP_APPTYPE_EDITOR
+	sys::gPhysics->initialize();
 	// initialize rigid bodies
 	auto rbView = scene.view<RigidbodyComponent>();
 	auto tcView = scene.view<TransformComponent>();
@@ -49,6 +40,16 @@ Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 		RigidbodyComponent* rbc = &rbView.get<RigidbodyComponent>(entity);
 		TransformComponent* tc = &tcView.get<TransformComponent>(entity);
 		sys::gPhysics->addRigidBody(rbc, tc);
+	}
+#endif
+
+	// load meshes from components
+	auto mcView = scene.view<MeshComponent>();
+	for (auto entity : mcView)
+	{
+		MeshComponent& mesh = mcView.get<MeshComponent>(entity);
+		rm->loadMesh(mesh);
+		rm->loadTexture(mesh);
 	}
 }
 

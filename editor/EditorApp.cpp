@@ -16,10 +16,7 @@ goop::App* goop::createEditor(int argc, char** argv, App* game, goop::Scene* sce
 	return new EditorApp(game, scene);
 }
 
-void EditorApp::init()
-{
-	game->init();
-}
+void EditorApp::init() { game->init(); }
 
 void EditorApp::update(float dt)
 {
@@ -53,7 +50,20 @@ void EditorApp::gui()
 		shouldPlay = !shouldPlay;
 		if (!shouldPlay)
 		{
+			goop::sys::gPhysics->destroy();
 			scene->resetScene();
+		}
+		else
+		{
+			goop::sys::gPhysics->initialize();
+			auto rbView = scene->view<goop::RigidbodyComponent>();
+			auto tcView = scene->view<goop::TransformComponent>();
+			for (auto entity : rbView)
+			{
+				goop::RigidbodyComponent* rbc = &rbView.get<goop::RigidbodyComponent>(entity);
+				goop::TransformComponent* tc = &tcView.get<goop::TransformComponent>(entity);
+				goop::sys::gPhysics->addRigidBody(rbc, tc);
+			}
 		}
 	}
 	if (!shouldPlay && ImGui::Button("Save"))
@@ -173,6 +183,13 @@ void EditorApp::gui()
 			ImGui::DragFloat3("Rotation", &tc.rotation[0], 0.1f);
 			ImGui::DragFloat3("Scale", &tc.scale[0], 0.1f);
 		}
+		if (e.hasComponent<goop::RigidbodyComponent>())
+		{
+			ImGui::Text("Rigidbody");
+			auto& rbc = e.getComponent<goop::RigidbodyComponent>();
+			ImGui::DragFloat("Mass", &rbc.mass, 0.1f);
+			ImGui::DragFloat3("Size", &rbc.box[0], 0.1f);
+		}
 		if (e.hasComponent<goop::MeshComponent>())
 		{
 			ImGui::Text("Mesh");
@@ -268,8 +285,10 @@ void EditorApp::gui()
 				ImGui::EndPopup();
 			}
 		}
-		if (!e.hasComponent<goop::TransformComponent>() ||
-			!e.hasComponent<goop::MeshComponent>() && ImGui::Button("Add Component"))
+		if ((!e.hasComponent<goop::TransformComponent>() ||
+			 !e.hasComponent<goop::MeshComponent>() ||
+			 !e.hasComponent<goop::RigidbodyComponent>()) &&
+			ImGui::Button("Add Component"))
 		{
 			addComponentPopupOpen = true;
 		}
@@ -302,6 +321,17 @@ void EditorApp::gui()
 				e.addComponent<goop::MeshComponent>("res/viking_room.obj", "res/viking_room.png");
 				goop::rm->loadMesh(e.getComponent<goop::MeshComponent>());
 				goop::rm->loadTexture(e.getComponent<goop::MeshComponent>());
+				ImGui::CloseCurrentPopup();
+				addComponentPopupOpen = false;
+			}
+			if (!e.hasComponent<goop::RigidbodyComponent>() && ImGui::Button("Rigidbody"))
+			{
+				e.addComponent<goop::RigidbodyComponent>();
+				if (goop::sys::gPhysics->isInitialized())
+				{
+					goop::sys::gPhysics->addRigidBody(&e.getComponent<goop::RigidbodyComponent>(),
+													  &e.getComponent<goop::TransformComponent>());
+				}
 				ImGui::CloseCurrentPopup();
 				addComponentPopupOpen = false;
 			}
