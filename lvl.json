@@ -26,7 +26,16 @@
               "path": "res/viking_room.obj",
               "texturePath": "res/viking_room.png",
               "type": "mesh"
-            }
+            },
+			{
+				"type": "rigidBody",
+				"mass": 1.0,
+				"box": {
+					"x": 1.0,
+					"y": 1.0,
+					"z": 1.0
+				}
+			}
           ],
           "name": "Viking Room"
         },

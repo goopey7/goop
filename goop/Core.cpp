@@ -24,6 +24,7 @@ Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 #ifdef GOOP_APPTYPE_EDITOR
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 #endif
+	sys::gPhysics->initialize();
 	sys::gWindow->initialize();
 	sys::gWindow->openWindow(1280, 720, "Goop", GOOP_WINDOW_DEFAULT);
 	sys::gRenderer->initialize();
@@ -32,12 +33,22 @@ Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 	app->init();
 
 	// load meshes from components
-	auto view = scene.view<MeshComponent>();
-	for (auto entity : view)
+	auto mcView = scene.view<MeshComponent>();
+	for (auto entity : mcView)
 	{
-		MeshComponent& mesh = view.get<MeshComponent>(entity);
+		MeshComponent& mesh = mcView.get<MeshComponent>(entity);
 		rm->loadMesh(mesh);
 		rm->loadTexture(mesh);
+	}
+
+	// initialize rigid bodies
+	auto rbView = scene.view<RigidbodyComponent>();
+	auto tcView = scene.view<TransformComponent>();
+	for (auto entity : rbView)
+	{
+		RigidbodyComponent* rbc = &rbView.get<RigidbodyComponent>(entity);
+		TransformComponent* tc = &tcView.get<TransformComponent>(entity);
+		sys::gPhysics->addRigidBody(rbc, tc);
 	}
 }
 
@@ -54,6 +65,7 @@ void Core::run()
 		auto dt = std::chrono::duration<float>(now - last).count();
 		sys::gWindow->pollEvents();
 
+		sys::gPhysics->simulate(dt);
 		app->update(dt);
 
 		sys::gRenderer->beginFrame();
@@ -93,5 +105,6 @@ void Core::run()
 
 	sys::gRenderer->destroy();
 	sys::gWindow->destroy();
+	sys::gPhysics->destroy();
 	rm->destroy();
 }

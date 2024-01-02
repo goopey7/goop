@@ -3,6 +3,7 @@
 
 #include "goop/Scene.h"
 #include <goop/App.h>
+#include <goop/sys/Physics.h>
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Window.h>
 #include <goop/sys/Sfx.h>

@@ -31,15 +31,21 @@ include_directories("libs/soloud/include")
 # Include STB headers
 include_directories("libs/stb/")
 
-# include volk headers
+# include volk
 include_directories("libs/volk/")
+add_subdirectory(libs/volk)
 
 # include vulkan headers
 include_directories("libs/vulkan/include")
 
-# include imgui headers
+# include imgui
 include_directories("libs/imgui/")
 include_directories("libs/imgui/backends")
+add_subdirectory(libs/imgui)
+
+# include bullet
+include_directories("libs/bullet3/src")
+add_subdirectory(libs/bullet3)
 
 # include entt headers
 include_directories("libs/entt/")
@@ -63,6 +69,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_WINDOW_GLFW)
 target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_AUDIO_SOLOUD)
 target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_MESHLOADER_ASSIMP)
 target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_IMGLOADER_STB)
+target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_PHYSICS_BULLET)
 
 # ##################### Build Soloud
 # Add a custom target to build Soloud using CMake
@@ -104,12 +111,10 @@ else()
 endif()
 
 # Link the C++ executable
-add_subdirectory(libs/volk)
 add_subdirectory(editor)
 add_subdirectory(game)
-add_subdirectory(libs/imgui)
 target_link_libraries(${PROJECT_NAME} PRIVATE volk ${SDL2_LIBRARY} ${RUST_LIB} ${GLFW3_LIBRARY}
-	${ASSIMP_LIBRARY} SoLoud imgui_lib app_lib game_lib)
+	${ASSIMP_LIBRARY} SoLoud imgui_lib app_lib game_lib BulletDynamics BulletCollision LinearMath)
 # ##############################################################################
 
 # ##################### Build shaders

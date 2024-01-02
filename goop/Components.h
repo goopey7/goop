@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include <glm/glm.hpp>
 #include <string>
 
@@ -33,6 +34,16 @@ struct MeshComponent
 	MeshComponent(const std::string& path, const std::string& texturePath)
 		: path(path), texturePath(texturePath)
 	{
+	}
+};
+
+struct RigidbodyComponent
+{
+	float mass;
+	float box[3];
+	RigidbodyComponent(float mass, float box[3]) : mass(mass)
+	{
+		memcpy(this->box, box, sizeof(float) * 3);
 	}
 };
 

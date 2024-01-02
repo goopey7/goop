@@ -69,6 +69,12 @@ void Scene::loadScene(nlohmann::json& startScene)
 			{
 				e.addComponent<goop::MeshComponent>(component["path"], component["texturePath"]);
 			}
+			else if (component["type"] == "rigidBody")
+			{
+				json& box = component["box"];
+				float size[3] = {box["x"], box["y"], box["z"]};
+				e.addComponent<goop::RigidbodyComponent>(component["mass"], size);
+			}
 		}
 	}
 }
@@ -127,6 +133,10 @@ void Scene::destroyEntity(Entity entity)
 	{
 		goop::rm->unloadMesh(entity.getComponent<MeshComponent>());
 		goop::rm->unloadTexture(entity.getComponent<MeshComponent>());
+	}
+	if (entity.hasComponent<RigidbodyComponent>())
+	{
+		sys::gPhysics->removeRigidBody(&entity.getComponent<RigidbodyComponent>());
 	}
 	registry.destroy((entt::entity)entity.getUID());
 }
