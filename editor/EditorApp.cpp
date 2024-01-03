@@ -12,6 +12,8 @@
 #include <GLFW/glfw3.h>
 #include <json.hpp>
 
+#include "components/CustomComponents.h"
+
 using json = nlohmann::json;
 
 goop::App* goop::createEditor(int argc, char** argv, App* game, goop::Scene* scene)
@@ -19,7 +21,21 @@ goop::App* goop::createEditor(int argc, char** argv, App* game, goop::Scene* sce
 	return new EditorApp(game, scene);
 }
 
-void EditorApp::init() { game->init(); }
+void EditorApp::init()
+{
+	game->init();
+
+	// scan components directory
+	for (const auto& entry : std::filesystem::directory_iterator("components"))
+	{
+		if (entry.path().extension() == ".cpp")
+		{
+			std::string name = entry.path().filename().string();
+			name = name.substr(0, name.size() - 4);
+			customComponentNames.push_back(name);
+		}
+	}
+}
 
 void EditorApp::update(float dt)
 {
@@ -342,10 +358,7 @@ void EditorApp::gui()
 				ImGui::EndPopup();
 			}
 		}
-		if ((!e.hasComponent<goop::TransformComponent>() ||
-			 !e.hasComponent<goop::MeshComponent>() ||
-			 !e.hasComponent<goop::RigidbodyComponent>()) &&
-			ImGui::Button("Add Component"))
+		if (ImGui::Button("Add Component"))
 		{
 			addComponentPopupOpen = true;
 		}
@@ -391,6 +404,19 @@ void EditorApp::gui()
 				}
 				ImGui::CloseCurrentPopup();
 				addComponentPopupOpen = false;
+			}
+			for (const auto& name : customComponentNames)
+			{
+				if (ImGui::Button(name.c_str()))
+				{
+					if (customComponentMap.find(name) == customComponentMap.end())
+					{
+						throw std::runtime_error("Custom component " + name + " not found");
+					}
+					e.addCustomComponent(customComponentMap[name](e.getEntity(), scene));
+					ImGui::CloseCurrentPopup();
+					addComponentPopupOpen = false;
+				}
 			}
 			if (ImGui::Button("Cancel"))
 			{

@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <goop/Primitives.h>
 #include <string>
+#include <goop/Entity.h>
 
 namespace goop
 {
@@ -59,4 +60,14 @@ struct RigidbodyComponent
 	}
 };
 
+class CustomComponent
+{
+  public:
+	CustomComponent(goop::Entity e) : entity(e) {}
+	virtual void init() = 0;
+	virtual void update(float dt) = 0;
+
+  protected:
+	goop::Entity entity;
+};
 } // namespace goop

@@ -1,7 +1,6 @@
 // Sam Collier 2023
 #pragma once
 
-#include "Components.h"
 #include "goop/Camera.h"
 #include <entt.hpp>
 

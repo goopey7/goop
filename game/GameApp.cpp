@@ -59,4 +59,13 @@ void GameApp::init()
 	scene->setCurrentCamera(cam);
 }
 
-void GameApp::update(float dt) { goop::sys::gPhysics->simulate(dt); }
+void GameApp::update(float dt)
+{
+	goop::sys::gPhysics->simulate(dt);
+	auto view = scene->view<goop::CustomComponent*>();
+	for (auto entity : view)
+	{
+		goop::CustomComponent* cc = view.get<goop::CustomComponent*>(entity);
+		cc->update(dt);
+	}
+}

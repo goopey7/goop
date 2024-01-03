@@ -5,13 +5,16 @@
 #include <imgui.h>
 #include <rustlib.h>
 
+#include <iostream>
+
 using namespace goop;
 
 const std::unique_ptr<goop::sys::ResourceManager> goop::rm =
 	std::make_unique<goop::sys::ResourceManager>();
 
 #ifdef GOOP_APPTYPE_EDITOR
-Core::Core(int argc, char** argv) : app(createEditor(argc, argv, createGame(argc, argv, &scene), &scene))
+Core::Core(int argc, char** argv)
+	: app(createEditor(argc, argv, createGame(argc, argv, &scene), &scene))
 #else
 Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 #endif
@@ -51,6 +54,13 @@ Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 		rm->loadMesh(mesh);
 		rm->loadTexture(mesh);
 	}
+
+	auto ccView = scene.view<CustomComponent*>();
+	for (auto entity : ccView)
+	{
+		CustomComponent* cc = ccView.get<CustomComponent*>(entity);
+		cc->init();
+	}
 }
 
 void Core::run()
@@ -67,7 +77,7 @@ void Core::run()
 		sys::gWindow->pollEvents();
 
 		app->update(dt);
-
+		
 		sys::gRenderer->beginFrame();
 		ImGui::NewFrame();
 

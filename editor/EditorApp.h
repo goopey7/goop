@@ -34,4 +34,5 @@ class EditorApp : public goop::App
 	char meshPath[256] = "";
 	char texturePath[256] = "";
 	std::optional<goop::Entity> selectedEntity = std::nullopt;
+	std::vector<std::string> customComponentNames;
 };

@@ -6,6 +6,7 @@
 
 namespace goop
 {
+class CustomComponent;
 class Entity
 {
   public:
@@ -24,6 +25,8 @@ class Entity
 
 	uint32_t getUID() { return (uint32_t)entity; }
 	entt::entity getEntity() { return entity; }
+
+	void addCustomComponent(goop::CustomComponent* component);
 
   private:
 	entt::entity entity;

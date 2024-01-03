@@ -1,7 +1,7 @@
 # Set the minimum required CMake version
 cmake_minimum_required(VERSION 3.12)
 
-project(app_lib)
+project(editor_lib)
 
 # Add your source files for the "app" here
 file(GLOB_RECURSE APP_SRC_FILES "*.cpp" "*.h")

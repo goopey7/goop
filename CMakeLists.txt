@@ -113,8 +113,9 @@ endif()
 # Link the C++ executable
 add_subdirectory(editor)
 add_subdirectory(game)
+add_subdirectory(components)
 target_link_libraries(${PROJECT_NAME} PRIVATE volk ${SDL2_LIBRARY} ${RUST_LIB} ${GLFW3_LIBRARY}
-	${ASSIMP_LIBRARY} SoLoud imgui_lib app_lib game_lib BulletDynamics BulletCollision LinearMath)
+	${ASSIMP_LIBRARY} SoLoud imgui_lib editor_lib game_lib components_lib BulletDynamics BulletCollision LinearMath)
 # ##############################################################################
 
 # ##################### Build shaders
