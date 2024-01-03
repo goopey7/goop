@@ -1,6 +1,6 @@
 #include "EditorApp.h"
-#include <goop/Input.h>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <goop/Input.h>
 #include <imgui.h>
 #include <iostream>
 
@@ -9,8 +9,8 @@
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Sfx.h>
 
-#include <json.hpp>
 #include <GLFW/glfw3.h>
+#include <json.hpp>
 
 using json = nlohmann::json;
 
@@ -19,57 +19,54 @@ goop::App* goop::createEditor(int argc, char** argv, App* game, goop::Scene* sce
 	return new EditorApp(game, scene);
 }
 
-void EditorApp::init()
-{
-	game->init();
-}
+void EditorApp::init() { game->init(); }
 
 void EditorApp::update(float dt)
 {
 	if (shouldPlay)
 	{
-		goop::sys::gPhysics->simulate(dt);
 		game->update(dt);
-	}
-
-	goop::Camera* cam = scene->getCurrentCamera();
-
-	if (goop::isLMBDown() || goop::isRMBDown())
-	{
-		goop::hideCursor(true);
-		if (goop::isKeyDown(GLFW_KEY_W))
-		{
-			cam->translate(cam->getForward() * dt * 5.f);
-		}
-		if (goop::isKeyDown(GLFW_KEY_S))
-		{
-			cam->translate(-cam->getForward() * dt * 5.f);
-		}
-		if (goop::isKeyDown(GLFW_KEY_A))
-		{
-			cam->translate(-cam->getRight() * dt * 5.f);
-		}
-		if (goop::isKeyDown(GLFW_KEY_D))
-		{
-			cam->translate(cam->getRight() * dt * 5.f);
-		}
-		if (goop::isKeyDown(GLFW_KEY_E))
-		{
-			cam->translate(cam->getUp() * dt * 5.f);
-		}
-		if (goop::isKeyDown(GLFW_KEY_Q))
-		{
-			cam->translate(-cam->getUp() * dt * 5.f);
-		}
-
-		float dx = goop::getMouseDeltaX();
-		float dy = goop::getMouseDeltaY();
-		cam->rotate(glm::vec3(-dy, dx, 0.f) * dt * 5.f);
-		cam->updateRotation();
 	}
 	else
 	{
-		goop::hideCursor(false);
+		goop::Camera* cam = scene->getCurrentCamera();
+
+		if (goop::isLMBDown() || goop::isRMBDown())
+		{
+			goop::hideCursor(true);
+			if (goop::isKeyDown(GLFW_KEY_W))
+			{
+				cam->translate(cam->getForward() * dt * 5.f);
+			}
+			if (goop::isKeyDown(GLFW_KEY_S))
+			{
+				cam->translate(-cam->getForward() * dt * 5.f);
+			}
+			if (goop::isKeyDown(GLFW_KEY_A))
+			{
+				cam->translate(-cam->getRight() * dt * 5.f);
+			}
+			if (goop::isKeyDown(GLFW_KEY_D))
+			{
+				cam->translate(cam->getRight() * dt * 5.f);
+			}
+			if (goop::isKeyDown(GLFW_KEY_E))
+			{
+				cam->translate(cam->getUp() * dt * 5.f);
+			}
+			if (goop::isKeyDown(GLFW_KEY_Q))
+			{
+				cam->translate(-cam->getUp() * dt * 5.f);
+			}
+
+			float dx = goop::getMouseDeltaX();
+			float dy = goop::getMouseDeltaY();
+			cam->rotate(glm::vec3(-dy, dx, 0.f) * dt * 5.f);
+		}
+		else
+		{
+			goop::hideCursor(false);
+		}
 	}
 }
 

@@ -15,7 +15,11 @@ Camera::Camera()
 
 void Camera::translate(const glm::vec3& translation) { position += translation; }
 
-void Camera::rotate(const glm::vec3& rotation) { this->rotation += rotation; }
+void Camera::rotate(const glm::vec3& rotation)
+{
+	this->rotation += rotation;
+	updateRotation();
+}
 
 void Camera::updateRotation()
 {

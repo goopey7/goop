@@ -59,4 +59,4 @@ void GameApp::init()
 	scene->setCurrentCamera(cam);
 }
 
-void GameApp::update(float dt) {}
+void GameApp::update(float dt) { goop::sys::gPhysics->simulate(dt); }

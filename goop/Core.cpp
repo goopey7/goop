@@ -66,9 +66,6 @@ void Core::run()
 		auto dt = std::chrono::duration<float>(now - last).count();
 		sys::gWindow->pollEvents();
 
-#ifndef GOOP_APPTYPE_EDITOR
-		sys::gPhysics->simulate(dt);
-#endif
 		app->update(dt);
 
 		sys::gRenderer->beginFrame();
