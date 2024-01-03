@@ -47,9 +47,30 @@ int Physics_Bullet::destroy()
 
 void Physics_Bullet::simulate(float dt)
 {
+	for (auto& [rbc, rb] : rigidBodies)
+	{
+		if (rbc->mass != 0)
+		{
+			continue;
+		}
+
+		auto tc = transforms[rbc];
+
+		btTransform transform;
+		transform.setIdentity();
+		transform.setOrigin(btVector3(tc->position.x, tc->position.y, tc->position.z));
+		auto rot = glm::quat(glm::radians(tc->rotation));
+		transform.setRotation(btQuaternion(rot.x, rot.y, rot.z, rot.w));
+		rb->setWorldTransform(transform);
+	}
 	dynamicsWorld->stepSimulation(dt, 10);
 	for (auto& [rbc, rb] : rigidBodies)
 	{
+		if (rbc->mass == 0)
+		{
+			continue;
+		}
+
 		btTransform transform;
 		rb->getMotionState()->getWorldTransform(transform);
 		btVector3 pos = transform.getOrigin();

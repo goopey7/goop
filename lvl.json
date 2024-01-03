@@ -7,49 +7,11 @@
             {
               "position": {
                 "x": 0.0,
-                "y": 0.0,
-                "z": -0.30000001192092896
-              },
-              "rotation": {
-                "x": 0.0,
-                "y": 25.399999618530273,
-                "z": -38.20000076293945
-              },
-              "scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "type": "transform"
-            },
-            {
-              "path": "box",
-              "primitive": "box",
-              "texturePath": "res/viking_room.png",
-              "type": "mesh"
-            },
-            {
-              "box": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "mass": 1.0,
-              "type": "rigidBody"
-            }
-          ],
-          "name": "Viking Room"
-        },
-        {
-          "components": [
-            {
-              "position": {
-                "x": -1.7000000476837158,
-                "y": 0.0,
+                "y": 2.0,
                 "z": 0.0
               },
               "rotation": {
-                "x": 0.0,
+                "x": 23.0,
                 "y": 35.099998474121094,
                 "z": 0.0
               },
@@ -77,6 +39,44 @@
             }
           ],
           "name": "Cow"
+        },
+        {
+          "components": [
+            {
+              "position": {
+                "x": 0.0,
+                "y": -1.0,
+                "z": 0.0
+              },
+              "rotation": {
+                "x": 32.0,
+                "y": -135.1999969482422,
+                "z": 24.0
+              },
+              "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "type": "transform"
+            },
+            {
+              "path": "box",
+              "primitive": "box",
+              "texturePath": "res/viking_room.png",
+              "type": "mesh"
+            },
+            {
+              "box": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "mass": 0.0,
+              "type": "rigidBody"
+            }
+          ],
+          "name": "Viking Room"
         }
       ],
       "name": "lvl_1"
