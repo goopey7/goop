@@ -26,6 +26,10 @@ int MeshLoader::loadPrimitive(Primitive primitive)
 		mid->vertices.reserve(8);
 		mid->indices.reserve(36);
 
+		box.x /= 2;
+		box.y /= 2;
+		box.z /= 2;
+
 		std::vector<float> cubeVertices = {
 			// Front face
 			box.x, box.y, box.z,   // Vertex 0
