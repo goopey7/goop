@@ -52,7 +52,6 @@ class Swapchain
 	void destroyViewportDependents();
 #endif
 
-
 	VkSwapchainKHR swapchain;
 	std::vector<VkImage> swapchainImages;
 	VkFormat swapchainImageFormat;
@@ -66,7 +65,7 @@ class Swapchain
 	VkImageView depthImageView;
 
 #ifdef GOOP_APPTYPE_EDITOR
-	VkExtent2D viewportExtent = { 1280, 720 };
+	VkExtent2D viewportExtent = {1280, 720};
 	VkRenderPass viewportRenderPass;
 	VkImageView viewportImageView;
 	VkImage viewportImage;

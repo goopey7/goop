@@ -14,6 +14,19 @@ using namespace goop::sys::platform::vulkan;
 
 Swapchain::Swapchain(Context* ctx, Swapchain* oldSwapchain) : ctx(ctx)
 {
+#ifdef GOOP_APPTYPE_EDITOR
+	if (oldSwapchain != nullptr)
+	{
+		uint32_t oldWidth = oldSwapchain->getViewportExtent().width;
+		uint32_t oldHeight = oldSwapchain->getViewportExtent().height;
+		if (oldWidth != 0 && oldHeight != 0)
+		{
+			viewportExtent.width = oldWidth;
+			viewportExtent.height = oldHeight;
+		}
+	}
+#endif
+
 	createSwapchain(oldSwapchain);
 	createImageViews();
 	createRenderPass();
