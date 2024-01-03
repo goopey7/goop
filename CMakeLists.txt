@@ -60,7 +60,7 @@ file(GLOB STB_IMAGE_HEADER "libs/stb/stb_image.h")
 # Define the C++ executable
 add_executable(${PROJECT_NAME} ${ENGINE_SRC_FILES} ${STB_VORBIS_SOURCE})
 
-#define app type
+# define app type
 target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_APPTYPE_EDITOR=1)
 
 # define systems
@@ -71,8 +71,8 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_MESHLOADER_ASSIMP)
 target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_IMGLOADER_STB)
 target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_PHYSICS_BULLET)
 
-# ##################### Build Soloud
-# Add a custom target to build Soloud using CMake
+# ##################### Build Soloud Add a custom target to build Soloud using
+# CMake
 add_custom_target(
   build_soloud
   SOURCES ${SOLOUD_SOURCES}
@@ -106,25 +106,39 @@ if(WIN32)
   set(RUST_LIB
       ${CMAKE_SOURCE_DIR}/rust_lib/target/release/rust_hello_lib.dll.lib)
 else()
-  set(RUST_LIB
-      ${CMAKE_SOURCE_DIR}/rust_lib/target/release/librust_hello_lib.so)
+  set(RUST_LIB ${CMAKE_SOURCE_DIR}/rust_lib/target/release/librust_hello_lib.so)
 endif()
 
 # Link the C++ executable
 add_subdirectory(editor)
 add_subdirectory(game)
 add_subdirectory(components)
-target_link_libraries(${PROJECT_NAME} PRIVATE volk ${SDL2_LIBRARY} ${RUST_LIB} ${GLFW3_LIBRARY}
-	${ASSIMP_LIBRARY} SoLoud imgui_lib editor_lib game_lib components_lib BulletDynamics BulletCollision LinearMath)
+target_link_libraries(
+  ${PROJECT_NAME}
+  PRIVATE volk
+          ${SDL2_LIBRARY}
+          ${RUST_LIB}
+          ${GLFW3_LIBRARY}
+          ${ASSIMP_LIBRARY}
+          SoLoud
+          imgui_lib
+          editor_lib
+          game_lib
+          components_lib
+          BulletDynamics
+          BulletCollision
+          LinearMath)
 # ##############################################################################
 
 # ##################### Build shaders
 
 if(WIN32)
-	find_program(GLSLC_EXECUTABLE NAMES glslc
+  find_program(
+    GLSLC_EXECUTABLE
+    NAMES glslc
     PATHS ${CMAKE_SOURCE_DIR}/windows/glslc)
 else()
-	find_program(GLSLC_EXECUTABLE glslc)
+  find_program(GLSLC_EXECUTABLE glslc)
 endif()
 if(NOT GLSLC_EXECUTABLE)
   message(
@@ -139,16 +153,20 @@ add_custom_target(
   compile_shaders
   COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/shaders/shader.vert.spv
           ${CMAKE_SOURCE_DIR}/shaders/shader.vert
-  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/shaders/shader_editor.frag.spv
-          ${CMAKE_SOURCE_DIR}/shaders/shader_editor.frag
-  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/shaders/shader_game.frag.spv
-          ${CMAKE_SOURCE_DIR}/shaders/shader_game.frag
+  COMMAND
+    ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/shaders/shader_editor.frag.spv
+    ${CMAKE_SOURCE_DIR}/shaders/shader_editor.frag
+  COMMAND
+    ${GLSLC_EXECUTABLE} -o ${CMAKE_BINARY_DIR}/shaders/shader_game.frag.spv
+    ${CMAKE_SOURCE_DIR}/shaders/shader_game.frag
   COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_SOURCE_DIR}/shaders/shader.vert.spv
           ${CMAKE_SOURCE_DIR}/shaders/shader.vert
-  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_SOURCE_DIR}/shaders/shader_editor.frag.spv
-          ${CMAKE_SOURCE_DIR}/shaders/shader_editor.frag
-  COMMAND ${GLSLC_EXECUTABLE} -o ${CMAKE_SOURCE_DIR}/shaders/shader_game.frag.spv
-          ${CMAKE_SOURCE_DIR}/shaders/shader_game.frag
+  COMMAND
+    ${GLSLC_EXECUTABLE} -o ${CMAKE_SOURCE_DIR}/shaders/shader_editor.frag.spv
+    ${CMAKE_SOURCE_DIR}/shaders/shader_editor.frag
+  COMMAND
+    ${GLSLC_EXECUTABLE} -o ${CMAKE_SOURCE_DIR}/shaders/shader_game.frag.spv
+    ${CMAKE_SOURCE_DIR}/shaders/shader_game.frag
   COMMENT "Compiling GLSL shaders...")
 
 # Specify the output directory for shader files
@@ -158,8 +176,16 @@ set(SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
 add_dependencies(${PROJECT_NAME} compile_shaders)
 # ##############################################################################
 
-# Copy the rust_hello_lib.dll to the build directory where the .exe goes
-# And copy SDL2.dll
+add_custom_target(update_components
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/components/updateComponents.sh
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Running updateComponents.sh script"
+)
+
+add_dependencies(${PROJECT_NAME} update_components)
+
+# Copy the rust_hello_lib.dll to the build directory where the .exe goes And
+# copy SDL2.dll
 if(WIN32)
   add_custom_command(
     TARGET ${PROJECT_NAME}
@@ -169,39 +195,32 @@ if(WIN32)
       ${CMAKE_SOURCE_DIR}/rust_lib/target/release/rust_hello_lib.dll
       $<TARGET_FILE_DIR:${PROJECT_NAME}>)
   add_custom_command(
-	  TARGET ${PROJECT_NAME}
-	  POST_BUILD
-	  COMMAND
-	  ${CMAKE_COMMAND} -E copy
-	  ${CMAKE_SOURCE_DIR}/windows/sdl2/lib/SDL2.dll
-	  $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND
+      ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/windows/sdl2/lib/SDL2.dll
+      $<TARGET_FILE_DIR:${PROJECT_NAME}>)
   add_custom_command(
-	  TARGET ${PROJECT_NAME}
-	  POST_BUILD
-	  COMMAND
-	  ${CMAKE_COMMAND} -E copy
-	  ${CMAKE_SOURCE_DIR}/windows/assimp/lib/assimp-vc143-mt.dll
-	  $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND
+      ${CMAKE_COMMAND} -E copy
+      ${CMAKE_SOURCE_DIR}/windows/assimp/lib/assimp-vc143-mt.dll
+      $<TARGET_FILE_DIR:${PROJECT_NAME}>)
   add_custom_command(
-	  TARGET ${PROJECT_NAME}
-	  POST_BUILD
-	  COMMAND
-	  ${CMAKE_COMMAND} -E copy_directory
-	  ${CMAKE_SOURCE_DIR}/res
-	  $<TARGET_FILE_DIR:${PROJECT_NAME}>/res)
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/res
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/res)
   add_custom_command(
-	  TARGET ${PROJECT_NAME}
-	  POST_BUILD
-	  COMMAND
-	  ${CMAKE_COMMAND} -E copy_directory
-	  ${CMAKE_SOURCE_DIR}/res
-	  ${CMAKE_BINARY_DIR}/res)
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/res
+            ${CMAKE_BINARY_DIR}/res)
   add_custom_command(
-	  TARGET ${PROJECT_NAME}
-	  POST_BUILD
-	  COMMAND
-	  ${CMAKE_COMMAND} -E copy_directory
-	  ${CMAKE_SOURCE_DIR}/shaders
-	  $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders)
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/shaders
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders)
 
 endif()
