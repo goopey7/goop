@@ -6,6 +6,82 @@
           "components": [
             {
               "position": {
+                "x": -5.0,
+                "y": -2.0,
+                "z": -11.600000381469727
+              },
+              "rotation": {
+                "x": 0.0,
+                "y": -2.4000000953674316,
+                "z": 0.0
+              },
+              "scale": {
+                "x": 100.0,
+                "y": 1.0,
+                "z": 100.0
+              },
+              "type": "transform"
+            },
+            {
+              "path": "box",
+              "primitive": "box",
+              "texturePath": "res/texture.jpg",
+              "type": "mesh"
+            },
+            {
+              "box": {
+                "x": 100.0,
+                "y": 1.0,
+                "z": 100.0
+              },
+              "mass": 0.0,
+              "type": "rigidBody"
+            }
+          ],
+          "name": "floor"
+        },
+        {
+          "components": [
+            {
+              "position": {
+                "x": 0.0,
+                "y": 5.0,
+                "z": 0.0
+              },
+              "rotation": {
+                "x": 32.0,
+                "y": -135.1999969482422,
+                "z": 24.0
+              },
+              "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "type": "transform"
+            },
+            {
+              "path": "box",
+              "primitive": "box",
+              "texturePath": "res/viking_room.png",
+              "type": "mesh"
+            },
+            {
+              "box": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "mass": 1.600000023841858,
+              "type": "rigidBody"
+            }
+          ],
+          "name": "Viking Room"
+        },
+        {
+          "components": [
+            {
+              "position": {
                 "x": 0.0,
                 "y": 2.0,
                 "z": 0.0
@@ -39,44 +115,6 @@
             }
           ],
           "name": "Cow"
-        },
-        {
-          "components": [
-            {
-              "position": {
-                "x": 0.0,
-                "y": -1.0,
-                "z": 0.0
-              },
-              "rotation": {
-                "x": 32.0,
-                "y": -135.1999969482422,
-                "z": 24.0
-              },
-              "scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "type": "transform"
-            },
-            {
-              "path": "box",
-              "primitive": "box",
-              "texturePath": "res/viking_room.png",
-              "type": "mesh"
-            },
-            {
-              "box": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "mass": 0.0,
-              "type": "rigidBody"
-            }
-          ],
-          "name": "Viking Room"
         }
       ],
       "name": "lvl_1"
