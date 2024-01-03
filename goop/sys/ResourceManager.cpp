@@ -60,15 +60,31 @@ bool ResourceManager::loadMesh(MeshComponent& mesh, const char* oldPath)
 		}
 	}
 
-	if (numLoadedMeshes[mesh.path] > 0)
+	// if primitive is not set - load from path provided
+	if (std::holds_alternative<std::monostate>(mesh.primitive))
 	{
-		std::cout << "Mesh " << mesh.path << " already loaded" << std::endl;
-		mesh.id = loadedMeshes[mesh.path];
-		numLoadedMeshes[mesh.path]++;
-		std::cout << "Loaded meshid: " << mesh.id << std::endl;
-		return true;
+		if (numLoadedMeshes[mesh.path] > 0)
+		{
+			std::cout << "Mesh " << mesh.path << " already loaded" << std::endl;
+			mesh.id = loadedMeshes[mesh.path];
+			numLoadedMeshes[mesh.path]++;
+			std::cout << "Loaded meshid: " << mesh.id << std::endl;
+			return true;
+		}
+		mesh.id = meshLoader->load(mesh.path);
 	}
-	mesh.id = meshLoader->load(mesh.path);
+	else // load primitive
+	{
+		if (numLoadedMeshes[mesh.path] > 0)
+		{
+			std::cout << "Mesh " << mesh.path << " already loaded" << std::endl;
+			mesh.id = loadedMeshes[mesh.path];
+			numLoadedMeshes[mesh.path]++;
+			std::cout << "Loaded meshid: " << mesh.id << std::endl;
+			return true;
+		}
+		mesh.id = meshLoader->loadPrimitive(mesh.primitive);
+	}
 	loadedMeshes[mesh.path] = mesh.id;
 	numLoadedMeshes[mesh.path]++;
 	std::cout << "Loaded mesh " << mesh.path << " with id " << mesh.id << std::endl;

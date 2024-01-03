@@ -271,6 +271,20 @@ void EditorApp::gui()
 				if (ImGui::Button("Change"))
 				{
 					mesh.path = std::string(meshPath);
+					if (oldMeshPath == "box")
+					{
+						mesh.primitive = std::monostate{};
+					}
+					goop::rm->loadMesh(mesh, oldMeshPath.c_str());
+					oldMeshPath = "";
+					std::memset(meshPath, 0, 256);
+					ImGui::CloseCurrentPopup();
+					changeMeshPopupOpen = false;
+				}
+				if (ImGui::Button("Box"))
+				{
+					mesh.primitive = goop::Box{};
+					mesh.path = "box";
 					goop::rm->loadMesh(mesh, oldMeshPath.c_str());
 					oldMeshPath = "";
 					std::memset(meshPath, 0, 256);

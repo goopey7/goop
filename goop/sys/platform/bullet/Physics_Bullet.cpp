@@ -63,7 +63,8 @@ void Physics_Bullet::simulate(float dt)
 
 void Physics_Bullet::addRigidBody(RigidbodyComponent* rbc, TransformComponent* tc)
 {
-	btCollisionShape* shape = new btBoxShape(btVector3(rbc->box[0], rbc->box[1], rbc->box[2]));
+	btCollisionShape* shape =
+		new btBoxShape(btVector3(rbc->box[0] / 2.f, rbc->box[1] / 2.f, rbc->box[2] / 2.f));
 	collisionShapes[rbc] = shape;
 
 	btTransform transform;
@@ -91,13 +92,16 @@ void Physics_Bullet::addRigidBody(RigidbodyComponent* rbc, TransformComponent* t
 
 void Physics_Bullet::removeRigidBody(RigidbodyComponent* rbc)
 {
-	dynamicsWorld->removeRigidBody(rigidBodies[rbc]);
-	delete rigidBodies[rbc]->getMotionState();
-	delete rigidBodies[rbc];
-	delete collisionShapes[rbc];
-	rigidBodies.erase(rbc);
-	collisionShapes.erase(rbc);
-	transforms.erase(rbc);
+	if (bIsInitialized)
+	{
+		dynamicsWorld->removeRigidBody(rigidBodies[rbc]);
+		delete rigidBodies[rbc]->getMotionState();
+		delete rigidBodies[rbc];
+		delete collisionShapes[rbc];
+		rigidBodies.erase(rbc);
+		collisionShapes.erase(rbc);
+		transforms.erase(rbc);
+	}
 }
 
 Physics_Bullet::~Physics_Bullet() { destroy(); }

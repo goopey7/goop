@@ -25,7 +25,5 @@ class MeshLoader_Assimp : public MeshLoader
 
   private:
 	Assimp::Importer importer;
-	std::map<std::string, uint32_t> loadedMeshes;
-	std::vector<int> unloadedSlots;
 };
 } // namespace goop::sys::platform::assimp

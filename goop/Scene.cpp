@@ -63,7 +63,16 @@ void Scene::loadScene(nlohmann::json& startScene)
 			}
 			else if (component["type"] == "mesh")
 			{
-				e.addComponent<goop::MeshComponent>(component["path"], component["texturePath"]);
+				if (component["primitive"].is_null())
+				{
+					e.addComponent<goop::MeshComponent>(component["path"],
+														component["texturePath"]);
+				}
+				else if (component["primitive"] == "box")
+				{
+					e.addComponent<goop::MeshComponent>(goop::Box(), component["texturePath"],
+														component["path"]);
+				}
 			}
 			else if (component["type"] == "rigidBody")
 			{
@@ -114,6 +123,10 @@ nlohmann::json Scene::saveScene()
 			auto mc = e.getComponent<MeshComponent>();
 			meshJson["path"] = mc.path;
 			meshJson["texturePath"] = mc.texturePath;
+			if (std::holds_alternative<goop::Box>(mc.primitive))
+			{
+				meshJson["primitive"] = "box";
+			}
 			eJson["components"].push_back(meshJson);
 		}
 		if (e.hasComponent<RigidbodyComponent>())
