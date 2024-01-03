@@ -18,7 +18,7 @@ int Physics_Bullet::initialize()
 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver,
 												collisionConfiguration);
 
-	dynamicsWorld->setGravity(btVector3(0, -0.81f, 0));
+	dynamicsWorld->setGravity(btVector3(0, -9.81f, 0));
 
 	bIsInitialized = true;
 	return 0;

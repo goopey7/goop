@@ -1,8 +1,9 @@
 // Sam Collier 2023
 #pragma once
 
-#include <entt.hpp>
 #include "Components.h"
+#include "goop/Camera.h"
+#include <entt.hpp>
 
 #include <json.hpp>
 using json = nlohmann::json;
@@ -19,15 +20,14 @@ class Scene
 	nlohmann::json getScene() const;
 	nlohmann::json saveScene();
 
-	template <typename T>
-	auto view() { return registry.view<T>(); }
+	template <typename T> auto view() { return registry.view<T>(); }
 
 	std::optional<Entity> getEntity(const std::string& tag);
 
-	bool hasEntity(entt::entity id) const
-	{
-		return registry.valid(id);
-	}
+	bool hasEntity(entt::entity id) const { return registry.valid(id); }
+
+	void setCurrentCamera(Camera* camera) { currentCamera = camera; }
+	Camera* getCurrentCamera() const { return currentCamera; }
 
 #ifdef GOOP_APPTYPE_EDITOR
 	void resetScene();
@@ -38,5 +38,7 @@ class Scene
 	friend class Entity;
 
 	nlohmann::json sceneJson;
+
+	Camera* currentCamera = nullptr;
 };
 } // namespace goop

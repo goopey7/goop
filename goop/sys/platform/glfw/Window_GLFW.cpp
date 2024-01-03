@@ -44,6 +44,21 @@ int Window_GLFW::openWindow(uint32_t width, uint32_t height, const char* title, 
 #ifdef GOOP_RENDERER_VULKAN
 	ImGui_ImplGlfw_InitForVulkan(window, true);
 #endif
+
+	glfwSetKeyCallback(window,
+					   [](GLFWwindow* window, int key, int scancode, int action, int mods)
+					   {
+						   auto& keyDown = gWindow->getKeyDownMap();
+						   if (action == GLFW_PRESS)
+						   {
+							   keyDown[key] = true;
+						   }
+						   else if (action == GLFW_RELEASE)
+						   {
+							   keyDown[key] = false;
+						   }
+					   });
+
 	return 0;
 }
 
@@ -75,6 +90,41 @@ bool Window_GLFW::shouldClose() { return glfwWindowShouldClose(window); }
 
 void Window_GLFW::pollEvents()
 {
+	lastMouseX = mouseX;
+	lastMouseY = mouseY;
 	glfwPollEvents();
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+	{
+		bIsLMBDown = true;
+	}
+	else
+	{
+		bIsLMBDown = false;
+	}
+
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+	{
+		bIsRMBDown = true;
+	}
+	else
+	{
+		bIsRMBDown = false;
+	}
+
+	glfwGetCursorPos(window, &mouseX, &mouseY);
+
 	ImGui_ImplGlfw_NewFrame();
 }
+
+void Window_GLFW::hideCursor(bool hide)
+{
+	if (hide)
+	{
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	}
+	else
+	{
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+}
+

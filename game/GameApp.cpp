@@ -53,6 +53,10 @@ void GameApp::init()
 	   - End user should not worry about loading / unloading resources
 			- should be abstracted once ECS is in -- but sfx??
    */
+
+	goop::Camera* cam = new goop::Camera();
+	cam->setPosition(glm::vec3(0.f, 0.f, 5.f));
+	scene->setCurrentCamera(cam);
 }
 
 void GameApp::update(float dt) {}

@@ -88,7 +88,7 @@ void Renderer_Vulkan::initImGui()
 
 #ifdef GOOP_APPTYPE_EDITOR
 	imgSet = VK_NULL_HANDLE;
-	//imgSet = ImGui_ImplVulkan_AddTexture(*sampler, viewTexture->getImageView(),
+	// imgSet = ImGui_ImplVulkan_AddTexture(*sampler, viewTexture->getImageView(),
 	//									 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 #endif
 }
@@ -139,14 +139,15 @@ void Renderer_Vulkan::updateUniformBuffer(Scene* scene, uint32_t currentFrame)
 {
 	UniformBufferObject ubo{};
 
+	Camera* cam = scene->getCurrentCamera();
 	ubo.view =
-		glm::lookAt(glm::vec3(2.f, 2.f, 2.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+		glm::lookAt(cam->getPosition(), cam->getPosition() + cam->getForward(), cam->getUp());
 
 #ifdef GOOP_APPTYPE_EDITOR
 	ubo.proj = glm::perspective(glm::radians(45.f),
 								swapchain->getViewportExtent().width /
 									(float)swapchain->getViewportExtent().height,
-								0.1f, 10.f);
+								0.1f, 100.f);
 #else
 	ubo.proj = glm::perspective(glm::radians(45.f),
 								swapchain->getExtent().width / (float)swapchain->getExtent().height,

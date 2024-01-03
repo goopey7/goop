@@ -22,6 +22,7 @@ class Window_GLFW : public Window
 	void waitEvents() final;
 	bool shouldClose() final;
 	void pollEvents() final;
+	void hideCursor(bool hide) final;
 
   private:
 	GLFWwindow* window = nullptr;

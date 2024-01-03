@@ -3,6 +3,7 @@
 
 #include "Subsystem.h"
 #include <cstdint>
+#include <map>
 #include <memory>
 
 #ifndef GOOP_RENDERER_VULKAN
@@ -37,8 +38,26 @@ class Window : public Subsystem
 	virtual void waitEvents() = 0;
 	virtual bool shouldClose() = 0;
 	virtual void pollEvents() = 0;
+	virtual void hideCursor(bool hide) = 0;
 
-  private:
+	std::map<int, bool>& getKeyDownMap() { return keyDown; }
+	bool isKeyDown(int key) { return keyDown[key]; }
+	bool isLMBDown() const { return bIsLMBDown; }
+	bool isRMBDown() const { return bIsRMBDown; }
+
+	float getMouseX() const { return mouseX; }
+	float getMouseY() const { return mouseY; }
+	float getMouseDeltaX() const { return mouseX - lastMouseX; }
+	float getMouseDeltaY() const { return mouseY - lastMouseY; }
+
+  protected:
+	std::map<int, bool> keyDown;
+	bool bIsLMBDown = false;
+	bool bIsRMBDown = false;
+	double lastMouseX = 0.0f;
+	double lastMouseY = 0.0f;
+	double mouseX = 0.0f;
+	double mouseY = 0.0f;
 };
 
 // Global pointer to goop's window
