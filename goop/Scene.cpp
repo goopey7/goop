@@ -16,7 +16,7 @@ Entity Scene::createEntity(const std::string& tag)
 	return e;
 }
 
-Entity Scene::getEntity(const std::string& tag)
+std::optional<Entity> Scene::getEntity(const std::string& tag)
 {
 	auto view = registry.view<TagComponent>();
 	for (auto entity : view)
@@ -25,7 +25,7 @@ Entity Scene::getEntity(const std::string& tag)
 			return Entity(entity, this);
 	}
 
-	return Entity(entt::null, this);
+	return std::nullopt;
 }
 
 void Scene::loadScene(nlohmann::json& startScene)
@@ -172,7 +172,13 @@ void Scene::resetScene()
 	for (json& entity : sceneJson["entities"])
 	{
 		std::string name = entity["name"];
-		goop::Entity e = getEntity(name);
+		auto eOpt = getEntity(name);
+		if (!eOpt.has_value())
+		{
+			continue;
+		}
+
+		goop::Entity e = eOpt.value();
 
 		for (json& component : entity["components"])
 		{

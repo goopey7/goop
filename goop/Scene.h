@@ -22,7 +22,7 @@ class Scene
 	template <typename T>
 	auto view() { return registry.view<T>(); }
 
-	Entity getEntity(const std::string& tag);
+	std::optional<Entity> getEntity(const std::string& tag);
 
 	bool hasEntity(entt::entity id) const
 	{
