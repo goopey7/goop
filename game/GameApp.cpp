@@ -68,4 +68,18 @@ void GameApp::update(float dt)
 {
 	goop::sys::gPhysics->simulate(dt);
 	updateCustomComponents(scene, dt);
+
+	auto view = scene->view<goop::CameraComponent>();
+	for (auto entity : view)
+	{
+		auto e = goop::Entity(entity, scene);
+		auto& cc = e.getComponent<goop::CameraComponent>();
+		if (cc.active)
+		{
+			auto& tc = e.getComponent<goop::TransformComponent>();
+			goop::Camera* cam = scene->getCurrentCamera();
+			cam->setPosition(tc.position + cc.position);
+			cam->setRotation(cc.rotation + cc.rotation);
+		}
+	}
 }

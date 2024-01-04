@@ -60,6 +60,18 @@ struct RigidbodyComponent
 	}
 };
 
+struct CameraComponent
+{
+	glm::vec3 position;
+	glm::vec3 rotation;
+	bool active = false;
+	CameraComponent() : position(0.0f), rotation(0.0f) {}
+	CameraComponent(const glm::vec3& position, const glm::vec3& rotation, bool active)
+		: position(position), rotation(rotation), active(active)
+	{
+	}
+};
+
 class CustomComponent
 {
   public:

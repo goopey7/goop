@@ -43,7 +43,7 @@ void EditorApp::update(float dt)
 	{
 		game->update(dt);
 	}
-	else
+	else if (isViewportFocused)
 	{
 		goop::Camera* cam = scene->getCurrentCamera();
 
@@ -149,6 +149,7 @@ void EditorApp::gui()
 	// Game Viewport
 	auto r = goop::sys::gRenderer.get();
 	ImGui::Begin("Viewport");
+	isViewportFocused = ImGui::IsWindowFocused();
 	ImVec2 max = ImGui::GetWindowContentRegionMax();
 	ImVec2 min = ImGui::GetWindowContentRegionMin();
 	max.x += ImGui::GetWindowPos().x;
@@ -239,9 +240,11 @@ void EditorApp::gui()
 			ImGui::Text("Transform");
 			auto& tc = e.getComponent<goop::TransformComponent>();
 
+			ImGui::PushID("Transform");
 			ImGui::DragFloat3("Position", &tc.position[0], 0.1f);
 			ImGui::DragFloat3("Rotation", &tc.rotation[0], 0.1f);
 			ImGui::DragFloat3("Scale", &tc.scale[0], 0.1f);
+			ImGui::PopID();
 		}
 		if (e.hasComponent<goop::RigidbodyComponent>())
 		{
@@ -359,6 +362,16 @@ void EditorApp::gui()
 				ImGui::EndPopup();
 			}
 		}
+		if (e.hasComponent<goop::CameraComponent>())
+		{
+			ImGui::Text("Camera");
+			auto& cam = e.getComponent<goop::CameraComponent>();
+			ImGui::PushID("Camera");
+			ImGui::DragFloat3("Position", &cam.position[0], 0.1f);
+			ImGui::DragFloat3("Rotation", &cam.rotation[0], 0.1f);
+			ImGui::Checkbox("Active", &cam.active);
+			ImGui::PopID();
+		}
 		guiCustomComponents(scene);
 		if (ImGui::Button("Add Component"))
 		{
@@ -404,6 +417,12 @@ void EditorApp::gui()
 					goop::sys::gPhysics->addRigidBody(&e.getComponent<goop::RigidbodyComponent>(),
 													  &e.getComponent<goop::TransformComponent>());
 				}
+				ImGui::CloseCurrentPopup();
+				addComponentPopupOpen = false;
+			}
+			if (!e.hasComponent<goop::CameraComponent>() && ImGui::Button("Camera"))
+			{
+				e.addComponent<goop::CameraComponent>();
 				ImGui::CloseCurrentPopup();
 				addComponentPopupOpen = false;
 			}

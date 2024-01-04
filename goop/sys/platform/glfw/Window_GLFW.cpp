@@ -57,6 +57,7 @@ int Window_GLFW::openWindow(uint32_t width, uint32_t height, const char* title, 
 						   {
 							   keyDown[key] = false;
 						   }
+						   ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
 					   });
 
 	return 0;
@@ -93,6 +94,8 @@ void Window_GLFW::pollEvents()
 	lastMouseX = mouseX;
 	lastMouseY = mouseY;
 	glfwPollEvents();
+	ImGui_ImplGlfw_NewFrame();
+
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 	{
 		bIsLMBDown = true;
@@ -112,8 +115,6 @@ void Window_GLFW::pollEvents()
 	}
 
 	glfwGetCursorPos(window, &mouseX, &mouseY);
-
-	ImGui_ImplGlfw_NewFrame();
 }
 
 void Window_GLFW::hideCursor(bool hide)

@@ -35,4 +35,5 @@ class EditorApp : public goop::App
 	char texturePath[256] = "";
 	std::optional<goop::Entity> selectedEntity = std::nullopt;
 	std::vector<std::string> customComponentNames;
+	bool isViewportFocused = false;
 };

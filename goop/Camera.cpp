@@ -43,7 +43,11 @@ void Camera::updateRotation()
 
 void Camera::setPosition(const glm::vec3& position) { this->position = position; }
 
-void Camera::setRotation(const glm::vec3& rotation) { this->rotation = rotation; }
+void Camera::setRotation(const glm::vec3& rotation)
+{
+	this->rotation = rotation;
+	updateRotation();
+}
 
 const glm::vec3& Camera::getPosition() const { return position; }
 

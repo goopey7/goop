@@ -1,12 +1,12 @@
 // Sam Collier 2023
 
 #include "Scene.h"
+#include "components/CustomComponents.h"
 #include "goop/Components.h"
 #include "goop/Entity.h"
 #include <glm/common.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <goop/Core.h>
-#include "components/CustomComponents.h"
 
 using namespace goop;
 
@@ -81,6 +81,14 @@ void Scene::loadScene(nlohmann::json& startScene)
 				float size[3] = {box["x"], box["y"], box["z"]};
 				e.addComponent<goop::RigidbodyComponent>(component["mass"], size);
 			}
+			else if (component["type"] == "camera")
+			{
+				glm::vec3 position = {component["position"]["x"], component["position"]["y"],
+									  component["position"]["z"]};
+				glm::vec3 rotation = {component["rotation"]["x"], component["rotation"]["y"],
+									  component["rotation"]["z"]};
+				e.addComponent<goop::CameraComponent>(position, rotation, component["active"]);
+			}
 			else if (customComponentFactoryMap.contains(component["type"]))
 			{
 				addCustomComponent(component["type"], e, this);
@@ -105,7 +113,7 @@ nlohmann::json Scene::saveScene()
 		{
 			json transformJson;
 			transformJson["type"] = "transform";
-			auto tc = e.getComponent<TransformComponent>();
+			auto& tc = e.getComponent<TransformComponent>();
 
 			transformJson["position"]["x"] = tc.position.x;
 			transformJson["position"]["y"] = tc.position.y;
@@ -125,7 +133,7 @@ nlohmann::json Scene::saveScene()
 		{
 			json meshJson;
 			meshJson["type"] = "mesh";
-			auto mc = e.getComponent<MeshComponent>();
+			auto& mc = e.getComponent<MeshComponent>();
 			meshJson["path"] = mc.path;
 			meshJson["texturePath"] = mc.texturePath;
 			if (std::holds_alternative<goop::Box>(mc.primitive))
@@ -138,12 +146,26 @@ nlohmann::json Scene::saveScene()
 		{
 			json rbJson;
 			rbJson["type"] = "rigidBody";
-			auto rbc = e.getComponent<RigidbodyComponent>();
+			auto& rbc = e.getComponent<RigidbodyComponent>();
 			rbJson["mass"] = rbc.mass;
 			rbJson["box"]["x"] = rbc.box[0];
 			rbJson["box"]["y"] = rbc.box[1];
 			rbJson["box"]["z"] = rbc.box[2];
 			eJson["components"].push_back(rbJson);
+		}
+		if (e.hasComponent<CameraComponent>())
+		{
+			json camJson;
+			camJson["type"] = "camera";
+			auto& cc = e.getComponent<CameraComponent>();
+			camJson["position"]["x"] = cc.position.x;
+			camJson["position"]["y"] = cc.position.y;
+			camJson["position"]["z"] = cc.position.z;
+			camJson["rotation"]["x"] = cc.rotation.x;
+			camJson["rotation"]["y"] = cc.rotation.y;
+			camJson["rotation"]["z"] = cc.rotation.z;
+			camJson["active"] = cc.active;
+			eJson["components"].push_back(camJson);
 		}
 
 		saveCustomComponents(this, e, eJson["components"]);
