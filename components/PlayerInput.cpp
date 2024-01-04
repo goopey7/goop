@@ -6,20 +6,7 @@
 #include <iostream>
 
 // Gets called when the game starts
-void PlayerInput::init()
-{
-	auto& rb = getComponent<goop::RigidbodyComponent>();
-	rb.onCollisionEnter = [](goop::Entity other)
-	{
-		std::cout << "onCollisionEnter() << other: " << other.getComponent<goop::TagComponent>().tag
-				  << std::endl;
-	};
-	rb.onCollisionExit = [](goop::Entity other)
-	{
-		std::cout << "onCollisionExit() << other: " << other.getComponent<goop::TagComponent>().tag
-				  << std::endl;
-	};
-}
+void PlayerInput::init() { CustomComponent::init(); }
 
 // Gets called every frame
 void PlayerInput::update(float dt)
@@ -44,10 +31,23 @@ void PlayerInput::update(float dt)
 	}
 }
 
+// Collision callbacks
+void PlayerInput::onCollisionEnter(goop::Entity other)
+{
+	std::cout << "Player started colliding with " << other.getComponent<goop::TagComponent>().tag << std::endl;
+	//...
+}
+
+void PlayerInput::onCollisionExit(goop::Entity other)
+{
+	std::cout << "Player stopped colliding with " << other.getComponent<goop::TagComponent>().tag << std::endl;
+	//...
+}
+
 // Editor GUI - Shown in inspector view
 // Refer to ImGui documentation for more info
 void PlayerInput::gui()
 {
-	// ImGui::Text("Hello from %s", name.c_str());
+	ImGui::Text("Hello from %s", name.c_str());
 	//...
 }

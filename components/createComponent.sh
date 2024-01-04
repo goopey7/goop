@@ -26,6 +26,8 @@ public:
     void update(float dt);
     void gui();
 private:
+	void onCollisionEnter(goop::Entity other) final;
+	void onCollisionExit(goop::Entity other) final;
 };
 EOF
 
@@ -38,6 +40,9 @@ cat <<EOF >"${CPP_FILE}"
 // Gets called when the game starts
 void ${CLASS_NAME}::init()
 {
+	/* do not remove this line */
+	CustomComponent::init();
+
     //...
 }
 
@@ -45,6 +50,19 @@ void ${CLASS_NAME}::init()
 void ${CLASS_NAME}::update(float dt)
 {
     //...
+}
+
+// Collision callbacks
+void PlayerInput::onCollisionEnter(goop::Entity other)
+{
+	// std::cout << "Player started colliding with " << other.getComponent<goop::TagComponent>().tag << std::endl;
+	//...
+}
+
+void PlayerInput::onCollisionExit(goop::Entity other)
+{
+	// std::cout << "Player stopped colliding with " << other.getComponent<goop::TagComponent>().tag << std::endl;
+	//...
 }
 
 // Editor GUI - Shown in inspector view

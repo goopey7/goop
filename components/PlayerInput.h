@@ -8,5 +8,8 @@ public:
     void init();
     void update(float dt);
     void gui();
+
 private:
+	void onCollisionEnter(goop::Entity other) final;
+	void onCollisionExit(goop::Entity other) final;
 };

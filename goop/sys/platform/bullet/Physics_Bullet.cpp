@@ -122,13 +122,19 @@ void Physics_Bullet::simulate(float dt)
 					if (!rbc->isColliding)
 					{
 						rbc->isColliding = true;
-						rbc->onCollisionEnter(otherRbc->entity);
+						for (auto& [entity, func] : rbc->onCollisionEnter)
+						{
+							func(otherRbc->entity);
+						}
 					}
 				}
 				else if (rbc->isColliding)
 				{
 					rbc->isColliding = false;
-					rbc->onCollisionExit(otherRbc->entity);
+					for (auto& [entity, func] : rbc->onCollisionExit)
+					{
+						func(otherRbc->entity);
+					}
 				}
 			}
 		}

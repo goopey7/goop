@@ -49,8 +49,8 @@ struct RigidbodyComponent
 	float mass;
 	float box[3];
 	bool isColliding = false;
-	std::function<void(goop::Entity)> onCollisionEnter = [](goop::Entity other) {};
-	std::function<void(goop::Entity)> onCollisionExit = [](goop::Entity other) {};
+	std::map<uint32_t, std::function<void(goop::Entity)>> onCollisionEnter;
+	std::map<uint32_t, std::function<void(goop::Entity)>> onCollisionExit;
 	goop::Entity entity;
 	RigidbodyComponent() : mass(1.0f), entity(entt::null, nullptr)
 	{
@@ -82,6 +82,15 @@ class CustomComponent
   public:
 	CustomComponent(goop::Entity e) : entity(e) {}
 	const std::string& getName() { return name; }
+	void init()
+	{
+		if (entity.hasComponent<goop::RigidbodyComponent>())
+		{
+			auto& rbc = entity.getComponent<goop::RigidbodyComponent>();
+			rbc.onCollisionEnter[entity.getUID()] = [this](goop::Entity other) { onCollisionEnter(other); };
+			rbc.onCollisionExit[entity.getUID()] = [this](goop::Entity other) { onCollisionExit(other); };
+		}
+	}
 
   protected:
 	template <typename T> T& getComponent() { return entity.getComponent<T>(); }
@@ -89,5 +98,7 @@ class CustomComponent
 
   private:
 	goop::Entity entity;
+	virtual void onCollisionEnter(goop::Entity other) {}
+	virtual void onCollisionExit(goop::Entity other) {}
 };
 } // namespace goop
