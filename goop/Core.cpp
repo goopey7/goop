@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+#include "components/CustomComponents.h"
+
 using namespace goop;
 
 const std::unique_ptr<goop::sys::ResourceManager> goop::rm =
@@ -55,12 +57,7 @@ Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 		rm->loadTexture(mesh);
 	}
 
-	auto ccView = scene.view<CustomComponent*>();
-	for (auto entity : ccView)
-	{
-		CustomComponent* cc = ccView.get<CustomComponent*>(entity);
-		cc->init();
-	}
+	initCustomComponents(&scene);
 }
 
 void Core::run()

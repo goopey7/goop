@@ -2,9 +2,9 @@
 
 #include <cstring>
 #include <glm/glm.hpp>
+#include <goop/Entity.h>
 #include <goop/Primitives.h>
 #include <string>
-#include <goop/Entity.h>
 
 namespace goop
 {
@@ -66,8 +66,12 @@ class CustomComponent
 	CustomComponent(goop::Entity e) : entity(e) {}
 	virtual void init() = 0;
 	virtual void update(float dt) = 0;
+	virtual void gui() = 0;
 
   protected:
+	template <typename T> T& getComponent() { return entity.getComponent<T>(); }
+
+  private:
 	goop::Entity entity;
 };
 } // namespace goop

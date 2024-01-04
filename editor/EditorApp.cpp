@@ -358,6 +358,7 @@ void EditorApp::gui()
 				ImGui::EndPopup();
 			}
 		}
+		guiCustomComponents(scene);
 		if (ImGui::Button("Add Component"))
 		{
 			addComponentPopupOpen = true;
@@ -409,11 +410,11 @@ void EditorApp::gui()
 			{
 				if (ImGui::Button(name.c_str()))
 				{
-					if (customComponentMap.find(name) == customComponentMap.end())
+					if (customComponentFactoryMap.find(name) == customComponentFactoryMap.end())
 					{
 						throw std::runtime_error("Custom component " + name + " not found");
 					}
-					e.addCustomComponent(customComponentMap[name](e.getEntity(), scene));
+					addCustomComponent(name, e, scene);
 					ImGui::CloseCurrentPopup();
 					addComponentPopupOpen = false;
 				}

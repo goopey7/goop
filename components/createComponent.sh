@@ -22,6 +22,7 @@ public:
     ${CLASS_NAME}(goop::Entity e) : goop::CustomComponent(e) {}
     void init() final;
     void update(float dt) final;
+	void gui() final;
 private:
 };
 EOF
@@ -32,14 +33,22 @@ echo "Created ${HEADER_FILE}"
 cat <<EOF >"${CPP_FILE}"
 #include "${HEADER_FILE}"
 
+// Gets called when the game starts
 void ${CLASS_NAME}::init()
 {
-    // Implement initialization
+	//...
 }
 
+// Gets called every frame
 void ${CLASS_NAME}::update(float dt)
 {
-    // Implement update
+	//...
+}
+
+// Editor GUI - Shown in inspector view
+void ${CLASS_NAME}::gui()
+{
+	//...
 }
 EOF
 

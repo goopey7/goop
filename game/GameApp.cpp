@@ -8,6 +8,7 @@
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Sfx.h>
 #include <json.hpp>
+#include "components/CustomComponents.h"
 using json = nlohmann::json;
 
 goop::App* goop::createGame(int argc, char** argv, Scene* scene) { return new GameApp(scene); }
@@ -62,10 +63,5 @@ void GameApp::init()
 void GameApp::update(float dt)
 {
 	goop::sys::gPhysics->simulate(dt);
-	auto view = scene->view<goop::CustomComponent*>();
-	for (auto entity : view)
-	{
-		goop::CustomComponent* cc = view.get<goop::CustomComponent*>(entity);
-		cc->update(dt);
-	}
+	updateCustomComponents(scene, dt);
 }
