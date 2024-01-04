@@ -1,5 +1,6 @@
 #include "Physics_Bullet.h"
 #include <glm/gtc/quaternion.hpp>
+#include <iostream>
 
 #ifdef GOOP_PHYSICS_BULLET
 const std::unique_ptr<goop::sys::Physics> goop::sys::gPhysics =
@@ -79,6 +80,58 @@ void Physics_Bullet::simulate(float dt)
 		glm::vec3 euler =
 			glm::degrees(glm::eulerAngles(glm::quat(rot.w(), rot.x(), rot.y(), rot.z())));
 		transforms[rbc]->rotation = euler;
+
+		// check entry and exit of collisions
+		int numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
+		for (int i = 0; i < numManifolds; i++)
+		{
+			btPersistentManifold* contactManifold =
+				dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+			const btCollisionObject* obA = contactManifold->getBody0();
+			const btCollisionObject* obB = contactManifold->getBody1();
+
+			if (obA == rb || obB == rb)
+			{
+				int numContacts = contactManifold->getNumContacts();
+				// find other rbc
+				RigidbodyComponent* otherRbc = nullptr;
+				if (obA == rb)
+				{
+					for (auto& [rbc, rb] : rigidBodies)
+					{
+						if (rb == obB)
+						{
+							otherRbc = rbc;
+							break;
+						}
+					}
+				}
+				else
+				{
+					for (auto& [rbc, rb] : rigidBodies)
+					{
+						if (rb == obA)
+						{
+							otherRbc = rbc;
+							break;
+						}
+					}
+				}
+				if (numContacts > 0)
+				{
+					if (!rbc->isColliding)
+					{
+						rbc->isColliding = true;
+						rbc->onCollisionEnter(otherRbc->entity);
+					}
+				}
+				else if (rbc->isColliding)
+				{
+					rbc->isColliding = false;
+					rbc->onCollisionExit(otherRbc->entity);
+				}
+			}
+		}
 	}
 }
 
@@ -131,4 +184,3 @@ void Physics_Bullet::applyImpulse(RigidbodyComponent* rbc, glm::vec3 impulse)
 {
 	rigidBodies[rbc]->applyCentralImpulse(btVector3(impulse.x, impulse.y, impulse.z));
 }
-

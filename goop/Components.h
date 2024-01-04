@@ -48,13 +48,18 @@ struct RigidbodyComponent
 {
 	float mass;
 	float box[3];
-	RigidbodyComponent() : mass(1.0f)
+	bool isColliding = false;
+	std::function<void(goop::Entity)> onCollisionEnter = [](goop::Entity other) {};
+	std::function<void(goop::Entity)> onCollisionExit = [](goop::Entity other) {};
+	goop::Entity entity;
+	RigidbodyComponent() : mass(1.0f), entity(entt::null, nullptr)
 	{
 		box[0] = 1.0f;
 		box[1] = 1.0f;
 		box[2] = 1.0f;
 	}
-	RigidbodyComponent(float mass, float box[3]) : mass(mass)
+	RigidbodyComponent(float mass, float box[3])
+		: mass(mass), entity(goop::Entity(entt::null, nullptr))
 	{
 		memcpy(this->box, box, sizeof(float) * 3);
 	}

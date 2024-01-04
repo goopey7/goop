@@ -79,7 +79,8 @@ void Scene::loadScene(nlohmann::json& startScene)
 			{
 				json& box = component["box"];
 				float size[3] = {box["x"], box["y"], box["z"]};
-				e.addComponent<goop::RigidbodyComponent>(component["mass"], size);
+				auto& rb = e.addComponent<goop::RigidbodyComponent>(component["mass"], size);
+				rb.entity = e;
 			}
 			else if (component["type"] == "camera")
 			{

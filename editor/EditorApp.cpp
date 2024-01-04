@@ -429,7 +429,8 @@ void EditorApp::gui()
 			}
 			if (!e.hasComponent<goop::RigidbodyComponent>() && ImGui::Button("Rigidbody"))
 			{
-				e.addComponent<goop::RigidbodyComponent>();
+				auto& rbc = e.addComponent<goop::RigidbodyComponent>();
+				rbc.entity = e;
 				if (goop::sys::gPhysics->isInitialized())
 				{
 					goop::sys::gPhysics->addRigidBody(&e.getComponent<goop::RigidbodyComponent>(),
