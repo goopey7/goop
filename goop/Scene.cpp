@@ -78,7 +78,7 @@ void Scene::loadScene(nlohmann::json& startScene)
 			else if (component["type"] == "rigidBody")
 			{
 				json& box = component["box"];
-				float size[3] = {box["x"], box["y"], box["z"]};
+				glm::vec3 size = {box["x"], box["y"], box["z"]};
 				auto& rb = e.addComponent<goop::RigidbodyComponent>(component["mass"], size);
 				rb.entity = e;
 			}
@@ -181,8 +181,8 @@ void Scene::destroyEntity(Entity entity)
 {
 	if (entity.hasComponent<MeshComponent>())
 	{
-		goop::rm->unloadMesh(entity.getComponent<MeshComponent>());
-		goop::rm->unloadTexture(entity.getComponent<MeshComponent>());
+		goop::rm->unloadMesh(&entity.getComponent<MeshComponent>());
+		goop::rm->unloadTexture(&entity.getComponent<MeshComponent>());
 	}
 	if (entity.hasComponent<RigidbodyComponent>())
 	{

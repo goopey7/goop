@@ -1,3 +1,4 @@
+#pragma once
 #include "Subsystem.h"
 #include <memory>
 #include <goop/Components.h>
@@ -12,6 +13,7 @@ class Physics : public Subsystem
 		virtual void addRigidBody(RigidbodyComponent* rbc, TransformComponent* tc) = 0;
 		virtual void removeRigidBody(RigidbodyComponent* rbc) = 0;
 		virtual void applyImpulse(RigidbodyComponent* rbc, glm::vec3 impulse) = 0;
+		virtual void setVelocity(RigidbodyComponent* rbc, glm::vec3 velocity) = 0;
 };
 
 extern const std::unique_ptr<Physics> gPhysics;

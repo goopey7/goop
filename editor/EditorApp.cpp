@@ -269,7 +269,7 @@ void EditorApp::gui()
 			ImGui::Text("Rigidbody");
 			auto& rbc = e.getComponent<goop::RigidbodyComponent>();
 			ImGui::DragFloat("Mass", &rbc.mass, 0.1f);
-			ImGui::DragFloat3("Size", &rbc.box[0], 0.1f);
+			ImGui::DragFloat3("Size", &rbc.box.x, 0.1f);
 		}
 		if (e.hasComponent<goop::MeshComponent>())
 		{
@@ -308,7 +308,7 @@ void EditorApp::gui()
 				if (ImGui::Button("Change"))
 				{
 					mesh.texturePath = std::string(texturePath);
-					goop::rm->loadTexture(mesh, oldTexturePath.c_str());
+					goop::rm->loadTexture(&mesh, oldTexturePath.c_str());
 					oldTexturePath = "";
 					std::memset(texturePath, 0, 256);
 					ImGui::CloseCurrentPopup();
@@ -356,7 +356,7 @@ void EditorApp::gui()
 					{
 						mesh.primitive = std::monostate{};
 					}
-					goop::rm->loadMesh(mesh, oldMeshPath.c_str());
+					goop::rm->loadMesh(&mesh, oldMeshPath.c_str());
 					oldMeshPath = "";
 					std::memset(meshPath, 0, 256);
 					ImGui::CloseCurrentPopup();
@@ -366,7 +366,7 @@ void EditorApp::gui()
 				{
 					mesh.primitive = goop::Box{};
 					mesh.path = "box";
-					goop::rm->loadMesh(mesh, oldMeshPath.c_str());
+					goop::rm->loadMesh(&mesh, oldMeshPath.c_str());
 					oldMeshPath = "";
 					std::memset(meshPath, 0, 256);
 					ImGui::CloseCurrentPopup();
@@ -422,8 +422,8 @@ void EditorApp::gui()
 			if (!e.hasComponent<goop::MeshComponent>() && ImGui::Button("Mesh"))
 			{
 				e.addComponent<goop::MeshComponent>("res/viking_room.obj", "res/viking_room.png");
-				goop::rm->loadMesh(e.getComponent<goop::MeshComponent>());
-				goop::rm->loadTexture(e.getComponent<goop::MeshComponent>());
+				goop::rm->loadMesh(&e.getComponent<goop::MeshComponent>());
+				goop::rm->loadTexture(&e.getComponent<goop::MeshComponent>());
 				ImGui::CloseCurrentPopup();
 				addComponentPopupOpen = false;
 			}

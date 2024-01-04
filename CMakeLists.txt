@@ -47,6 +47,9 @@ add_subdirectory(libs/imgui)
 include_directories("libs/bullet3/src")
 add_subdirectory(libs/bullet3)
 
+# include sha256
+include_directories("libs/sha256/")
+
 # include entt headers
 include_directories("libs/entt/")
 
@@ -61,7 +64,7 @@ file(GLOB STB_IMAGE_HEADER "libs/stb/stb_image.h")
 add_executable(${PROJECT_NAME} ${ENGINE_SRC_FILES} ${STB_VORBIS_SOURCE})
 
 # define app type
-target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_APPTYPE_EDITOR)
+#target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_APPTYPE_EDITOR)
 
 # define systems
 target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_RENDERER_VULKAN)

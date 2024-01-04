@@ -5,10 +5,13 @@
 #include "goop/sys/Sfx.h"
 #include <goop/sys/MeshLoader.h>
 #include <goop/sys/Subsystem.h>
-#include <goop/Components.h>
 #include <map>
 #include <string>
 
+namespace goop
+{
+	class MeshComponent;
+}
 namespace goop::sys
 {
 class ResourceManager : public Subsystem
@@ -17,11 +20,11 @@ class ResourceManager : public Subsystem
 	virtual int initialize() final;
 	virtual int destroy() final;
 
-	bool loadMesh(MeshComponent& mesh, const char* oldPath = nullptr);
-	bool unloadMesh(MeshComponent& mesh);
+	bool loadMesh(MeshComponent* mesh, const char* oldPath = nullptr);
+	bool unloadMesh(MeshComponent* mesh);
 
-	bool loadTexture(MeshComponent& mesh, const char* oldPath = nullptr);
-	bool unloadTexture(MeshComponent& mesh);
+	bool loadTexture(MeshComponent* mesh, const char* oldPath = nullptr);
+	bool unloadTexture(MeshComponent* mesh);
 
 	bool loadSfx(const std::string& path);
 
@@ -39,3 +42,7 @@ class ResourceManager : public Subsystem
 	std::map<std::string, uint32_t> numLoadedTextures;
 };
 } // namespace goop::sys
+namespace goop
+{
+extern const std::unique_ptr<sys::ResourceManager> rm;
+}

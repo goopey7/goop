@@ -53,8 +53,8 @@ Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 	for (auto entity : mcView)
 	{
 		MeshComponent& mesh = mcView.get<MeshComponent>(entity);
-		rm->loadMesh(mesh);
-		rm->loadTexture(mesh);
+		rm->loadMesh(&mesh);
+		rm->loadTexture(&mesh);
 	}
 }
 

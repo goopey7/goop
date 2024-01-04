@@ -23,6 +23,7 @@
 
 #include <goop/sys/platform/vulkan/QueueFamilyIndices.h>
 #include <goop/sys/platform/vulkan/SwapchainSupportInfo.h>
+#include <goop/Components.h>
 
 struct ImGui_ImplVulkan_InitInfo;
 

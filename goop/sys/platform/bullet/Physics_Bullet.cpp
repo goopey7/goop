@@ -190,3 +190,11 @@ void Physics_Bullet::applyImpulse(RigidbodyComponent* rbc, glm::vec3 impulse)
 {
 	rigidBodies[rbc]->applyCentralImpulse(btVector3(impulse.x, impulse.y, impulse.z));
 }
+
+void Physics_Bullet::setVelocity(RigidbodyComponent* rbc, glm::vec3 velocity)
+{
+	auto currentVelocity = rigidBodies[rbc]->getLinearVelocity();
+	rigidBodies[rbc]->setLinearVelocity(btVector3(velocity.x,
+												  velocity.y + currentVelocity.y(),
+												  velocity.z));
+}

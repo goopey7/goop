@@ -14,6 +14,7 @@
 #endif
 
 #include <iostream>
+#include <goop/Components.h>
 
 using namespace goop::sys;
 
@@ -39,7 +40,7 @@ int ResourceManager::initialize()
 	return 0;
 }
 
-bool ResourceManager::loadMesh(MeshComponent& mesh, const char* oldPath)
+bool ResourceManager::loadMesh(MeshComponent* mesh, const char* oldPath)
 {
 	if (oldPath != nullptr)
 	{
@@ -61,44 +62,44 @@ bool ResourceManager::loadMesh(MeshComponent& mesh, const char* oldPath)
 	}
 
 	// if primitive is not set - load from path provided
-	if (std::holds_alternative<std::monostate>(mesh.primitive))
+	if (std::holds_alternative<std::monostate>(mesh->primitive))
 	{
-		if (numLoadedMeshes[mesh.path] > 0)
+		if (numLoadedMeshes[mesh->path] > 0)
 		{
-			std::cout << "Mesh " << mesh.path << " already loaded" << std::endl;
-			mesh.id = loadedMeshes[mesh.path];
-			numLoadedMeshes[mesh.path]++;
-			std::cout << "Loaded meshid: " << mesh.id << std::endl;
+			std::cout << "Mesh " << mesh->path << " already loaded" << std::endl;
+			mesh->id = loadedMeshes[mesh->path];
+			numLoadedMeshes[mesh->path]++;
+			std::cout << "Loaded meshid: " << mesh->id << std::endl;
 			return true;
 		}
-		mesh.id = meshLoader->load(mesh.path);
+		mesh->id = meshLoader->load(mesh->path);
 	}
 	else // load primitive
 	{
-		if (numLoadedMeshes[mesh.path] > 0)
+		if (numLoadedMeshes[mesh->path] > 0)
 		{
-			std::cout << "Mesh " << mesh.path << " already loaded" << std::endl;
-			mesh.id = loadedMeshes[mesh.path];
-			numLoadedMeshes[mesh.path]++;
-			std::cout << "Loaded meshid: " << mesh.id << std::endl;
+			std::cout << "Mesh " << mesh->path << " already loaded" << std::endl;
+			mesh->id = loadedMeshes[mesh->path];
+			numLoadedMeshes[mesh->path]++;
+			std::cout << "Loaded meshid: " << mesh->id << std::endl;
 			return true;
 		}
-		mesh.id = meshLoader->loadPrimitive(mesh.primitive);
+		mesh->id = meshLoader->loadPrimitive(mesh->primitive);
 	}
-	loadedMeshes[mesh.path] = mesh.id;
-	numLoadedMeshes[mesh.path]++;
-	std::cout << "Loaded mesh " << mesh.path << " with id " << mesh.id << std::endl;
+	loadedMeshes[mesh->path] = mesh->id;
+	numLoadedMeshes[mesh->path]++;
+	std::cout << "Loaded mesh " << mesh->path << " with id " << mesh->id << std::endl;
 	return true;
 }
 
-bool ResourceManager::unloadMesh(MeshComponent& mesh)
+bool ResourceManager::unloadMesh(MeshComponent* mesh)
 {
-	numLoadedMeshes[mesh.path]--;
-	if (numLoadedMeshes[mesh.path] <= 0)
+	numLoadedMeshes[mesh->path]--;
+	if (numLoadedMeshes[mesh->path] <= 0)
 	{
-		std::cout << "Unloading mesh " << mesh.path << std::endl;
-		meshLoader->unload(mesh.path);
-		loadedMeshes.erase(mesh.path);
+		std::cout << "Unloading mesh " << mesh->path << std::endl;
+		meshLoader->unload(mesh->path);
+		loadedMeshes.erase(mesh->path);
 	}
 	return true;
 }
@@ -114,7 +115,7 @@ int ResourceManager::destroy()
 
 void ResourceManager::playSfx(uint32_t id) const { sfx->playSfx(id); }
 
-bool ResourceManager::loadTexture(MeshComponent& mesh, const char* oldPath)
+bool ResourceManager::loadTexture(MeshComponent* mesh, const char* oldPath)
 {
 	if (oldPath != nullptr)
 	{
@@ -134,25 +135,25 @@ bool ResourceManager::loadTexture(MeshComponent& mesh, const char* oldPath)
 		}
 	}
 
-	if (numLoadedTextures[mesh.texturePath] > 0)
+	if (numLoadedTextures[mesh->texturePath] > 0)
 	{
-		std::cout << "Texture " << mesh.texturePath << " already loaded" << std::endl;
-		numLoadedTextures[mesh.texturePath]++;
+		std::cout << "Texture " << mesh->texturePath << " already loaded" << std::endl;
+		numLoadedTextures[mesh->texturePath]++;
 		return true;
 	}
-	imgLoader->load(mesh.texturePath);
-	numLoadedTextures[mesh.texturePath]++;
-	std::cout << "Loaded texture " << mesh.texturePath << std::endl;
+	imgLoader->load(mesh->texturePath);
+	numLoadedTextures[mesh->texturePath]++;
+	std::cout << "Loaded texture " << mesh->texturePath << std::endl;
 	return true;
 }
 
-bool ResourceManager::unloadTexture(MeshComponent& mesh)
+bool ResourceManager::unloadTexture(MeshComponent* mesh)
 {
-	numLoadedTextures[mesh.texturePath]--;
-	if (numLoadedTextures[mesh.texturePath] <= 0)
+	numLoadedTextures[mesh->texturePath]--;
+	if (numLoadedTextures[mesh->texturePath] <= 0)
 	{
-		std::cout << "Unloading texture " << mesh.texturePath << std::endl;
-		imgLoader->unload(mesh.texturePath);
+		std::cout << "Unloading texture " << mesh->texturePath << std::endl;
+		imgLoader->unload(mesh->texturePath);
 	}
 	return true;
 }

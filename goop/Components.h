@@ -4,6 +4,8 @@
 #include <glm/glm.hpp>
 #include <goop/Entity.h>
 #include <goop/Primitives.h>
+#include <goop/sys/ResourceManager.h>
+#include <sha256.h>
 #include <string>
 
 namespace goop
@@ -36,32 +38,30 @@ struct MeshComponent
 	MeshComponent(const std::string& path, const std::string& texturePath)
 		: path(path), texturePath(texturePath)
 	{
+		goop::rm->loadMesh(this);
+		goop::rm->loadTexture(this);
 	}
 	MeshComponent(goop::Primitive primitive, const std::string& texturePath,
 				  const std::string& path)
 		: primitive(primitive), texturePath(texturePath), path(path)
 	{
+		goop::rm->loadMesh(this);
+		goop::rm->loadTexture(this);
 	}
 };
 
 struct RigidbodyComponent
 {
 	float mass;
-	float box[3];
+	glm::vec3 box;
 	bool isColliding = false;
 	std::map<uint32_t, std::function<void(goop::Entity)>> onCollisionEnter;
 	std::map<uint32_t, std::function<void(goop::Entity)>> onCollisionExit;
 	goop::Entity entity;
-	RigidbodyComponent() : mass(1.0f), entity(entt::null, nullptr)
+	RigidbodyComponent() : mass(1.0f), entity(entt::null, nullptr), box(1.0f) {}
+	RigidbodyComponent(float mass, glm::vec3 box)
+		: mass(mass), box(box), entity(goop::Entity(entt::null, nullptr))
 	{
-		box[0] = 1.0f;
-		box[1] = 1.0f;
-		box[2] = 1.0f;
-	}
-	RigidbodyComponent(float mass, float box[3])
-		: mass(mass), entity(goop::Entity(entt::null, nullptr))
-	{
-		memcpy(this->box, box, sizeof(float) * 3);
 	}
 };
 
@@ -87,17 +87,26 @@ class CustomComponent
 		if (entity.hasComponent<goop::RigidbodyComponent>())
 		{
 			auto& rbc = entity.getComponent<goop::RigidbodyComponent>();
-			rbc.onCollisionEnter[entity.getUID()] = [this](goop::Entity other) { onCollisionEnter(other); };
-			rbc.onCollisionExit[entity.getUID()] = [this](goop::Entity other) { onCollisionExit(other); };
+			rbc.onCollisionEnter[entity.getUID()] = [this](goop::Entity other)
+			{ onCollisionEnter(other); };
+			rbc.onCollisionExit[entity.getUID()] = [this](goop::Entity other)
+			{ onCollisionExit(other); };
 		}
 	}
 
   protected:
 	template <typename T> T& getComponent() { return entity.getComponent<T>(); }
+	Entity spawnEntity(const std::string& tag = "")
+	{
+		auto now = std::chrono::high_resolution_clock::now();
+		std::string hash =
+			picosha2::hash256_hex_string(std::to_string(now.time_since_epoch().count()));
+		return entity.getScene()->createEntity(tag);
+	}
 	std::string name;
+	goop::Entity entity;
 
   private:
-	goop::Entity entity;
 	virtual void onCollisionEnter(goop::Entity other) {}
 	virtual void onCollisionExit(goop::Entity other) {}
 };

@@ -24,6 +24,8 @@ class Entity
 	uint32_t getUID() { return (uint32_t)entity; }
 	entt::entity getEntity() const { return entity; }
 
+	Scene* getScene() const { return scene; }
+
   private:
 	entt::entity entity;
 

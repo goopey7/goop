@@ -12,4 +12,7 @@ public:
 private:
 	void onCollisionEnter(goop::Entity other) final;
 	void onCollisionExit(goop::Entity other) final;
+
+	glm::vec3 velocity;
+	float walkSpeed = 2.f;
 };
