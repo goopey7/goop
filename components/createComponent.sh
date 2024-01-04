@@ -16,6 +16,7 @@ echo "Creating C++ class: ${CLASS_NAME}..."
 cat <<EOF >"${HEADER_FILE}"
 #pragma once
 #include <goop/Components.h>
+#include <imgui.h>
 
 class ${CLASS_NAME} : public goop::CustomComponent
 {

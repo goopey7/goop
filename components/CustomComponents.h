@@ -2,6 +2,7 @@
 #include <goop/Scene.h>
 #include <map>
 #include <variant>
+#include <imgui.h>
 
 using CustomComponentVariant = std::variant<
     Shoutout
@@ -57,12 +58,13 @@ inline void guiCustomComponents(goop::Scene* s)
     for (auto& [name, factory] : customComponentFactoryMap)
     {
  auto variant = factory(entt::null, s);
- std::visit([s](auto& arg)
+ std::visit([s, &name](auto& arg)
  {
      using T = std::decay_t<decltype(arg)>;
      auto view = s->view<T>();
      for (auto e : view)
      {
+         ImGui::Text("%s", name.c_str());
          goop::Entity(e, s).getComponent<T>().gui();
      }
  }, variant);

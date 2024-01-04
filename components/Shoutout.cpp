@@ -1,4 +1,5 @@
 #include "Shoutout.h"
+#include <imgui.h>
 #include <iostream>
 
 // Gets called when the game starts
@@ -19,5 +20,5 @@ void Shoutout::update(float dt)
 // Editor GUI - Shown in inspector view
 void Shoutout::gui()
 {
-    //...
+	ImGui::Text("Shoutout to my mom");
 }

@@ -44,6 +44,7 @@ done
 echo "#include <goop/Scene.h>" >>CustomComponents.h
 echo "#include <map>" >>CustomComponents.h
 echo "#include <variant>" >>CustomComponents.h
+echo "#include <imgui.h>" >> CustomComponents.h
 echo >>CustomComponents.h
 echo "using CustomComponentVariant = std::variant<" >>CustomComponents.h
 
@@ -116,12 +117,13 @@ echo "{" >> CustomComponents.h
 echo "    for (auto& [name, factory] : customComponentFactoryMap)" >> CustomComponents.h
 echo "    {" >> CustomComponents.h
 echo " auto variant = factory(entt::null, s);" >> CustomComponents.h
-echo " std::visit([s](auto& arg)" >> CustomComponents.h
+echo " std::visit([s, &name](auto& arg)" >> CustomComponents.h
 echo " {" >> CustomComponents.h
 echo "     using T = std::decay_t<decltype(arg)>;" >> CustomComponents.h
 echo "     auto view = s->view<T>();" >> CustomComponents.h
 echo "     for (auto e : view)" >> CustomComponents.h
 echo "     {" >> CustomComponents.h
+echo "         ImGui::Text(\"%s\", name.c_str());" >> CustomComponents.h
 echo "         goop::Entity(e, s).getComponent<T>().gui();" >> CustomComponents.h
 echo "     }" >> CustomComponents.h
 echo " }, variant);" >> CustomComponents.h
