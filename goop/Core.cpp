@@ -56,8 +56,6 @@ Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 		rm->loadMesh(mesh);
 		rm->loadTexture(mesh);
 	}
-
-	initCustomComponents(&scene);
 }
 
 void Core::run()

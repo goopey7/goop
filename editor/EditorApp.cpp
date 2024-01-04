@@ -123,6 +123,7 @@ void EditorApp::gui()
 				goop::TransformComponent* tc = &tcView.get<goop::TransformComponent>(entity);
 				goop::sys::gPhysics->addRigidBody(rbc, tc);
 			}
+			initCustomComponents(scene);
 		}
 	}
 	if (!shouldPlay && ImGui::Button("Save"))

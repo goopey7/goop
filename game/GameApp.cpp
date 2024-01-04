@@ -58,6 +58,10 @@ void GameApp::init()
 	goop::Camera* cam = new goop::Camera();
 	cam->setPosition(glm::vec3(0.f, 0.f, 5.f));
 	scene->setCurrentCamera(cam);
+
+#ifndef GOOP_APPTYPE_EDITOR
+	initCustomComponents(scene);
+#endif
 }
 
 void GameApp::update(float dt)

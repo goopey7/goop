@@ -64,9 +64,6 @@ class CustomComponent
 {
   public:
 	CustomComponent(goop::Entity e) : entity(e) {}
-	virtual void init() = 0;
-	virtual void update(float dt) = 0;
-	virtual void gui() = 0;
 
   protected:
 	template <typename T> T& getComponent() { return entity.getComponent<T>(); }
