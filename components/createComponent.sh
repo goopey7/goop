@@ -21,7 +21,7 @@ cat <<EOF >"${HEADER_FILE}"
 class ${CLASS_NAME} : public goop::CustomComponent
 {
 public:
-    ${CLASS_NAME}(goop::Entity e) : goop::CustomComponent(e) {}
+    ${CLASS_NAME}(goop::Entity e) : goop::CustomComponent(e) {name = "${CLASS_NAME}";}
     void init();
     void update(float dt);
     void gui();
@@ -48,8 +48,10 @@ void ${CLASS_NAME}::update(float dt)
 }
 
 // Editor GUI - Shown in inspector view
+// Refer to ImGui documentation for more info
 void ${CLASS_NAME}::gui()
 {
+	// ImGui::Text("Hello from %s", name.c_str());
     //...
 }
 EOF

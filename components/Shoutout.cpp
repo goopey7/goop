@@ -1,5 +1,4 @@
 #include "Shoutout.h"
-#include <imgui.h>
 #include <iostream>
 
 // Gets called when the game starts
@@ -13,12 +12,14 @@ void Shoutout::update(float dt)
 {
 	timer += dt;
 	auto& tc = getComponent<goop::TransformComponent>();
-	tc.position.x = cosf(timer);
-	tc.position.y = sinf(timer);
+	tc.position.x = sinf(timer);
+	tc.position.z = cosf(timer);
 }
 
 // Editor GUI - Shown in inspector view
+// Refer to ImGui documentation for more info
 void Shoutout::gui()
 {
-	ImGui::Text("Shoutout to my mom");
+	ImGui::Text("Hello from %s", name.c_str());
+    //...
 }
