@@ -1,5 +1,6 @@
-//67f1d40669d8352484e1c7030e16037d289cbda95843c1cf514d250b31b4a7d6
+//d9f223827793ea3f823538c76b74b4ce608e210157e0b329f1f700a44bff59e8
 #include "PlayerInput.h"
+#include "WindowsTest.h"
 #include <goop/Scene.h>
 #include <goop/Entity.h>
 #include <map> 
@@ -7,7 +8,8 @@
 #include <imgui.h>
 
 using CustomComponentVariant = std::variant<
-    PlayerInput
+    PlayerInput,
+    WindowsTest
 >;
 
 static std::map<std::string, std::function<CustomComponentVariant(entt::entity, goop::Scene*)>> customComponentFactoryMap;
@@ -23,6 +25,7 @@ static std::map<std::string, std::function<CustomComponentVariant(entt::entity, 
 			return true; \
 		}()  
 REGISTER_CUSTOM_COMPONENT("PlayerInput", PlayerInput);
+REGISTER_CUSTOM_COMPONENT("WindowsTest", WindowsTest);
 inline void initCustomComponents(goop::Scene* s)
 {
     for (auto& [name, factory] : customComponentFactoryMap) 
@@ -57,17 +60,22 @@ inline void updateCustomComponents(goop::Scene* s, float dt)
     }
 }  
 
-inline void guiCustomComponents(goop::Scene* s)
+inline void guiCustomComponents(goop::Entity en)
 {
     for (auto& [name, factory] : customComponentFactoryMap)  
     {
-        auto variant = factory(entt::null, s);
-        std::visit([s, &name](auto& arg) 
+        auto variant = factory(entt::null, en.getScene());
+        std::visit([en, &name](auto& arg) 
         {
+			auto s = en.getScene();
             using T = std::decay_t<decltype(arg)>;
             auto view = s->view<T>();
             for (auto e : view)
-            {     
+            {
+                if (en.getEntity() != e)
+                {
+					continue;
+                }
                 ImGui::Text("%s", name.c_str());        
                 goop::Entity(e, s).getComponent<T>().gui(); 
             }

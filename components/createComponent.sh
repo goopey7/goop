@@ -53,13 +53,13 @@ void ${CLASS_NAME}::update(float dt)
 }
 
 // Collision callbacks
-void PlayerInput::onCollisionEnter(goop::Entity other)
+void ${CLASS_NAME}::onCollisionEnter(goop::Entity other)
 {
 	// std::cout << "Player started colliding with " << other.getComponent<goop::TagComponent>().tag << std::endl;
 	//...
 }
 
-void PlayerInput::onCollisionExit(goop::Entity other)
+void ${CLASS_NAME}::onCollisionExit(goop::Entity other)
 {
 	// std::cout << "Player stopped colliding with " << other.getComponent<goop::TagComponent>().tag << std::endl;
 	//...

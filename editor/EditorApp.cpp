@@ -41,7 +41,6 @@ void EditorApp::update(float dt)
 {
 	if (shouldPlay)
 	{
-		//goop::grabCursor(grabCursor);
 		game->update(dt);
 		if (goop::isKeyPressed(ImGuiKey_Escape))
 		{
@@ -58,7 +57,7 @@ void EditorApp::update(float dt)
 	else if (isViewportFocused)
 	{
 		goop::Camera* cam = scene->getCurrentCamera();
-
+		goop::grabCursor(true);
 		if (goop::isLMBDown() || goop::isRMBDown())
 		{
 			goop::hideCursor(true);
@@ -390,7 +389,7 @@ void EditorApp::gui()
 			ImGui::Checkbox("Active", &cam.active);
 			ImGui::PopID();
 		}
-		guiCustomComponents(scene);
+		guiCustomComponents(e);
 		if (ImGui::Button("Add Component"))
 		{
 			addComponentPopupOpen = true;

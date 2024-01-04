@@ -64,7 +64,7 @@ file(GLOB STB_IMAGE_HEADER "libs/stb/stb_image.h")
 add_executable(${PROJECT_NAME} ${ENGINE_SRC_FILES} ${STB_VORBIS_SOURCE})
 
 # define app type
-#target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_APPTYPE_EDITOR)
+target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_APPTYPE_EDITOR)
 
 # define systems
 target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_RENDERER_VULKAN)
@@ -150,22 +150,6 @@ set(SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
 add_dependencies(${PROJECT_NAME} compile_shaders)
 # ##############################################################################
 
-if(WIN32)
-add_custom_target(update_components
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/components/updateComponents.bat
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Running updateComponents.bat script"
-)
-else()
-add_custom_target(update_components
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/components/updateComponents.sh
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Running updateComponents.sh script"
-)
-endif()
-
-add_dependencies(${PROJECT_NAME} update_components)
-
 # copy SDL2.dll
 if(WIN32)
   add_custom_command(
@@ -198,3 +182,12 @@ if(WIN32)
             $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders)
 
 endif()
+
+
+add_custom_target(update_components
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/components/updateComponents.sh
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Running updateComponents.sh script"
+)
+add_dependencies(${PROJECT_NAME} update_components)
+
