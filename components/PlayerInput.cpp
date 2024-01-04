@@ -76,7 +76,6 @@ void PlayerInput::update(float dt)
 void PlayerInput::onCollisionEnter(goop::Entity other)
 {
 	//...
-	std::cout << "Colliding with " << other.getComponent<goop::TagComponent>().tag << std::endl;
 }
 
 void PlayerInput::onCollisionExit(goop::Entity other)
