@@ -1,6 +1,9 @@
 #include "PlayerInput.h"
 #include <goop/Input.h>
 #include <imgui.h>
+#include <GLFW/glfw3.h>
+#include <goop/Physics.h>
+#include <iostream>
 
 // Gets called when the game starts
 void PlayerInput::init()
@@ -17,6 +20,18 @@ void PlayerInput::update(float dt)
 	auto& cam = getComponent<goop::CameraComponent>();
 	cam.rotation.x -= mouseDY * dt * 5.f;
 	cam.rotation.y += mouseDX * dt * 5.f;
+
+	// jump
+	if (goop::isKeyPressed(ImGuiKey_Space))
+	{
+		auto& rb = getComponent<goop::RigidbodyComponent>();
+		goop::applyImpulse(rb, glm::vec3(0, 5.f, 0));
+		std::cout<<"pressed space"<<std::endl;
+	}
+	if (goop::isKeyReleased(ImGuiKey_Space))
+	{
+		std::cout<<"released space"<<std::endl;
+	}
 }
 
 // Editor GUI - Shown in inspector view

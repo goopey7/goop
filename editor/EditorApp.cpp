@@ -43,14 +43,14 @@ void EditorApp::update(float dt)
 	{
 		//goop::grabCursor(grabCursor);
 		game->update(dt);
-		if (goop::isKeyDown(GLFW_KEY_ESCAPE))
+		if (goop::isKeyPressed(ImGuiKey_Escape))
 		{
 			shouldPlay = false;
 			goop::sys::gPhysics->destroy();
 			scene->resetScene();
 			goop::grabCursor(false);
 		}
-		else if (goop::isKeyDown(GLFW_KEY_F1))
+		else if (goop::isKeyPressed(ImGuiKey_F1))
 		{
 			grabCursor = false;
 		}
@@ -62,27 +62,27 @@ void EditorApp::update(float dt)
 		if (goop::isLMBDown() || goop::isRMBDown())
 		{
 			goop::hideCursor(true);
-			if (goop::isKeyDown(GLFW_KEY_W))
+			if (goop::isKeyDown(ImGuiKey_W))
 			{
 				cam->translate(cam->getForward() * dt * 5.f);
 			}
-			if (goop::isKeyDown(GLFW_KEY_S))
+			if (goop::isKeyDown(ImGuiKey_S))
 			{
 				cam->translate(-cam->getForward() * dt * 5.f);
 			}
-			if (goop::isKeyDown(GLFW_KEY_A))
+			if (goop::isKeyDown(ImGuiKey_A))
 			{
 				cam->translate(-cam->getRight() * dt * 5.f);
 			}
-			if (goop::isKeyDown(GLFW_KEY_D))
+			if (goop::isKeyDown(ImGuiKey_D))
 			{
 				cam->translate(cam->getRight() * dt * 5.f);
 			}
-			if (goop::isKeyDown(GLFW_KEY_E))
+			if (goop::isKeyDown(ImGuiKey_E))
 			{
 				cam->translate(cam->getUp() * dt * 5.f);
 			}
-			if (goop::isKeyDown(GLFW_KEY_Q))
+			if (goop::isKeyDown(ImGuiKey_Q))
 			{
 				cam->translate(-cam->getUp() * dt * 5.f);
 			}

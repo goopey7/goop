@@ -11,6 +11,7 @@ class Physics : public Subsystem
 		virtual void simulate(float dt) = 0;
 		virtual void addRigidBody(RigidbodyComponent* rbc, TransformComponent* tc) = 0;
 		virtual void removeRigidBody(RigidbodyComponent* rbc) = 0;
+		virtual void applyImpulse(RigidbodyComponent* rbc, glm::vec3 impulse) = 0;
 };
 
 extern const std::unique_ptr<Physics> gPhysics;

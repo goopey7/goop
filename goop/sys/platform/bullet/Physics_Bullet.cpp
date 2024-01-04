@@ -126,3 +126,9 @@ void Physics_Bullet::removeRigidBody(RigidbodyComponent* rbc)
 }
 
 Physics_Bullet::~Physics_Bullet() { destroy(); }
+
+void Physics_Bullet::applyImpulse(RigidbodyComponent* rbc, glm::vec3 impulse)
+{
+	rigidBodies[rbc]->applyCentralImpulse(btVector3(impulse.x, impulse.y, impulse.z));
+}
+

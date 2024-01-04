@@ -45,20 +45,8 @@ int Window_GLFW::openWindow(uint32_t width, uint32_t height, const char* title, 
 	ImGui_ImplGlfw_InitForVulkan(window, true);
 #endif
 
-	glfwSetKeyCallback(window,
-					   [](GLFWwindow* window, int key, int scancode, int action, int mods)
-					   {
-						   auto& keyDown = gWindow->getKeyDownMap();
-						   if (action == GLFW_PRESS)
-						   {
-							   keyDown[key] = true;
-						   }
-						   else if (action == GLFW_RELEASE)
-						   {
-							   keyDown[key] = false;
-						   }
-						   ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
-					   });
+	glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+					   { ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods); });
 
 	return 0;
 }
@@ -140,4 +128,3 @@ void Window_GLFW::grabCursor(bool grab)
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 }
-

@@ -21,6 +21,7 @@ class Physics_Bullet : public Physics
 	void simulate(float dt) final;
 	void addRigidBody(RigidbodyComponent* rbc, TransformComponent* tc) final;
 	void removeRigidBody(RigidbodyComponent* rbc) final;
+	void applyImpulse(RigidbodyComponent* rbc, glm::vec3 impulse) final;
 
   private:
 	btDefaultCollisionConfiguration* collisionConfiguration;

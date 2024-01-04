@@ -41,8 +41,6 @@ class Window : public Subsystem
 	virtual void hideCursor(bool hide) = 0;
 	virtual void grabCursor(bool grab) = 0;
 
-	std::map<int, bool>& getKeyDownMap() { return keyDown; }
-	bool isKeyDown(int key) { return keyDown[key]; }
 	bool isLMBDown() const { return bIsLMBDown; }
 	bool isRMBDown() const { return bIsRMBDown; }
 
@@ -52,7 +50,6 @@ class Window : public Subsystem
 	float getMouseDeltaY() const { return mouseY - lastMouseY; }
 
   protected:
-	std::map<int, bool> keyDown;
 	bool bIsLMBDown = false;
 	bool bIsRMBDown = false;
 	double lastMouseX = 0.0f;
