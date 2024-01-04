@@ -11,6 +11,39 @@ shopt -s nullglob
 cpp_files=("$script_dir"/*.cpp)
 shopt -u nullglob
 
+# Calculate hash of CustomComponents.h if it exists
+existing_hash=""
+if [ -e CustomComponents.h ]; then
+    existing_hash=$(sha256sum CustomComponents.h | awk '{ print $1 }')
+fi
+
+# Function to calculate hash for a file
+calculate_hash() {
+    local file="$1"
+    sha256sum "$file" | awk '{ print $1 }'
+}
+
+# Concatenate all .cpp file names together to form a string
+file_names_concatenated=$(printf "%s" "${cpp_files[@]##*/}")
+
+# Calculate the hash of the concatenated file names
+updated_hash=$(echo -n "$file_names_concatenated" | sha256sum | awk '{ print $1 }')
+
+# Get the existing hash from the first line comment
+existing_hash_comment=$(head -n 1 CustomComponents.h)
+existing_hash=$(echo "$existing_hash_comment" | sed 's/^\/\/\(.*\)$/\1/')
+
+# Check if the file needs updating based on the hash
+needs_update=false
+if [ "$existing_hash" != "$updated_hash" ]; then
+    needs_update=true
+fi
+
+if ! $needs_update; then
+	echo "CustomComponents.h is up to date"
+	exit 0
+fi
+
 echo "#pragma once" > CustomComponents.h
 
 for file in "${cpp_files[@]}"; do
@@ -178,3 +211,6 @@ fi
 cat <<EOF >>CustomComponents.h
 }
 EOF
+
+sed -i "1s/.*/\/\/$updated_hash/" CustomComponents.h
+echo "CustomComponents.h updated"

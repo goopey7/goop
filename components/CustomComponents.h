@@ -1,27 +1,27 @@
-#pragma once
+//67f1d40669d8352484e1c7030e16037d289cbda95843c1cf514d250b31b4a7d6
 #include "PlayerInput.h"
 #include <goop/Scene.h>
+#include <goop/Entity.h>
 #include <map> 
 #include <variant>
 #include <imgui.h>
 
-using CustomComponentVariant = std::variant<  
+using CustomComponentVariant = std::variant<
     PlayerInput
 >;
 
 static std::map<std::string, std::function<CustomComponentVariant(entt::entity, goop::Scene*)>> customComponentFactoryMap;
 
-#define REGISTER_CUSTOM_COMPONENT(name, type) \
-    static CustomComponentVariant create##type(entt::entity e, goop::Scene* s) \
-    { \
-        return type(goop::Entity(e, s)); \
-    } \
-    static bool registered##type = []() \
-    { \
-        customComponentFactoryMap[name] = create##type; \
-        return true; \
-    }()  
-
+	#define REGISTER_CUSTOM_COMPONENT(name, type) \
+		static CustomComponentVariant create##type(entt::entity e, goop::Scene* s) \
+		{ \
+			return type(goop::Entity(e, s)); \
+		} \
+		static bool registered##type = []() \
+		{ \
+			customComponentFactoryMap[name] = create##type; \
+			return true; \
+		}()  
 REGISTER_CUSTOM_COMPONENT("PlayerInput", PlayerInput);
 inline void initCustomComponents(goop::Scene* s)
 {
