@@ -6,6 +6,7 @@
 #include <glm/common.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <goop/Core.h>
+#include "components/CustomComponents.h"
 
 using namespace goop;
 
@@ -80,6 +81,10 @@ void Scene::loadScene(nlohmann::json& startScene)
 				float size[3] = {box["x"], box["y"], box["z"]};
 				e.addComponent<goop::RigidbodyComponent>(component["mass"], size);
 			}
+			else if (customComponentFactoryMap.contains(component["type"]))
+			{
+				addCustomComponent(component["type"], e, this);
+			}
 		}
 	}
 }
@@ -140,6 +145,8 @@ nlohmann::json Scene::saveScene()
 			rbJson["box"]["z"] = rbc.box[2];
 			eJson["components"].push_back(rbJson);
 		}
+
+		saveCustomComponents(this, e, eJson["components"]);
 
 		sceneJson["entities"].push_back(eJson);
 	}

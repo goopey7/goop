@@ -7,12 +7,12 @@
             {
               "position": {
                 "x": 0.0,
-                "y": 0.0,
+                "y": 9.699999809265137,
                 "z": 0.0
               },
               "rotation": {
-                "x": 0.0,
-                "y": 0.0,
+                "x": 23.0,
+                "y": 35.099998474121094,
                 "z": 0.0
               },
               "scale": {
@@ -23,12 +23,60 @@
               "type": "transform"
             },
             {
-              "path": "res/viking_room.obj",
-              "texturePath": "res/viking_room.png",
+              "path": "box",
+              "primitive": "box",
+              "texturePath": "res/texture.jpg",
               "type": "mesh"
+            },
+            {
+              "box": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "mass": 1.0,
+              "type": "rigidBody"
             }
           ],
-          "name": "CustomCompTest"
+          "name": "Cow"
+        },
+        {
+          "components": [
+            {
+              "position": {
+                "x": 0.0,
+                "y": 5.0,
+                "z": 0.0
+              },
+              "rotation": {
+                "x": 32.0,
+                "y": -135.1999969482422,
+                "z": 24.0
+              },
+              "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "type": "transform"
+            },
+            {
+              "path": "box",
+              "primitive": "box",
+              "texturePath": "res/viking_room.png",
+              "type": "mesh"
+            },
+            {
+              "box": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "mass": 1.600000023841858,
+              "type": "rigidBody"
+            }
+          ],
+          "name": "Viking Room"
         },
         {
           "components": [
@@ -73,13 +121,13 @@
             {
               "position": {
                 "x": 0.0,
-                "y": 5.0,
+                "y": 0.0,
                 "z": 0.0
               },
               "rotation": {
-                "x": 32.0,
-                "y": -135.1999969482422,
-                "z": 24.0
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
               },
               "scale": {
                 "x": 1.0,
@@ -89,60 +137,15 @@
               "type": "transform"
             },
             {
-              "path": "box",
-              "primitive": "box",
+              "path": "res/viking_room.obj",
               "texturePath": "res/viking_room.png",
               "type": "mesh"
             },
             {
-              "box": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "mass": 1.600000023841858,
-              "type": "rigidBody"
+              "type": "Shoutout"
             }
           ],
-          "name": "Viking Room"
-        },
-        {
-          "components": [
-            {
-              "position": {
-                "x": 0.0,
-                "y": 9.699999809265137,
-                "z": 0.0
-              },
-              "rotation": {
-                "x": 23.0,
-                "y": 35.099998474121094,
-                "z": 0.0
-              },
-              "scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "type": "transform"
-            },
-            {
-              "path": "box",
-              "primitive": "box",
-              "texturePath": "res/texture.jpg",
-              "type": "mesh"
-            },
-            {
-              "box": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "mass": 1.0,
-              "type": "rigidBody"
-            }
-          ],
-          "name": "Cow"
+          "name": "CustomCompTest"
         }
       ],
       "name": "lvl_1"

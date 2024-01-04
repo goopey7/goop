@@ -17,7 +17,7 @@ class Entity
 
 	template <typename T> T& getComponent() const { return scene->registry.get<T>(entity); }
 
-	template <typename T> bool hasComponent() { return scene->registry.any_of<T>(entity); }
+	template <typename T> bool hasComponent() const { return scene->registry.any_of<T>(entity); }
 
 	template <typename T> void removeComponent() { scene->registry.remove<T>(entity); }
 

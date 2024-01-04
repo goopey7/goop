@@ -29,6 +29,7 @@ echo "inline void initCustomComponents(goop::Scene* s) {}" >> CustomComponents.h
 echo "inline void updateCustomComponents(goop::Scene* s, float dt) {}" >> CustomComponents.h
 echo "inline void guiCustomComponents(goop::Scene* s) {}" >> CustomComponents.h
 echo "inline void addCustomComponent(const std::string& name, goop::Entity e, goop::Scene* scene) {}" >> CustomComponents.h
+echo "inline void saveCustomComponents(goop::Scene* scene, goop::Entity e, nlohmann::json& json) {}" >> CustomComponents.h
 
     exit 0
 fi
@@ -136,3 +137,22 @@ echo "        using T = std::decay_t<decltype(arg)>;" >> CustomComponents.h
 echo "        e.addComponent<T>(arg);" >> CustomComponents.h
 echo "    }, variant);" >> CustomComponents.h
 echo "}" >> CustomComponents.h
+
+echo "inline void saveCustomComponents(goop::Scene* scene, goop::Entity e, nlohmann::json& json)" >> CustomComponents.h
+echo "{" >> CustomComponents.h
+echo "for (auto& [n, factory] : customComponentFactoryMap)" >> CustomComponents.h
+echo "{" >> CustomComponents.h
+echo " auto variant = factory(entt::null, nullptr);" >> CustomComponents.h
+echo " std::visit([&e, &json, &n](auto& arg)" >> CustomComponents.h
+echo " {" >> CustomComponents.h
+echo "	 using T = std::decay_t<decltype(arg)>;" >> CustomComponents.h
+echo " if (e.hasComponent<T>())" >> CustomComponents.h
+echo " {" >> CustomComponents.h
+echo " nlohmann::json j;" >> CustomComponents.h
+echo " j[\"type\"] = n;" >> CustomComponents.h
+echo " json.push_back(j);" >> CustomComponents.h
+echo " }" >> CustomComponents.h
+echo " }, variant);" >> CustomComponents.h
+echo "}" >> CustomComponents.h
+echo "}" >> CustomComponents.h
+

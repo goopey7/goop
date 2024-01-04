@@ -151,7 +151,7 @@ void Renderer_Vulkan::updateUniformBuffer(Scene* scene, uint32_t currentFrame)
 #else
 	ubo.proj = glm::perspective(glm::radians(45.f),
 								swapchain->getExtent().width / (float)swapchain->getExtent().height,
-								0.1f, 10.f);
+								0.1f, 100.f);
 #endif
 
 	// flip y coordinate, glm was designed for OpenGL which has an inverted y coordinate

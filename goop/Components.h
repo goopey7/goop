@@ -64,9 +64,11 @@ class CustomComponent
 {
   public:
 	CustomComponent(goop::Entity e) : entity(e) {}
+	const std::string& getName() { return name; }
 
   protected:
 	template <typename T> T& getComponent() { return entity.getComponent<T>(); }
+	std::string name;
 
   private:
 	goop::Entity entity;
