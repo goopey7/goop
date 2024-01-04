@@ -61,6 +61,7 @@ void GameApp::init()
 
 #ifndef GOOP_APPTYPE_EDITOR
 	initCustomComponents(scene);
+	goop::sys::gWindow->grabCursor(true);
 #endif
 }
 

@@ -36,4 +36,5 @@ class EditorApp : public goop::App
 	std::optional<goop::Entity> selectedEntity = std::nullopt;
 	std::vector<std::string> customComponentNames;
 	bool isViewportFocused = false;
+	bool grabCursor = false;
 };

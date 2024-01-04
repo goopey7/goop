@@ -23,6 +23,7 @@ class Window_GLFW : public Window
 	bool shouldClose() final;
 	void pollEvents() final;
 	void hideCursor(bool hide) final;
+	void grabCursor(bool grab) final;
 
   private:
 	GLFWwindow* window = nullptr;

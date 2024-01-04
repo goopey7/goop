@@ -39,6 +39,7 @@ class Window : public Subsystem
 	virtual bool shouldClose() = 0;
 	virtual void pollEvents() = 0;
 	virtual void hideCursor(bool hide) = 0;
+	virtual void grabCursor(bool grab) = 0;
 
 	std::map<int, bool>& getKeyDownMap() { return keyDown; }
 	bool isKeyDown(int key) { return keyDown[key]; }

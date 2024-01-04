@@ -6,155 +6,137 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Move to the script's directory
 cd "$script_dir" || exit
 
-# Find .cpp files
+# Find .cpp files  
 shopt -s nullglob
 cpp_files=("$script_dir"/*.cpp)
 shopt -u nullglob
 
-# Start by creating or clearing CustomComponents.h
-echo -n >CustomComponents.h
+echo "#pragma once" > CustomComponents.h
 
-# Check if there are no .cpp files
-if [ ${#cpp_files[@]} -eq 0 ]; then
-echo "No .cpp files found in the directory."
-echo "#include <variant>" >>CustomComponents.h
-echo "#include <goop/Scene.h>" >>CustomComponents.h
-echo "#include <goop/Entity.h>" >>CustomComponents.h
-echo "#include <map>" >>CustomComponents.h
-echo >>CustomComponents.h
-echo "using CustomComponentVariant = std::variant<std::monostate>;" >>CustomComponents.h
-echo "static std::map<std::string, std::function<CustomComponentVariant(entt::entity, goop::Scene*)>> customComponentFactoryMap;" >>CustomComponents.h
-echo >>CustomComponents.h
-echo "inline void initCustomComponents(goop::Scene* s) {}" >> CustomComponents.h
-echo "inline void updateCustomComponents(goop::Scene* s, float dt) {}" >> CustomComponents.h
-echo "inline void guiCustomComponents(goop::Scene* s) {}" >> CustomComponents.h
-echo "inline void addCustomComponent(const std::string& name, goop::Entity e, goop::Scene* scene) {}" >> CustomComponents.h
-echo "inline void saveCustomComponents(goop::Scene* scene, goop::Entity e, nlohmann::json& json) {}" >> CustomComponents.h
-
-    exit 0
-fi
-
-
-# Add #includes
 for file in "${cpp_files[@]}"; do
     filename=$(basename "$file" .cpp)
-    echo "#include \"$filename.h\"" >>CustomComponents.h
-done
+    echo "#include \"$filename.h\""  
+done >> CustomComponents.h
 
-echo "#include <goop/Scene.h>" >>CustomComponents.h
-echo "#include <map>" >>CustomComponents.h
-echo "#include <variant>" >>CustomComponents.h
-echo "#include <imgui.h>" >> CustomComponents.h
-echo >>CustomComponents.h
-echo "using CustomComponentVariant = std::variant<" >>CustomComponents.h
+cat <<EOF >>CustomComponents.h
+#include <goop/Scene.h>
+#include <map> 
+#include <variant>
+#include <imgui.h>
 
-for file in "${cpp_files[@]}"; do
-	filename=$(basename "$file" .cpp)
-	echo "    $filename," >>CustomComponents.h
-done
+using CustomComponentVariant = std::variant<  
+EOF
+
+for file in "${cpp_files[@]}"; do 
+    filename=$(basename "$file" .cpp)
+    echo "    $filename,"  
+done >> CustomComponents.h
 
 # remove last comma
 sed -i '$ s/.$//' CustomComponents.h
 
-echo ">;" >>CustomComponents.h
+cat <<EOF >>CustomComponents.h 
+>;
 
-echo "static std::map<std::string, std::function<CustomComponentVariant(entt::entity, goop::Scene*)>> customComponentFactoryMap;" >>CustomComponents.h
-echo >>CustomComponents.h
-echo "#define REGISTER_CUSTOM_COMPONENT(name, type) \\" >>CustomComponents.h
-echo "    static CustomComponentVariant create##type(entt::entity e, goop::Scene* s) \\" >>CustomComponents.h
-echo "    { \\" >>CustomComponents.h
-echo "        return type(goop::Entity(e, s)); \\" >>CustomComponents.h
-echo "    } \\" >>CustomComponents.h
-echo "    static bool registered##type = []() \\" >>CustomComponents.h
-echo "    { \\" >>CustomComponents.h
-echo "        customComponentFactoryMap[name] = create##type; \\" >>CustomComponents.h
-echo "        return true; \\" >>CustomComponents.h
-echo "    }()" >>CustomComponents.h
-echo >>CustomComponents.h
+static std::map<std::string, std::function<CustomComponentVariant(entt::entity, goop::Scene*)>> customComponentFactoryMap;
+
+#define REGISTER_CUSTOM_COMPONENT(name, type) \\
+    static CustomComponentVariant create##type(entt::entity e, goop::Scene* s) \\
+    { \\
+        return type(goop::Entity(e, s)); \\
+    } \\
+    static bool registered##type = []() \\
+    { \\
+        customComponentFactoryMap[name] = create##type; \\
+        return true; \\
+    }()  
+
+EOF
 
 # Register components
-for file in "${cpp_files[@]}"; do
+for file in "${cpp_files[@]}"; do  
     filename=$(basename "$file" .cpp)
-    echo "REGISTER_CUSTOM_COMPONENT(\"$filename\", $filename);" >>CustomComponents.h
-done
+    echo "REGISTER_CUSTOM_COMPONENT(\"$filename\", $filename);"   
+done >> CustomComponents.h
 
-echo "inline void initCustomComponents(goop::Scene* s)" >> CustomComponents.h
-echo "{" >> CustomComponents.h
-echo "    for (auto& [name, factory] : customComponentFactoryMap)" >> CustomComponents.h
-echo "    {" >> CustomComponents.h
-echo " auto variant = factory(entt::null, s);" >> CustomComponents.h
-echo " std::visit([s](auto& arg)" >> CustomComponents.h
-echo " {" >> CustomComponents.h
-echo "     using T = std::decay_t<decltype(arg)>;" >> CustomComponents.h
-echo "     auto view = s->view<T>();" >> CustomComponents.h
-echo "     for (auto e : view)" >> CustomComponents.h
-echo "     {" >> CustomComponents.h
-echo "         goop::Entity(e, s).getComponent<T>().init();" >> CustomComponents.h
-echo "     }" >> CustomComponents.h
-echo " }, variant);" >> CustomComponents.h
-echo "    }" >> CustomComponents.h
-echo "}" >> CustomComponents.h
+cat <<EOF >>CustomComponents.h  
+inline void initCustomComponents(goop::Scene* s)
+{
+    for (auto& [name, factory] : customComponentFactoryMap) 
+    {
+        auto variant = factory(entt::null, s);
+        std::visit([s](auto& arg)  
+        {     
+            using T = std::decay_t<decltype(arg)>;
+            auto view = s->view<T>();
+            for (auto e : view)  
+            {        
+                goop::Entity(e, s).getComponent<T>().init();
+            }
+        }, variant);
+    }
+}
 
-echo "inline void updateCustomComponents(goop::Scene* s, float dt)" >> CustomComponents.h
-echo "{" >> CustomComponents.h
-echo "    for (auto& [name, factory] : customComponentFactoryMap)" >> CustomComponents.h
-echo "    {" >> CustomComponents.h
-echo " auto variant = factory(entt::null, s);" >> CustomComponents.h
-echo " std::visit([s, dt](auto& arg)" >> CustomComponents.h
-echo " {" >> CustomComponents.h
-echo "     using T = std::decay_t<decltype(arg)>;" >> CustomComponents.h
-echo "     auto view = s->view<T>();" >> CustomComponents.h
-echo "     for (auto e : view)" >> CustomComponents.h
-echo "     {" >> CustomComponents.h
-echo "         goop::Entity(e, s).getComponent<T>().update(dt);" >> CustomComponents.h
-echo "     }" >> CustomComponents.h
-echo " }, variant);" >> CustomComponents.h
-echo "    }" >> CustomComponents.h
-echo "}" >> CustomComponents.h
+inline void updateCustomComponents(goop::Scene* s, float dt)  
+{
+    for (auto& [name, factory] : customComponentFactoryMap)
+    {
+        auto variant = factory(entt::null, s);
+        std::visit([s, dt](auto& arg) 
+        {  
+            using T = std::decay_t<decltype(arg)>;
+            auto view = s->view<T>();
+            for (auto e : view)   
+            {         
+                goop::Entity(e, s).getComponent<T>().update(dt);
+            }
+        }, variant);
+    }
+}  
 
-echo "inline void guiCustomComponents(goop::Scene* s)" >> CustomComponents.h
-echo "{" >> CustomComponents.h
-echo "    for (auto& [name, factory] : customComponentFactoryMap)" >> CustomComponents.h
-echo "    {" >> CustomComponents.h
-echo " auto variant = factory(entt::null, s);" >> CustomComponents.h
-echo " std::visit([s, &name](auto& arg)" >> CustomComponents.h
-echo " {" >> CustomComponents.h
-echo "     using T = std::decay_t<decltype(arg)>;" >> CustomComponents.h
-echo "     auto view = s->view<T>();" >> CustomComponents.h
-echo "     for (auto e : view)" >> CustomComponents.h
-echo "     {" >> CustomComponents.h
-echo "         ImGui::Text(\"%s\", name.c_str());" >> CustomComponents.h
-echo "         goop::Entity(e, s).getComponent<T>().gui();" >> CustomComponents.h
-echo "     }" >> CustomComponents.h
-echo " }, variant);" >> CustomComponents.h
-echo "    }" >> CustomComponents.h
-echo "}" >> CustomComponents.h
+inline void guiCustomComponents(goop::Scene* s)
+{
+    for (auto& [name, factory] : customComponentFactoryMap)  
+    {
+        auto variant = factory(entt::null, s);
+        std::visit([s, &name](auto& arg) 
+        {
+            using T = std::decay_t<decltype(arg)>;
+            auto view = s->view<T>();
+            for (auto e : view)
+            {     
+                ImGui::Text("%s", name.c_str());        
+                goop::Entity(e, s).getComponent<T>().gui(); 
+            }
+        }, variant);
+    }
+}   
 
-echo "inline void addCustomComponent(const std::string& name, goop::Entity e, goop::Scene* scene)" >> CustomComponents.h
-echo "{" >> CustomComponents.h
-echo "    auto variant = customComponentFactoryMap[name](e.getEntity(), scene);" >> CustomComponents.h
-echo "    std::visit([e](auto& arg)" >> CustomComponents.h
-echo "    {" >> CustomComponents.h
-echo "        using T = std::decay_t<decltype(arg)>;" >> CustomComponents.h
-echo "        e.addComponent<T>(arg);" >> CustomComponents.h
-echo "    }, variant);" >> CustomComponents.h
-echo "}" >> CustomComponents.h
+inline void addCustomComponent(const std::string& name, goop::Entity e, goop::Scene* scene) 
+{
+    auto variant = customComponentFactoryMap[name](e.getEntity(), scene);
+    std::visit([e](auto& arg)   
+    {
+        using T = std::decay_t<decltype(arg)>;
+        e.addComponent<T>(arg);
+    }, variant);
+}
 
-echo "inline void saveCustomComponents(goop::Scene* scene, goop::Entity e, nlohmann::json& json)" >> CustomComponents.h
-echo "{" >> CustomComponents.h
-echo "for (auto& [n, factory] : customComponentFactoryMap)" >> CustomComponents.h
-echo "{" >> CustomComponents.h
-echo " auto variant = factory(entt::null, nullptr);" >> CustomComponents.h
-echo " std::visit([&e, &json, &n](auto& arg)" >> CustomComponents.h
-echo " {" >> CustomComponents.h
-echo "	 using T = std::decay_t<decltype(arg)>;" >> CustomComponents.h
-echo " if (e.hasComponent<T>())" >> CustomComponents.h
-echo " {" >> CustomComponents.h
-echo " nlohmann::json j;" >> CustomComponents.h
-echo " j[\"type\"] = n;" >> CustomComponents.h
-echo " json.push_back(j);" >> CustomComponents.h
-echo " }" >> CustomComponents.h
-echo " }, variant);" >> CustomComponents.h
-echo "}" >> CustomComponents.h
-echo "}" >> CustomComponents.h
-
+inline void saveCustomComponents(goop::Scene* scene, goop::Entity e, nlohmann::json& json)  
+{
+    for (auto& [n, factory] : customComponentFactoryMap)
+    { 
+        auto variant = factory(entt::null, nullptr);
+        std::visit([&e, &json, &n](auto& arg)
+        {
+            using T = std::decay_t<decltype(arg)>;
+            if (e.hasComponent<T>())  
+            {     
+                nlohmann::json j;
+                j["type"] = n; 
+                json.push_back(j);
+            } 
+        }, variant);
+    }
+}
+EOF

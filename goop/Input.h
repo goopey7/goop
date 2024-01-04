@@ -42,6 +42,11 @@ namespace goop
 
 	static void hideCursor(bool hide)
 	{
-		return goop::sys::gWindow->hideCursor(hide);
+		goop::sys::gWindow->hideCursor(hide);
+	}
+
+	static void grabCursor(bool grab)
+	{
+		goop::sys::gWindow->grabCursor(grab);
 	}
 }

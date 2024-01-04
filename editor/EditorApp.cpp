@@ -41,7 +41,19 @@ void EditorApp::update(float dt)
 {
 	if (shouldPlay)
 	{
+		//goop::grabCursor(grabCursor);
 		game->update(dt);
+		if (goop::isKeyDown(GLFW_KEY_ESCAPE))
+		{
+			shouldPlay = false;
+			goop::sys::gPhysics->destroy();
+			scene->resetScene();
+			goop::grabCursor(false);
+		}
+		else if (goop::isKeyDown(GLFW_KEY_F1))
+		{
+			grabCursor = false;
+		}
 	}
 	else if (isViewportFocused)
 	{
@@ -82,7 +94,13 @@ void EditorApp::update(float dt)
 		else
 		{
 			goop::hideCursor(false);
+			goop::grabCursor(false);
 		}
+	}
+
+	if (!shouldPlay)
+	{
+		goop::grabCursor(false);
 	}
 }
 
