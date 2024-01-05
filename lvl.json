@@ -102,6 +102,44 @@
             {
               "position": {
                 "x": 0.0,
+                "y": -2.0,
+                "z": 0.0
+              },
+              "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "scale": {
+                "x": 100.0,
+                "y": 1.0,
+                "z": 100.0
+              },
+              "type": "transform"
+            },
+            {
+              "path": "box",
+              "primitive": "box",
+              "texturePath": "res/viking_room.png",
+              "type": "mesh"
+            },
+            {
+              "box": {
+                "x": 100.0,
+                "y": 1.0,
+                "z": 100.0
+              },
+              "mass": 0.0,
+              "type": "rigidBody"
+            }
+          ],
+          "name": "floorrrrlvl2"
+        },
+        {
+          "components": [
+            {
+              "position": {
+                "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
               },
@@ -121,9 +159,67 @@
               "path": "res/viking_room.obj",
               "texturePath": "res/viking_room.png",
               "type": "mesh"
+            },
+            {
+              "box": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "mass": 1.0,
+              "type": "rigidBody"
             }
           ],
           "name": "FloorLvl2"
+        },
+        {
+          "components": [
+            {
+              "position": {
+                "x": 0.0,
+                "y": 3.0,
+                "z": 5.0
+              },
+              "rotation": {
+                "x": -93.7972183227539,
+                "y": -60.25933074951172,
+                "z": 5.723802089691162
+              },
+              "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "type": "transform"
+            },
+            {
+              "box": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "mass": 1.0,
+              "type": "rigidBody"
+            },
+            {
+              "active": true,
+              "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "rotation": {
+                "x": -3.4055721759796143,
+                "y": 177.96070861816406,
+                "z": 0.0
+              },
+              "type": "camera"
+            },
+            {
+              "type": "PlayerInput"
+            }
+          ],
+          "name": "playerLvl2"
         }
       ],
       "name": "lvl_2"
