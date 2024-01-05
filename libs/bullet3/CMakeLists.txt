@@ -78,16 +78,8 @@ endif(NOT WIN32)
 
 option(USE_MSVC_INCREMENTAL_LINKING "Use MSVC Incremental Linking" OFF)
 
-# statically linking VC++ isn't supported for WindowsPhone/WindowsStore
-if(CMAKE_SYSTEM_NAME STREQUAL WindowsPhone OR CMAKE_SYSTEM_NAME STREQUAL
-                                              WindowsStore)
-  option(USE_MSVC_RUNTIME_LIBRARY_DLL
-         "Use MSVC Runtime Library DLL (/MD or /MDd)" ON)
-else()
-  option(USE_MSVC_RUNTIME_LIBRARY_DLL
-         "Use MSVC Runtime Library DLL (/MD or /MDd)" OFF)
-endif(CMAKE_SYSTEM_NAME STREQUAL WindowsPhone OR CMAKE_SYSTEM_NAME STREQUAL
-                                                 WindowsStore)
+option(USE_MSVC_RUNTIME_LIBRARY_DLL
+       "Use MSVC Runtime Library DLL (/MD or /MDd)" ON)
 option(USE_MSVC_RELEASE_RUNTIME_ALWAYS
        "Use MSVC Release Runtime Library even in Debug" OFF)
 
@@ -369,7 +361,6 @@ option(BUILD_ENET
        "Set when you want to build apps with enet UDP networking support" ON)
 option(BUILD_CLSOCKET
        "Set when you want to build apps with enet TCP networking support" ON)
-
 
 subdirs(src)
 
