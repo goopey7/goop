@@ -401,6 +401,10 @@ void EditorApp::gui()
 		{
 			addComponentPopupOpen = true;
 		}
+		if (ImGui::Button("Create Custom Component"))
+		{
+			customComponentPopupOpen = true;
+		}
 		if (addComponentPopupOpen)
 		{
 			ImGui::OpenPopup("AddComponent");
@@ -468,6 +472,42 @@ void EditorApp::gui()
 			{
 				ImGui::CloseCurrentPopup();
 				addComponentPopupOpen = false;
+			}
+			ImGui::EndPopup();
+		}
+
+		if (customComponentPopupOpen)
+		{
+			ImGui::OpenPopup("CustomComponent");
+
+			ImVec2 centerPos = ImVec2(viewport->WorkPos.x + viewport->WorkSize.x * 0.5f,
+									  viewport->WorkPos.y + viewport->WorkSize.y * 0.5f);
+
+			ImVec2 popupSize = ImVec2(200, 100); // Adjust the size if needed
+			ImVec2 popupPos =
+				ImVec2(centerPos.x - popupSize.x * 0.5f, centerPos.y - popupSize.y * 0.5f);
+			ImGui::SetNextWindowPos(popupPos, ImGuiCond_Always);
+			ImGui::SetNextWindowSize(popupSize, ImGuiCond_Always);
+		}
+
+		if (ImGui::BeginPopup("CustomComponent"))
+		{
+			ImGui::Text("Create Custom Component");
+			ImGui::Text("You'll need to recompile the editor for it to show up");
+			ImGui::InputText("Name", componentName, 256);
+			if (ImGui::Button("Create"))
+			{
+				// execute components/createComponent.sh name
+				std::string cmd = "components/createComponent.sh ";
+				cmd += componentName;
+				system(cmd.c_str());
+				ImGui::CloseCurrentPopup();
+				customComponentPopupOpen = false;
+			}
+			if (ImGui::Button("Cancel"))
+			{
+				ImGui::CloseCurrentPopup();
+				customComponentPopupOpen = false;
 			}
 			ImGui::EndPopup();
 		}
