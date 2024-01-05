@@ -179,11 +179,19 @@ set(SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/shaders)
 add_dependencies(${PROJECT_NAME} compile_shaders)
 # ##############################################################################
 
+if(WIN32)
+add_custom_target(update_components
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/components/updateComponents.bat
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Running updateComponents.bat script"
+)
+else()
 add_custom_target(update_components
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/components/updateComponents.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running updateComponents.sh script"
 )
+endif()
 
 add_dependencies(${PROJECT_NAME} update_components)
 
