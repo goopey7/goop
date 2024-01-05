@@ -188,5 +188,43 @@ add_custom_target(update_components
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running updateComponents.sh script"
 )
+
 add_dependencies(${PROJECT_NAME} update_components)
+
+add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_SOURCE_DIR}/imgui.ini
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/imgui.ini
+    COMMENT "Copying imgui.ini to build directory"
+)
+
+add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_SOURCE_DIR}/cfg.json
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/cfg.json
+    COMMENT "Copying cfg.json to build directory"
+)
+
+add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_SOURCE_DIR}/lvl.json
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/lvl.json
+    COMMENT "Copying lvl.json to build directory"
+)
+
+add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/res
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/res
+    COMMENT "Copying 'res' folder to build directory"
+)
+
 

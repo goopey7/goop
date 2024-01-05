@@ -77,5 +77,5 @@ EOF
 echo "Created ${CPP_FILE}"
 echo "C++ class '${CLASS_NAME}' created successfully!"
 
-cd ../build
+cd build
 cmake ..
