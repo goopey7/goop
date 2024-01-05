@@ -57,7 +57,6 @@ void EditorApp::update(float dt)
 	else if (isViewportFocused)
 	{
 		goop::Camera* cam = scene->getCurrentCamera();
-		goop::grabCursor(true);
 		if (goop::isLMBDown() || goop::isRMBDown())
 		{
 			goop::hideCursor(true);
@@ -93,13 +92,11 @@ void EditorApp::update(float dt)
 		else
 		{
 			goop::hideCursor(false);
-			goop::grabCursor(false);
 		}
 	}
 
 	if (!shouldPlay)
 	{
-		goop::grabCursor(false);
 	}
 }
 

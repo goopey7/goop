@@ -28,6 +28,8 @@ class Scene
 	void setCurrentCamera(Camera* camera) { currentCamera = camera; }
 	Camera* getCurrentCamera() const { return currentCamera; }
 
+	void addSpawnedEntity(entt::entity entity) { spawnedEntities.push_back(entity); }
+
 #ifdef GOOP_APPTYPE_EDITOR
 	void resetScene();
 #endif
@@ -39,5 +41,7 @@ class Scene
 	nlohmann::json sceneJson;
 
 	Camera* currentCamera = nullptr;
+
+	std::vector<entt::entity> spawnedEntities;
 };
 } // namespace goop

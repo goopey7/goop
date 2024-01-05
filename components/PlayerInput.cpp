@@ -69,6 +69,8 @@ void PlayerInput::update(float dt)
 		goop::sys::gPhysics->addRigidBody(&e.getComponent<goop::RigidbodyComponent>(),
 										  &e.getComponent<goop::TransformComponent>());
 		auto& mc = e.addComponent<goop::MeshComponent>(goop::Box(), "res/texture.jpg", "box");
+		goop::rm->loadMesh(&mc);
+		goop::rm->loadTexture(&mc);
 	}
 }
 

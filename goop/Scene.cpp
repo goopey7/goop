@@ -230,5 +230,11 @@ void Scene::resetScene()
 			}
 		}
 	}
+
+	for (auto e : spawnedEntities)
+	{
+		destroyEntity(goop::Entity(e, this));
+	}
+	spawnedEntities.clear();
 }
 #endif

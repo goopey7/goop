@@ -37,15 +37,15 @@ struct MeshComponent
 	MeshComponent(const std::string& path, const std::string& texturePath)
 		: path(path), texturePath(texturePath)
 	{
-		//goop::rm->loadMesh(this);
-		//goop::rm->loadTexture(this);
+		// goop::rm->loadMesh(this);
+		// goop::rm->loadTexture(this);
 	}
 	MeshComponent(goop::Primitive primitive, const std::string& texturePath,
 				  const std::string& path)
 		: primitive(primitive), texturePath(texturePath), path(path)
 	{
-		//goop::rm->loadMesh(this);
-		//goop::rm->loadTexture(this);
+		// goop::rm->loadMesh(this);
+		// goop::rm->loadTexture(this);
 	}
 };
 
@@ -97,10 +97,21 @@ class CustomComponent
 	template <typename T> T& getComponent() { return entity.getComponent<T>(); }
 	Entity spawnEntity(const std::string& tag = "")
 	{
-		auto now = std::chrono::high_resolution_clock::now();
-		std::string hash =
-			picosha2::hash256_hex_string(std::to_string(now.time_since_epoch().count()));
-		return entity.getScene()->createEntity(tag);
+		if (tag.empty())
+		{
+			auto now = std::chrono::high_resolution_clock::now();
+			std::string hash =
+				picosha2::hash256_hex_string(std::to_string(now.time_since_epoch().count()));
+			auto e = entity.getScene()->createEntity(hash);
+			entity.getScene()->addSpawnedEntity(e.getEntity());
+			return e;
+		}
+		else
+		{
+			auto e = entity.getScene()->createEntity(tag);
+			entity.getScene()->addSpawnedEntity(e.getEntity());
+			return e;
+		}
 	}
 	std::string name;
 	goop::Entity entity;
