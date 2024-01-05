@@ -498,7 +498,11 @@ void EditorApp::gui()
 			if (ImGui::Button("Create"))
 			{
 				// execute components/createComponent.sh name
-				std::string cmd = "components/createComponent.sh ";
+				#ifdef _WIN32
+				std::string cmd = "start components/createComponentWin.sh ";
+				#else
+				std::string cmd = "components/createComponentLinux.sh ";
+				#endif
 				cmd += componentName;
 				system(cmd.c_str());
 				ImGui::CloseCurrentPopup();
