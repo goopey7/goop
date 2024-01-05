@@ -106,3 +106,32 @@ Also the editor doesn't have any system for multiple games/projects. Which to me
 
 Another unfortunate failing at submission time is that all of the math is glm. There's no wrapper or subsystem to allow for any other math libraries. Although the solution isn't technically challenging, it's laborious. So from an educational standpoint it's not a priority until I need to implement a Direct3D renderer. 
 
+# References
+assimp team (2006) assimp. Available at: [https://github.com/assimp/assimp](https://github.com/assimp/assimp) 
+
+(Accessed: 5 January 2024).
+Barrett, S. (2017) stb image. Available at: [https://github.com/nothings/stb](https://github.com/nothings/stb) (Accessed: 5 January 2024).
+
+Caini, M. (2017) EnTT. Available at: [https://github.com/skypjack/entt](https://github.com/skypjack/entt) (Accessed: 5 January 2024).
+
+Coumans, E. (2022) bullet3. Available at: [https://github.com/bulletphysics/bullet3](https://github.com/bulletphysics/bullet3) (Accessed: 5 January 2024).
+
+Geelnard, M. and Löwy, C. (2002) GLFW. Available at: [https://github.com/glfw/glfw](https://github.com/glfw/glfw) (Accessed: 5 January 2024).
+
+G-Truc Creation (2005) glm. Available at: [https://github.com/g-truc/glm](https://github.com/g-truc/glm) (Accessed: 5 January 2024).
+
+Kapoulkine, A. (2018) volk. Available at: [https://github.com/zeux/volk](https://github.com/zeux/volk) (Accessed: 5 January 2024).
+
+Khronos Group (2016) Vulkan 1.0 specification. Available at: [https://www.khronos.org/registry/vulkan/specs/1.0/pdf/vkspec.pdf](https://www.khronos.org/registry/vulkan/specs/1.0/pdf/vkspec.pdf) (Accessed: 5 January 2024).
+
+Komppa, J. (2013) SoLoud audio engine. Available at: [https://github.com/jarikomppa/soloud](https://github.com/jarikomppa/soloud) (Accessed: 5 January 2024).
+
+Lantinga, S. (1997) SDL2. Available at: [https://www.libsdl.org/](https://www.libsdl.org/) (Accessed: 5 January 2024).
+
+Niels, L. (2013) JSON for Modern C++. Available at: [https://github.com/nlohmann/json](https://github.com/nlohmann/json) (Accessed: 5 January 2024).
+
+Ocornut, M. (2014) Dear ImGui. Available at: [https://github.com/ocornut/imgui](https://github.com/ocornut/imgui) (Accessed: 5 January 2024).
+
+Okada, S. (2017) PicoSHA2 - a C++ SHA256 hash generator. Available at: [https://github.com/okdshin/PicoSHA2](https://github.com/okdshin/PicoSHA2) (Accessed: 5 January 2024).
+
+
