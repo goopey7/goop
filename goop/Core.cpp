@@ -3,7 +3,6 @@
 
 #include <chrono>
 #include <imgui.h>
-#include <rustlib.h>
 
 #include <iostream>
 
@@ -60,8 +59,6 @@ Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 
 void Core::run()
 {
-	say_hello("Sam");
-
 	auto last = std::chrono::high_resolution_clock::now();
 
 	while (!sys::gWindow->shouldClose())

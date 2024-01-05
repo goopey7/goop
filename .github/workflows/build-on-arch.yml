@@ -19,8 +19,7 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/app archlinux:base-devel bash -c '
             # Install build deps
-            pacman -Syu cmake shaderc glfw-x11 glm rustup stb sdl2 assimp --noconfirm
-            rustup default stable
+            pacman -Syu cmake shaderc glfw-x11 glm stb sdl2 assimp --noconfirm
 
             # Run Build
             cd /app && mkdir build && cd build

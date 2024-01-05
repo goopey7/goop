@@ -84,34 +84,6 @@ add_custom_target(
 # Add a dependency to ensure that Soloud is built before engine code
 add_dependencies(${PROJECT_NAME} build_soloud)
 
-# ##################### Build rust library Find the cargo executable
-find_program(CARGO_EXECUTABLE cargo)
-
-if(NOT CARGO_EXECUTABLE)
-  message(
-    FATAL_ERROR "Cargo not found. Make sure it is installed and in your PATH.")
-endif()
-
-# Add a custom target to build your Rust project using cargo
-add_custom_target(
-  build_rust_project
-  COMMAND ${CARGO_EXECUTABLE} build --release
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/rust_lib
-  COMMENT "Building Rust project...")
-
-include_directories("rust_lib/include")
-
-# Add a dependency to ensure that the Rust project is built before your C++
-# project
-add_dependencies(${PROJECT_NAME} build_rust_project)
-
-if(WIN32)
-  set(RUST_LIB
-      ${CMAKE_SOURCE_DIR}/rust_lib/target/release/rust_hello_lib.dll.lib)
-else()
-  set(RUST_LIB ${CMAKE_SOURCE_DIR}/rust_lib/target/release/librust_hello_lib.so)
-endif()
-
 # Link the C++ executable
 add_subdirectory(editor)
 add_subdirectory(game)
@@ -120,7 +92,6 @@ target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE volk
           ${SDL2_LIBRARY}
-          ${RUST_LIB}
           ${GLFW3_LIBRARY}
           ${ASSIMP_LIBRARY}
           SoLoud
@@ -195,16 +166,8 @@ endif()
 
 add_dependencies(${PROJECT_NAME} update_components)
 
-# Copy the rust_hello_lib.dll to the build directory where the .exe goes And
 # copy SDL2.dll
 if(WIN32)
-  add_custom_command(
-    TARGET ${PROJECT_NAME}
-    POST_BUILD
-    COMMAND
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_SOURCE_DIR}/rust_lib/target/release/rust_hello_lib.dll
-      $<TARGET_FILE_DIR:${PROJECT_NAME}>)
   add_custom_command(
     TARGET ${PROJECT_NAME}
     POST_BUILD
