@@ -134,4 +134,4 @@ Ocornut, M. (2014) Dear ImGui. Available at: [https://github.com/ocornut/imgui](
 
 Okada, S. (2017) PicoSHA2 - a C++ SHA256 hash generator. Available at: [https://github.com/okdshin/PicoSHA2](https://github.com/okdshin/PicoSHA2) (Accessed: 5 January 2024).
 
-
+Overvoorde, A. (2021) Vulkan tutorial. Available at: [https://vulkan-tutorial.com/](https://vulkan-tutorial.com/) (Accessed: 5 January 2024).
