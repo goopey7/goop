@@ -1,13 +1,17 @@
 #include "PlayerInput.h"
-#include "goop/Core.h"
-#include <GLFW/glfw3.h>
+#include <goop/Core.h>
 #include <goop/Input.h>
 #include <goop/Physics.h>
+#include <goop/Sound.h>
 #include <imgui.h>
 #include <iostream>
 
 // Gets called when the game starts
-void PlayerInput::init() { CustomComponent::init(); }
+void PlayerInput::init()
+{
+	CustomComponent::init();
+	goop::rm->loadSfx("res/blast.mp3");
+}
 
 // Gets called every frame
 void PlayerInput::update(float dt)
@@ -59,6 +63,7 @@ void PlayerInput::update(float dt)
 
 	if (goop::isKeyPressed(ImGuiKey_F))
 	{
+		goop::playSfx("res/blast.mp3");
 		auto e = spawnEntity();
 		auto& tc = e.addComponent<goop::TransformComponent>();
 		tc.position = e.getScene()->getCurrentCamera()->getPosition() +
