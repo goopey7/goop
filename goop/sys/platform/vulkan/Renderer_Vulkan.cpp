@@ -529,6 +529,10 @@ bool Renderer_Vulkan::renderScene(uint32_t width, uint32_t height, uint32_t imag
 			for (int instanceIndex = instanceOffset; instanceIndex < instanceOffset + instanceCount;
 				 instanceIndex++)
 			{
+				if (entitiesToRender.empty())
+				{
+					break;
+				}
 				auto e = entitiesToRender.front();
 				if (!scene->hasEntity(e.getEntity()))
 				{
