@@ -1,12 +1,13 @@
-# GOOP - Gaming On Open-source Playground
+# goop - Gaming On Open-source Playground
 ## Key Features
 1. Editor GUI
 2. C++ Scripting Through Custom Components
 3. Vulkan Renderer
 4. Physics
 5. Scene serialization
-6. SFX
-7. Efficient Resource Management (instanced rendering)
+6. Scene State - Hit play in the editor and then hit stop to go back to editing
+7. SFX
+8. Efficient Resource Management (instanced rendering)
 ## Getting Started
 ### Build
 #### Linux - First Class Experience
@@ -33,8 +34,10 @@ Open up the repo in file explorer and navigate to the `windows` folder. Yeah in 
 
 You can then choose to either execute `BUILD_MSVC.bat`, which will make the Visual Studio Solution and build a debug executable, or `GEN_VS_PROJ.bat`, which will make the Solution and open up Visual Studio.
 
+Set the project named "goop" to run as the startup project.
+
 ### Running
-GOOP uses Vulkan for 3D rendering. So you'll need GPU/iGPU drivers that support Vulkan. Most modern hardware should be sufficient.
+goop uses Vulkan for 3D rendering. So you'll need GPU/iGPU drivers that support Vulkan. Most modern hardware should be sufficient.
 
 If you want to run in Debug mode you must install the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home). The program will otherwise crash looking for validation layers which don't exist on your machine.
 
@@ -44,6 +47,12 @@ Run the executable and you'll be greeted with the editor:
 * In the middle is the viewport of the scene. Hold Left or Right Mouse Button to navigate around the environment.
 * On the right is the inspector. All of the components for the selected entity are exposed. And you can add components to the selected entity.
 * On the bottom is the scene browser. You can load a scene there, or create a new one.![Editor](https://lh3.googleusercontent.com/pw/ABLVV87LDiXllQYY0zBZdMfwMJ_I8MRpq5EqdY5jGk07cuIye-bnjn6fkvjX7-S-mYm3k0sR0FmQYGNVhoAoQ_N-dow4kTm7BLhweUccr95eya-AaJHMlWBxvisoUnbwqL0ka7tHKlDlXWkP0pey0dLXZwy--Q=w2025-h1350-s-no-gm?authuser=0)
+
+### Editor Controls
+#### While Holding LMB/RMB
+WASD - strafe 
+E/Q - Up/Down
+Mouse X/Y - Pitch/Yaw
 
 ### Your First Component
 Ideally all of your gamedev coding activity will be spent within the `components/` directory. To create a component, go to the inspector view in the editor and click Create Custom Component. Give it a name such as `HelloWorld` and click Create.
@@ -67,6 +76,15 @@ You will need to close the editor and run CMake again to pickup the new files.
 * `CameraComponent` - When active is set to true you will see through this camera's position and rotation.
 * `TagComponent` - contains a string to identify the entity. Used for serialization and editor gui. But could be handy for the gamedev.
 
+### Build the Game (no editor) - Way smoother frames
+Go to line 67 of CMakeLists.txt and comment out this line:
+`target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_APPTYPE_EDITOR)`
+so that it looks like this:
+`#target_compile_definitions(${PROJECT_NAME} PRIVATE GOOP_APPTYPE_EDITOR)`
+
+Just rerun CMake, build, and you're good to go!
+
+To build the editor again just go back and uncomment that line and rerun CMake.
 ## Report and Critical Reflection
 This is the most complicated software project I've ever worked on. To get all of the current features working before the deadline has required an unfathomable amount of time and sanity. 
 
@@ -81,6 +99,8 @@ I guess I can't just say meta-meta-programming without explaining myself. So let
 Loading and unloading meshes and textures is also pretty efficient and robust. If you try and load a mesh more than once, the engine will actually just increment the amount of instances instead of duplicating the vertices and indices. This means we can take advantage of Vulkan's instanced rendering feature.
 
 What plagued this submission the most was that despite being told to make a game alongside the engine, I was lazer focused on the technology. And you can tell. The inline helper functions in places like `<goop/Input.h>` get the job done, but were added last minute in a scramble to get something that could maybe turn into a game by the submission. And so it's definitely missing some functions and lacking in thought for the application programmer. If I wanted to make an FPS, I could get the camera working fine. But how on earth would I ray-cast or shoot something that triggers but doesn't do collision physics? Having just those two basic additional features would go a really long way in the potential for games.
+
+I'm also very sad to say that this submission does not make use of DLLs. One of my original visions was being able to just slot an editor DLL in and then boom you're in the editor. Due to time constraints I did not have much time to investigate.
 
 Also the editor doesn't have any system for multiple games/projects. Which to me feels like an essential game engine feature. But maybe for in-house engines not so much? It's definitely something I'd want for my engine.
 
