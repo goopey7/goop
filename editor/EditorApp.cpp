@@ -9,7 +9,6 @@
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Sfx.h>
 
-#include <GLFW/glfw3.h>
 #include <json.hpp>
 
 #include "components/CustomComponents.h"
@@ -462,6 +461,23 @@ void EditorApp::gui()
 			ImGui::EndPopup();
 		}
 	}
+
+	// Scene Browser
+	ImGui::Begin("Scene Browser");
+	ImGui::Text("Scenes");
+	// List scenes as buttons
+	auto& loadedScenes = scene->getLoadedScenes();
+	for (auto i = loadedScenes.rbegin(); i != loadedScenes.rend(); i++)
+	{
+		if (ImGui::Button((*i)["name"].get<std::string>().c_str()))
+		{
+			scene->clearQueue();
+			scene->queueScene(*i);
+			scene->nextScene();
+		}
+	}
+	ImGui::End();
+
 	ImGui::End();
 
 	game->gui();

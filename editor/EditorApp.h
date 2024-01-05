@@ -37,4 +37,5 @@ class EditorApp : public goop::App
 	std::vector<std::string> customComponentNames;
 	bool isViewportFocused = false;
 	bool grabCursor = false;
+	bool loadScenePopupOpen = false;
 };

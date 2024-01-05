@@ -43,7 +43,18 @@ class Scene
 		sceneQueue.pop();
 		loadScene();
 	}
-	void queueScene(nlohmann::json scene) { sceneQueue.push(scene); }
+	void queueScene(nlohmann::json scene)
+	{
+		sceneQueue.push(scene);
+		loadedScenes.emplace(scene);
+	}
+	void clearQueue()
+	{
+		json currentScene = sceneQueue.front();
+		sceneQueue = std::queue<nlohmann::json>();
+		sceneQueue.push(currentScene);
+	}
+	const std::set<json>& getLoadedScenes() const { return loadedScenes; }
 
   private:
 	entt::registry registry;
@@ -54,5 +65,6 @@ class Scene
 	std::vector<entt::entity> spawnedEntities;
 
 	std::queue<nlohmann::json> sceneQueue;
+	std::set<json> loadedScenes;
 };
 } // namespace goop
