@@ -4,7 +4,6 @@
 #include <glm/glm.hpp>
 #include <goop/Entity.h>
 #include <goop/Primitives.h>
-#include <goop/sys/ResourceManager.h>
 #include <sha256.h>
 #include <string>
 
@@ -38,15 +37,15 @@ struct MeshComponent
 	MeshComponent(const std::string& path, const std::string& texturePath)
 		: path(path), texturePath(texturePath)
 	{
-		goop::rm->loadMesh(this);
-		goop::rm->loadTexture(this);
+		//goop::rm->loadMesh(this);
+		//goop::rm->loadTexture(this);
 	}
 	MeshComponent(goop::Primitive primitive, const std::string& texturePath,
 				  const std::string& path)
 		: primitive(primitive), texturePath(texturePath), path(path)
 	{
-		goop::rm->loadMesh(this);
-		goop::rm->loadTexture(this);
+		//goop::rm->loadMesh(this);
+		//goop::rm->loadTexture(this);
 	}
 };
 

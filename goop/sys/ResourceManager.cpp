@@ -14,7 +14,6 @@
 #endif
 
 #include <iostream>
-#include <goop/Components.h>
 
 using namespace goop::sys;
 

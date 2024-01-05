@@ -7,11 +7,8 @@
 #include <goop/sys/Subsystem.h>
 #include <map>
 #include <string>
+#include <goop/Components.h>
 
-namespace goop
-{
-	class MeshComponent;
-}
 namespace goop::sys
 {
 class ResourceManager : public Subsystem
