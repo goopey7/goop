@@ -3,11 +3,11 @@
 
 namespace goop
 {
-static void applyImpulse(RigidbodyComponent& rbc, glm::vec3 impulse)
+inline void applyImpulse(RigidbodyComponent& rbc, glm::vec3 impulse)
 {
 	sys::gPhysics->applyImpulse(&rbc, impulse);
 }
-static void setVelocity(goop::Entity& e, glm::vec3 velocity, bool relative = false)
+inline void setVelocity(goop::Entity& e, glm::vec3 velocity, bool relative = false)
 {
 	if (!e.hasComponent<RigidbodyComponent>())
 	{

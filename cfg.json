@@ -1,4 +1,8 @@
 {
-	"game_file":"lvl.json",
-	"scene_queue":["lvl_1", "lvl_2"]
+  "game_file": "lvl.json",
+  "scene_queue": [
+    "lvl_1",
+    "lvl_2",
+    "four"
+  ]
 }

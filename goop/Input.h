@@ -5,11 +5,11 @@
 
 namespace goop
 {
-static bool isKeyDown(ImGuiKey key) { return ImGui::IsKeyDown(key); }
+inline bool isKeyDown(ImGuiKey key) { return ImGui::IsKeyDown(key); }
 
-static bool wasKeyDown[ImGuiKey_COUNT];
+inline bool wasKeyDown[ImGuiKey_COUNT];
 
-static bool isKeyPressed(ImGuiKey key)
+inline bool isKeyPressed(ImGuiKey key)
 {
 	bool down = ImGui::IsKeyDown(key);
 	bool pressed = down && !wasKeyDown[key];
@@ -17,21 +17,21 @@ static bool isKeyPressed(ImGuiKey key)
 	return pressed;
 }
 
-static bool isKeyReleased(ImGuiKey key) { return ImGui::IsKeyReleased(key); }
+inline bool isKeyReleased(ImGuiKey key) { return ImGui::IsKeyReleased(key); }
 
-static bool isLMBDown() { return goop::sys::gWindow->isLMBDown(); }
+inline bool isLMBDown() { return goop::sys::gWindow->isLMBDown(); }
 
-static bool isRMBDown() { return goop::sys::gWindow->isRMBDown(); }
+inline bool isRMBDown() { return goop::sys::gWindow->isRMBDown(); }
 
-static float getMouseX() { return goop::sys::gWindow->getMouseX(); }
+inline float getMouseX() { return goop::sys::gWindow->getMouseX(); }
 
-static float getMouseY() { return goop::sys::gWindow->getMouseY(); }
+inline float getMouseY() { return goop::sys::gWindow->getMouseY(); }
 
-static float getMouseDeltaX() { return goop::sys::gWindow->getMouseDeltaX(); }
+inline float getMouseDeltaX() { return goop::sys::gWindow->getMouseDeltaX(); }
 
-static float getMouseDeltaY() { return goop::sys::gWindow->getMouseDeltaY(); }
+inline float getMouseDeltaY() { return goop::sys::gWindow->getMouseDeltaY(); }
 
-static void hideCursor(bool hide) { goop::sys::gWindow->hideCursor(hide); }
+inline void hideCursor(bool hide) { goop::sys::gWindow->hideCursor(hide); }
 
-static void grabCursor(bool grab) { goop::sys::gWindow->grabCursor(grab); }
+inline void grabCursor(bool grab) { goop::sys::gWindow->grabCursor(grab); }
 } // namespace goop

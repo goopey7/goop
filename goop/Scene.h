@@ -35,7 +35,7 @@ class Scene
 	void clearScene();
 	void nextScene()
 	{
-		if (sceneQueue.empty())
+		if (sceneQueue.size() == 1)
 		{
 			return;
 		}

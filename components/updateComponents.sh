@@ -23,17 +23,16 @@ calculate_hash() {
     sha256sum "$file" | awk '{ print $1 }'
 }
 
-# Concatenate all .cpp file names together to form a string
+# Concatenate all .cpp file names together
 file_names_concatenated=$(printf "%s" "${cpp_files[@]##*/}")
 
-# Calculate the hash of the concatenated file names
+# Calculate the hash
 updated_hash=$(echo -n "$file_names_concatenated" | sha256sum | awk '{ print $1 }')
 
-# Get the existing hash from the first line comment
+# Get existing hash from first line comment
 existing_hash_comment=$(head -n 1 CustomComponents.h)
 existing_hash=$(echo "$existing_hash_comment" | sed 's/^\/\/\(.*\)$/\1/')
 
-# Check if the file needs updating based on the hash
 needs_update=false
 if [ "$existing_hash" != "$updated_hash" ]; then
     needs_update=true
@@ -93,7 +92,6 @@ if [ ${#cpp_files[@]} -ne 0 ]; then
 		}()  
 EOF
 
-	# Register components
 	for file in "${cpp_files[@]}"; do  
 		filename=$(basename "$file" .cpp)
 		echo "REGISTER_CUSTOM_COMPONENT(\"$filename\", $filename);"   
@@ -147,22 +145,24 @@ fi
 cat <<EOF >>CustomComponents.h
 }  
 
-inline void guiCustomComponents(goop::Scene* s)
+inline void guiCustomComponents(goop::Entity e)
 {
 EOF
 if [ ${#cpp_files[@]} -ne 0 ]; then
 cat <<EOF >>CustomComponents.h
     for (auto& [name, factory] : customComponentFactoryMap)  
     {
-        auto variant = factory(entt::null, s);
-        std::visit([s, &name](auto& arg) 
+        auto variant = factory(entt::null, nullptr);
+        std::visit([e, &name](auto& arg) 
         {
+			goop::Scene* s = e.getScene();
             using T = std::decay_t<decltype(arg)>;
             auto view = s->view<T>();
-            for (auto e : view)
+            for (auto en : view)
             {     
+				if (e.getEntity() != en) continue;
                 ImGui::Text("%s", name.c_str());        
-                goop::Entity(e, s).getComponent<T>().gui(); 
+                goop::Entity(en, s).getComponent<T>().gui(); 
             }
         }, variant);
     }

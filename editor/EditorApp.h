@@ -29,6 +29,7 @@ class EditorApp : public goop::App
 	bool changeMeshPopupOpen = false;
 	bool changeTexturePopupOpen = false;
 	char entityName[256] = "";
+	char sceneName[256] = "";
 	std::string oldMeshPath = "";
 	std::string oldTexturePath = "";
 	char meshPath[256] = "";
@@ -37,5 +38,5 @@ class EditorApp : public goop::App
 	std::vector<std::string> customComponentNames;
 	bool isViewportFocused = false;
 	bool grabCursor = false;
-	bool loadScenePopupOpen = false;
+	bool newScenePopupOpen = false;
 };

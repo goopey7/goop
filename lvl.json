@@ -6,71 +6,57 @@
           "components": [
             {
               "position": {
-                "x": 0,
-                "y": 5,
-                "z": 0
+                "x": 6.642286462010816e-05,
+                "y": 0.0,
+                "z": -2.0
               },
               "rotation": {
-                "x": 0,
-                "y": 0,
-                "z": 0
+                "x": 0.0003054060216527432,
+                "y": 0.0704326182603836,
+                "z": -0.0004983032704330981
               },
               "scale": {
-                "x": 1,
-                "y": 1,
-                "z": 1
+                "x": 0.5,
+                "y": 0.5,
+                "z": 0.5
               },
               "type": "transform"
             },
             {
+              "path": "Box",
+              "primitive": "box",
+              "texturePath": "res/check.png",
+              "type": "mesh"
+            },
+            {
               "box": {
-                "x": 1,
-                "y": 1,
-                "z": 1
+                "x": 0.5,
+                "y": 0.5,
+                "z": 0.5
               },
-              "mass": 1,
+              "mass": 1.0,
               "type": "rigidBody"
-            },
-            {
-              "active": true,
-              "position": {
-                "x": 0,
-                "y": 0,
-                "z": 0
-              },
-              "rotation": {
-                "x": 0,
-                "y": 0,
-                "z": 0
-              },
-              "type": "camera"
-            },
-            {
-              "type": "PlayerInput"
-            },
-            {
-              "type": "WindowsTest"
             }
           ],
-          "name": "Player"
+          "name": "box"
         },
         {
           "components": [
             {
               "position": {
-                "x": -5,
-                "y": -2,
+                "x": -5.0,
+                "y": -2.0,
                 "z": -11.600000381469727
               },
               "rotation": {
-                "x": 0,
+                "x": 0.0,
                 "y": -2.4000000953674316,
-                "z": 0
+                "z": 0.0
               },
               "scale": {
-                "x": 100,
-                "y": 1,
-                "z": 100
+                "x": 100.0,
+                "y": 1.0,
+                "z": 100.0
               },
               "type": "transform"
             },
@@ -82,15 +68,67 @@
             },
             {
               "box": {
-                "x": 100,
-                "y": 1,
-                "z": 100
+                "x": 100.0,
+                "y": 1.0,
+                "z": 100.0
               },
-              "mass": 0,
+              "mass": 0.0,
               "type": "rigidBody"
             }
           ],
           "name": "floor"
+        },
+        {
+          "components": [
+            {
+              "position": {
+                "x": 0.0,
+                "y": 5.0,
+                "z": 0.0
+              },
+              "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "type": "transform"
+            },
+            {
+              "box": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "mass": 1.0,
+              "type": "rigidBody"
+            },
+            {
+              "active": true,
+              "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "type": "camera"
+            },
+            {
+              "type": "PlayerInput"
+            },
+            {
+              "type": "WindowsTest"
+            }
+          ],
+          "name": "Player"
         }
       ],
       "name": "lvl_1"
@@ -223,6 +261,40 @@
         }
       ],
       "name": "lvl_2"
+    },
+    {
+      "entities": [
+        {
+          "components": [
+            {
+              "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "type": "transform"
+            },
+            {
+              "path": "res/viking_room.obj",
+              "primitive": "box",
+              "texturePath": "res/check.png",
+              "type": "mesh"
+            }
+          ],
+          "name": "cubef"
+        }
+      ],
+      "name": "four"
     }
   ]
 }

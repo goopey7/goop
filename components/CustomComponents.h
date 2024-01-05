@@ -60,24 +60,21 @@ inline void updateCustomComponents(goop::Scene* s, float dt)
     }
 }  
 
-inline void guiCustomComponents(goop::Entity en)
+inline void guiCustomComponents(goop::Entity e)
 {
     for (auto& [name, factory] : customComponentFactoryMap)  
     {
-        auto variant = factory(entt::null, en.getScene());
-        std::visit([en, &name](auto& arg) 
+        auto variant = factory(entt::null, nullptr);
+        std::visit([e, &name](auto& arg) 
         {
-			auto s = en.getScene();
+			goop::Scene* s = e.getScene();
             using T = std::decay_t<decltype(arg)>;
             auto view = s->view<T>();
-            for (auto e : view)
-            {
-                if (en.getEntity() != e)
-                {
-					continue;
-                }
+            for (auto en : view)
+            {     
+				if (e.getEntity() != en) continue;
                 ImGui::Text("%s", name.c_str());        
-                goop::Entity(e, s).getComponent<T>().gui(); 
+                goop::Entity(en, s).getComponent<T>().gui(); 
             }
         }, variant);
     }

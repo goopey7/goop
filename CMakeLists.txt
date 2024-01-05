@@ -183,7 +183,6 @@ if(WIN32)
 
 endif()
 
-
 add_custom_target(update_components
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/components/updateComponents.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

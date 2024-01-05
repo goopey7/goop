@@ -144,17 +144,28 @@ void EditorApp::gui()
 		json sceneJson = scene->saveScene();
 		json cfg = loadJson("cfg.json").value();
 		json lvl = loadJson(cfg["game_file"]).value();
+		bool found = false;
 		for (json& sceneObj : lvl["scenes"])
 		{
 			if (sceneObj["name"] == scene->getScene()["name"])
 			{
 				sceneObj = sceneJson;
+				found = true;
 				break;
 			}
+		}
+		if (!found)
+		{
+			lvl["scenes"].push_back(sceneJson);
+			cfg["scene_queue"].push_back(sceneJson["name"]);
 		}
 		std::ofstream file(cfg["game_file"].get<std::string>().c_str());
 		file << lvl.dump(2);
 		file.close();
+
+		std::ofstream cfgFile("cfg.json");
+		cfgFile << cfg.dump(2);
+		cfgFile.close();
 	}
 	ImGui::Text("%s", scene->getScene()["name"].get<std::string>().c_str());
 	ImGui::EndMainMenuBar();
@@ -416,7 +427,7 @@ void EditorApp::gui()
 			}
 			if (!e.hasComponent<goop::MeshComponent>() && ImGui::Button("Mesh"))
 			{
-				e.addComponent<goop::MeshComponent>("res/viking_room.obj", "res/viking_room.png");
+				e.addComponent<goop::MeshComponent>(goop::Box(), "res/check.png", "Box");
 				goop::rm->loadMesh(&e.getComponent<goop::MeshComponent>());
 				goop::rm->loadTexture(&e.getComponent<goop::MeshComponent>());
 				ImGui::CloseCurrentPopup();
@@ -476,7 +487,54 @@ void EditorApp::gui()
 			scene->nextScene();
 		}
 	}
+
+	// Create new scene button
+	if (ImGui::Button("New Scene"))
+	{
+		newScenePopupOpen = true;
+		ImVec2 centerPos = ImVec2(viewport->WorkPos.x + viewport->WorkSize.x * 0.5f,
+								  viewport->WorkPos.y + viewport->WorkSize.y * 0.5f);
+		ImGui::SetNextWindowPos(centerPos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+	}
 	ImGui::End();
+
+	// New Scene Popup
+	if (newScenePopupOpen)
+	{
+		ImGui::OpenPopup("NewScene");
+
+		ImVec2 centerPos = ImVec2(viewport->WorkPos.x + viewport->WorkSize.x * 0.5f,
+								  viewport->WorkPos.y + viewport->WorkSize.y * 0.5f);
+
+		ImVec2 popupSize = ImVec2(200, 100); // Adjust the size if needed
+		ImVec2 popupPos =
+			ImVec2(centerPos.x - popupSize.x * 0.5f, centerPos.y - popupSize.y * 0.5f);
+		ImGui::SetNextWindowPos(popupPos, ImGuiCond_Always);
+		ImGui::SetNextWindowSize(popupSize, ImGuiCond_Always);
+	}
+
+	if (ImGui::BeginPopup("NewScene"))
+	{
+		ImGui::Text("New Scene");
+		ImGui::InputText("Name", sceneName, 256);
+		if (ImGui::Button("Create"))
+		{
+			scene->clearQueue();
+			json sceneJson;
+			sceneJson["name"] = sceneName;
+			sceneJson["entities"] = json::array();
+			scene->queueScene(sceneJson);
+			scene->nextScene();
+			ImGui::CloseCurrentPopup();
+			newScenePopupOpen = false;
+		}
+		if (ImGui::Button("Cancel"))
+		{
+			ImGui::CloseCurrentPopup();
+			newScenePopupOpen = false;
+		}
+		ImGui::EndPopup();
+	}
 
 	ImGui::End();
 

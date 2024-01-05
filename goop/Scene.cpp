@@ -64,7 +64,7 @@ void Scene::loadScene()
 			}
 			else if (component["type"] == "mesh")
 			{
-				if (component["primitive"].is_null())
+				if (component["primitive"].is_null() || component["path"].get<std::string>().find('.') != std::string::npos)
 				{
 					e.addComponent<goop::MeshComponent>(component["path"],
 														component["texturePath"]);
