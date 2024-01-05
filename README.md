@@ -46,13 +46,13 @@ Run the executable and you'll be greeted with the editor:
 * On the bottom is the scene browser. You can load a scene there, or create a new one.![Editor](https://lh3.googleusercontent.com/pw/ABLVV87LDiXllQYY0zBZdMfwMJ_I8MRpq5EqdY5jGk07cuIye-bnjn6fkvjX7-S-mYm3k0sR0FmQYGNVhoAoQ_N-dow4kTm7BLhweUccr95eya-AaJHMlWBxvisoUnbwqL0ka7tHKlDlXWkP0pey0dLXZwy--Q=w2025-h1350-s-no-gm?authuser=0)
 
 ### Your First Component
-Ideally all of your gamedev coding activity will be spent within the `components/` directory. To create a component execute `createComponent.sh` and pass it a name. 
-
-ie. `./createComponent.sh HelloWorld` I'm afraid you're gonna need to hop into a commandline for this one Windows users.
+Ideally all of your gamedev coding activity will be spent within the `components/` directory. To create a component, go to the inspector view in the editor and click Create Custom Component. Give it a name such as `HelloWorld` and click Create.
 
 Following this example, a `HelloWorld.h` and `HelloWorld.cpp` file will appear in the `components/` directory.
 
 Open up `HelloWorld.cpp` in your favorite editor. The template given should be self-explanatory. 
+
+You will need to close the editor and run CMake again to pickup the new files.
 
 `init()` occurs when the game starts
 `update(float dt)` occurs every frame
@@ -85,5 +85,4 @@ What plagued this submission the most was that despite being told to make a game
 Also the editor doesn't have any system for multiple games/projects. Which to me feels like an essential game engine feature. But maybe for in-house engines not so much? It's definitely something I'd want for my engine.
 
 Another unfortunate failing at submission time is that all of the math is glm. There's no wrapper or subsystem to allow for any other math libraries. Although the solution isn't technically challenging, it's laborious. So from an educational standpoint it's not a priority until I need to implement a Direct3D renderer. 
-
 
