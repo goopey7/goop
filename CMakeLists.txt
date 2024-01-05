@@ -228,3 +228,14 @@ add_custom_command(
 )
 
 
+# Check if the components folder exists in the build directory
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/components")
+    # Create a symbolic link to source/components if the folder doesn't exist
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+        ${CMAKE_SOURCE_DIR}/source/components ${CMAKE_BINARY_DIR}/components
+        RESULT_VARIABLE symLinkResult)
+
+    if(NOT symLinkResult EQUAL 0)
+        message(FATAL_ERROR "Failed to create symbolic link to components folder")
+    endif()
+endif()
