@@ -103,7 +103,11 @@ bool ResourceManager::unloadMesh(MeshComponent* mesh)
 	return true;
 }
 
-bool ResourceManager::loadSfx(const std::string& path) { return sfx->load(path); }
+bool ResourceManager::loadSfx(const std::string& path)
+{
+	loadedSfx[path] = sfx->load(path);
+	return true;
+}
 
 int ResourceManager::destroy()
 {
@@ -112,7 +116,7 @@ int ResourceManager::destroy()
 	return 0;
 }
 
-void ResourceManager::playSfx(uint32_t id) const { sfx->playSfx(id); }
+void ResourceManager::playSfx(const std::string& path) const { sfx->playSfx(loadedSfx.at(path)); }
 
 bool ResourceManager::loadTexture(MeshComponent* mesh, const char* oldPath)
 {
@@ -154,5 +158,13 @@ bool ResourceManager::unloadTexture(MeshComponent* mesh)
 		std::cout << "Unloading texture " << mesh->texturePath << std::endl;
 		imgLoader->unload(mesh->texturePath);
 	}
+	return true;
+}
+
+bool ResourceManager::unloadSfx(const std::string& path)
+{
+	unloadedSfxSlots.push(loadedSfx[path]);
+	sfx->unload(path);
+	loadedSfx.erase(path);
 	return true;
 }

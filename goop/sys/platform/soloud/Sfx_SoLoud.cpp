@@ -22,9 +22,19 @@ int Sfx_SoLoud::destroy()
 
 uint32_t Sfx_SoLoud::load(const std::string& path)
 {
-	sfx.push_back(SoLoud::Wav());
-	sfx.back().load(path.c_str());
-	return sfx.size() - 1;
+	if (!unloadedSfxSlots.empty())
+	{
+		uint32_t id = unloadedSfxSlots.front();
+		unloadedSfxSlots.pop();
+		sfx[id].load(path.c_str());
+		return id;
+	}
+	else
+	{
+		uint32_t id = sfx.size();
+		sfx[id].load(path.c_str());
+		return id;
+	}
 }
 
 void Sfx_SoLoud::playSfx(uint32_t id) { engine.play(sfx[id]); }

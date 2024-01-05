@@ -24,8 +24,8 @@ class ResourceManager : public Subsystem
 	bool unloadTexture(MeshComponent* mesh);
 
 	bool loadSfx(const std::string& path);
-
-	void playSfx(uint32_t id) const;
+	bool unloadSfx(const std::string& path);
+	void playSfx(const std::string& path) const;
 
 	const MeshLoader* getMeshLoader() const { return meshLoader.get(); }
 	MeshLoader* getMeshLoader() { return meshLoader.get(); }
@@ -37,6 +37,8 @@ class ResourceManager : public Subsystem
 	std::map<std::string, uint32_t> loadedMeshes;
 	std::map<std::string, uint32_t> numLoadedMeshes;
 	std::map<std::string, uint32_t> numLoadedTextures;
+	std::map<std::string, uint32_t> loadedSfx;
+	std::queue<uint32_t> unloadedSfxSlots;
 };
 } // namespace goop::sys
 namespace goop

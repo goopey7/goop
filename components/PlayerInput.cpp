@@ -10,7 +10,7 @@
 void PlayerInput::init()
 {
 	CustomComponent::init();
-	goop::rm->loadSfx("res/blast.mp3");
+	goop::loadSfx("res/blast.mp3");
 }
 
 // Gets called every frame
@@ -63,7 +63,6 @@ void PlayerInput::update(float dt)
 
 	if (goop::isKeyPressed(ImGuiKey_F))
 	{
-		goop::playSfx("res/blast.mp3");
 		auto e = spawnEntity();
 		auto& tc = e.addComponent<goop::TransformComponent>();
 		tc.position = e.getScene()->getCurrentCamera()->getPosition() +
@@ -76,6 +75,8 @@ void PlayerInput::update(float dt)
 		auto& mc = e.addComponent<goop::MeshComponent>(goop::Box(), "res/texture.jpg", "box");
 		goop::rm->loadMesh(&mc);
 		goop::rm->loadTexture(&mc);
+
+		goop::playSfx("res/blast.mp3");
 	}
 }
 

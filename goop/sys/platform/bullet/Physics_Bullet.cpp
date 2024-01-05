@@ -172,7 +172,7 @@ void Physics_Bullet::addRigidBody(RigidbodyComponent* rbc, TransformComponent* t
 
 void Physics_Bullet::removeRigidBody(RigidbodyComponent* rbc)
 {
-	if (bIsInitialized)
+	if (bIsInitialized && rigidBodies.find(rbc) != rigidBodies.end())
 	{
 		dynamicsWorld->removeRigidBody(rigidBodies[rbc]);
 		delete rigidBodies[rbc]->getMotionState();

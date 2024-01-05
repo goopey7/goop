@@ -6,6 +6,7 @@
 #include <soloud.h>
 #include <soloud_wav.h>
 #include <vector>
+#include <queue>
 
 namespace goop::sys::platform::soloud
 {
@@ -25,6 +26,7 @@ class Sfx_SoLoud : public Sfx
 
   private:
 	  SoLoud::Soloud engine;
-	  std::vector<SoLoud::Wav> sfx;
+	  std::map<uint32_t, SoLoud::Wav> sfx;
+	  std::queue<uint32_t> unloadedSfxSlots;
 };
 } // namespace goop::sys::platform::soloud
