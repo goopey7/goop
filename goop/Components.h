@@ -113,6 +113,11 @@ class CustomComponent
 			return e;
 		}
 	}
+	void nextScene()
+	{
+		auto scene = entity.getScene();
+		scene->nextScene();
+	}
 	std::string name;
 	goop::Entity entity;
 

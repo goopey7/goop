@@ -1,1 +1,4 @@
-{"game_file":"lvl.json","start_scene":"lvl_1"}
+{
+	"game_file":"lvl.json",
+	"scene_queue":["lvl_1", "lvl_2"]
+}

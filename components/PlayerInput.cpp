@@ -77,7 +77,7 @@ void PlayerInput::update(float dt)
 // Collision callbacks
 void PlayerInput::onCollisionEnter(goop::Entity other)
 {
-	//...
+	std::cout << "Collision enter with entity " << other.getUID() << std::endl;
 }
 
 void PlayerInput::onCollisionExit(goop::Entity other)

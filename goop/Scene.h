@@ -5,6 +5,7 @@
 #include <entt.hpp>
 
 #include <json.hpp>
+#include <queue>
 using json = nlohmann::json;
 
 namespace goop
@@ -15,7 +16,7 @@ class Scene
   public:
 	Entity createEntity(const std::string& tag = "Entity");
 	void destroyEntity(Entity entity);
-	void loadScene(nlohmann::json& scene);
+	void loadScene();
 	nlohmann::json getScene() const;
 	nlohmann::json saveScene();
 
@@ -30,18 +31,28 @@ class Scene
 
 	void addSpawnedEntity(entt::entity entity) { spawnedEntities.push_back(entity); }
 
-#ifdef GOOP_APPTYPE_EDITOR
 	void resetScene();
-#endif
+	void clearScene();
+	void nextScene()
+	{
+		if (sceneQueue.empty())
+		{
+			return;
+		}
+		clearScene();
+		sceneQueue.pop();
+		loadScene();
+	}
+	void queueScene(nlohmann::json scene) { sceneQueue.push(scene); }
 
   private:
 	entt::registry registry;
 	friend class Entity;
 
-	nlohmann::json sceneJson;
-
 	Camera* currentCamera = nullptr;
 
 	std::vector<entt::entity> spawnedEntities;
+
+	std::queue<nlohmann::json> sceneQueue;
 };
 } // namespace goop

@@ -4,11 +4,11 @@
 #include <imgui.h>
 #include <iostream>
 
+#include "components/CustomComponents.h"
 #include <goop/Core.h>
 #include <goop/sys/Renderer.h>
 #include <goop/sys/Sfx.h>
 #include <json.hpp>
-#include "components/CustomComponents.h"
 using json = nlohmann::json;
 
 goop::App* goop::createGame(int argc, char** argv, Scene* scene) { return new GameApp(scene); }
@@ -33,19 +33,24 @@ void GameApp::init()
 	}
 	json lvl = lvlOpt.value();
 
-	json startScene;
-
-	// find starting scene
-	for (json& scene : lvl["scenes"])
+	int size = cfg["scene_queue"].size();
+	std::cout << "Loading " << size << " scenes" << std::endl;
+	for (int i = 0; i < cfg["scene_queue"].size(); i++)
 	{
-		if (scene["name"] == cfg["start_scene"])
+		std::string sceneName = cfg["scene_queue"][i];
+		std::cout << "Loading scene: " << sceneName << std::endl;
+		for (auto& sceneJson : lvl["scenes"])
 		{
-			startScene = scene;
-			break;
+			if (sceneJson["name"] == sceneName)
+			{
+				std::cout << "Found scene: " << sceneName << std::endl;
+				std::cout << sceneJson.dump(4) << std::endl;
+				scene->queueScene(sceneJson);
+				break;
+			}
 		}
 	}
-
-	scene->loadScene(startScene);
+	scene->loadScene();
 
 	/* TODO -------------
 	   - store EVERYTHING contiguously - decide on a data structure - (week 7)

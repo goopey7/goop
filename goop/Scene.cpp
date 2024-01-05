@@ -29,9 +29,9 @@ std::optional<Entity> Scene::getEntity(const std::string& tag)
 	return std::nullopt;
 }
 
-void Scene::loadScene(nlohmann::json& startScene)
+void Scene::loadScene()
 {
-	sceneJson = startScene;
+	json startScene = sceneQueue.front();
 	if (startScene["entities"].is_null())
 	{
 		return;
@@ -96,12 +96,36 @@ void Scene::loadScene(nlohmann::json& startScene)
 			}
 		}
 	}
+
+	// load meshes from components
+	auto mcView = view<MeshComponent>();
+	for (auto entity : mcView)
+	{
+		MeshComponent& mesh = mcView.get<MeshComponent>(entity);
+		rm->loadMesh(&mesh);
+		rm->loadTexture(&mesh);
+	}
+
+	// initialize rigid bodies
+	if (sys::gPhysics != nullptr && !sys::gPhysics->isInitialized())
+	{
+		sys::gPhysics->initialize();
+	}
+	auto rbView = view<RigidbodyComponent>();
+	auto tcView = view<TransformComponent>();
+	for (auto entity : rbView)
+	{
+		RigidbodyComponent* rbc = &rbView.get<RigidbodyComponent>(entity);
+		TransformComponent* tc = &tcView.get<TransformComponent>(entity);
+		sys::gPhysics->addRigidBody(rbc, tc);
+	}
 }
 
-nlohmann::json Scene::getScene() const { return sceneJson; }
+nlohmann::json Scene::getScene() const { return sceneQueue.front(); }
 
 nlohmann::json Scene::saveScene()
 {
+	json sceneJson = sceneQueue.front();
 	sceneJson["entities"] = json::array();
 	auto view = registry.view<TagComponent>();
 	for (auto& entity : view)
@@ -191,9 +215,9 @@ void Scene::destroyEntity(Entity entity)
 	registry.destroy((entt::entity)entity.getUID());
 }
 
-#ifdef GOOP_APPTYPE_EDITOR
 void Scene::resetScene()
 {
+	json sceneJson = sceneQueue.front();
 	if (sceneJson["entities"].is_null())
 	{
 		return;
@@ -237,4 +261,21 @@ void Scene::resetScene()
 	}
 	spawnedEntities.clear();
 }
-#endif
+
+void Scene::clearScene()
+{
+	for (auto e : spawnedEntities)
+	{
+		destroyEntity(goop::Entity(e, this));
+	}
+	spawnedEntities.clear();
+
+	auto view = registry.view<TagComponent>();
+	for (auto entity : view)
+	{
+		destroyEntity(goop::Entity(entity, this));
+	}
+
+	currentCamera->setPosition(glm::vec3(0.f, 0.f, 5.f));
+	currentCamera->setRotation(glm::vec3(0.f, 0.f, 0.f));
+}

@@ -1,5 +1,6 @@
 #include "WindowsTest.h"
 #include <iostream>
+#include <goop/Input.h>
 
 // Gets called when the game starts
 void WindowsTest::init()
@@ -14,6 +15,11 @@ void WindowsTest::init()
 void WindowsTest::update(float dt)
 {
     //...
+	if (goop::isKeyPressed(ImGuiKey_T))
+	{
+		std::cout << "T was pressed" << std::endl;
+		nextScene();
+	}
 }
 
 // Collision callbacks

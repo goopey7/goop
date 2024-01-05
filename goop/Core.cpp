@@ -34,27 +34,6 @@ Core::Core(int argc, char** argv) : app(createGame(argc, argv, &scene))
 	sys::gRenderer->setScene(&scene);
 	rm->initialize();
 	app->init();
-#ifndef GOOP_APPTYPE_EDITOR
-	sys::gPhysics->initialize();
-	// initialize rigid bodies
-	auto rbView = scene.view<RigidbodyComponent>();
-	auto tcView = scene.view<TransformComponent>();
-	for (auto entity : rbView)
-	{
-		RigidbodyComponent* rbc = &rbView.get<RigidbodyComponent>(entity);
-		TransformComponent* tc = &tcView.get<TransformComponent>(entity);
-		sys::gPhysics->addRigidBody(rbc, tc);
-	}
-#endif
-
-	// load meshes from components
-	auto mcView = scene.view<MeshComponent>();
-	for (auto entity : mcView)
-	{
-		MeshComponent& mesh = mcView.get<MeshComponent>(entity);
-		rm->loadMesh(&mesh);
-		rm->loadTexture(&mesh);
-	}
 }
 
 void Core::run()
