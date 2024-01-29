@@ -5,6 +5,7 @@
 #include "goop/Components.h"
 #include "goop/Entity.h"
 #include <glm/common.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 #include <goop/Core.h>
 
